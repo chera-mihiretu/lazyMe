@@ -1,0 +1,40 @@
+package usecases
+
+import (
+	"context"
+
+	"github.com/chera-mihiretu/IKnow/domain/models"
+	"github.com/chera-mihiretu/IKnow/reposiroty"
+	"go.mongodb.org/mongo-driver/bson/primitive"
+)
+
+type UserUseCase interface {
+	GetUserById(ctx context.Context, userID string) (models.UserView, error)
+	GetUserByEmail(ctx context.Context, email string) (models.UserView, error)
+	GetListOfUsers(ctx context.Context, ids []primitive.ObjectID) ([]models.UserView, error)
+}
+
+type userUseCase struct {
+	userRepository reposiroty.UserRepository
+}
+
+// GetListOfUsers implements UserUseCase.
+func (u *userUseCase) GetListOfUsers(ctx context.Context, ids []primitive.ObjectID) ([]models.UserView, error) {
+	return u.userRepository.GetListOfUsers(ctx, ids)
+}
+
+// GetUserByEmail implements UserUseCase.
+func (u *userUseCase) GetUserByEmail(ctx context.Context, email string) (models.UserView, error) {
+	return u.userRepository.GetUserByEmail(ctx, email)
+}
+
+// GetUserById implements UserUseCase.
+func (u *userUseCase) GetUserById(ctx context.Context, userID string) (models.UserView, error) {
+	return u.userRepository.GetUserById(ctx, userID)
+}
+
+func NewUserUseCase(repository reposiroty.UserRepository) UserUseCase {
+	return &userUseCase{
+		userRepository: repository,
+	}
+}

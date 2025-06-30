@@ -26,11 +26,28 @@ func main() {
 	}
 
 	myDatabase := client.Database("lazyme")
+	// auth dependecies
 	authRepository := reposiroty.NewAuthRepository(myDatabase)
 	authUseCase := usecases.NewAuthUseCase(authRepository)
 	AuthController := controller.NewAuthController(authUseCase)
+	// user dependencies
+	userRepository := reposiroty.NewUserRepository(myDatabase)
+	userUseCase := usecases.NewUserUseCase(userRepository)
+	// follow dependencies
+	connectionRepository := reposiroty.NewConnectRepository(myDatabase)
+	connectionUsecase := usecases.NewConnectUsecase(connectionRepository)
+	connectionController := controller.NewConnectController(connectionUsecase, userUseCase)
 
-	router := router.SetupRoutes(AuthController)
+	// post dependencies
+	postRepository := reposiroty.NewPostRepository(myDatabase, connectionRepository)
+	postUseCase := usecases.NewPostUseCase(postRepository)
+	PostController := controller.NewPostController(postUseCase)
+
+	router := router.SetupRoutes(
+		AuthController,
+		PostController,
+		connectionController,
+	)
 
 	if err := router.Run(":3000"); err != nil {
 		log.Fatal("Failed to start server:", err)

@@ -99,7 +99,7 @@ func (repo *authRepository) LoginWithEmail(ctx context.Context, user models.User
 		return "", errors.New("wrong cridential or maybe the user have no password, try forgot password")
 	}
 
-	token, err := middleware.GenerateVerficationToken(foundUser.Email)
+	token, err := middleware.GenerateJWT(foundUser.ID.Hex(), foundUser.Role)
 	if err != nil {
 		return "", errors.New("could not generate JWT token")
 	}
