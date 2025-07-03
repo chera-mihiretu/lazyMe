@@ -4,10 +4,10 @@ import (
 	"context"
 
 	"github.com/chera-mihiretu/IKnow/domain/models"
-	"github.com/chera-mihiretu/IKnow/reposiroty"
+	"github.com/chera-mihiretu/IKnow/repository"
 )
 
-type FollowUseCase interface {
+type ConnectUsecase interface {
 	GetConnects(ctx context.Context, userID string) ([]models.Connects, error)
 	GetConnections(ctx context.Context, userID string, page int) ([]models.Connects, error)
 	GetConnectRequests(ctx context.Context, userID string, page int) ([]models.Connects, error)
@@ -19,10 +19,10 @@ type FollowUseCase interface {
 }
 
 type followUseCase struct {
-	connect reposiroty.ConnectRepository
+	connect repository.ConnectRepository
 }
 
-func NewConnectUsecase(repository reposiroty.ConnectRepository) FollowUseCase {
+func NewConnectUsecase(repository repository.ConnectRepository) ConnectUsecase {
 	return &followUseCase{
 		connect: repository,
 	}

@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"github.com/chera-mihiretu/IKnow/domain/models"
-	"github.com/chera-mihiretu/IKnow/reposiroty"
+	"github.com/chera-mihiretu/IKnow/repository"
 )
 
 type AuthUseCase interface {
@@ -15,10 +15,10 @@ type AuthUseCase interface {
 }
 
 type authUseCase struct {
-	AuthRepository reposiroty.AuthRepository
+	AuthRepository repository.AuthRepository
 }
 
-func NewAuthUseCase(repository reposiroty.AuthRepository) AuthUseCase {
+func NewAuthUseCase(repository repository.AuthRepository) AuthUseCase {
 	return &authUseCase{
 		AuthRepository: repository,
 	}

@@ -11,11 +11,11 @@ import (
 )
 
 type ConnectionController struct {
-	connectionUsecase usecases.FollowUseCase
+	connectionUsecase usecases.ConnectUsecase
 	userUsecase       usecases.UserUseCase
 }
 
-func NewConnectController(connect usecases.FollowUseCase, userUsecase usecases.UserUseCase) *ConnectionController {
+func NewConnectController(connect usecases.ConnectUsecase, userUsecase usecases.UserUseCase) *ConnectionController {
 	return &ConnectionController{
 		connectionUsecase: connect,
 		userUsecase:       userUsecase,
@@ -300,4 +300,8 @@ func (c *ConnectionController) AcceptConnection(ctx *gin.Context) {
 		return
 	}
 	ctx.JSON(201, gin.H{"message": "Connection created successfully"})
+}
+
+func (c *ConnectionController) GetMyConnections(ctx *gin.Context) {
+
 }

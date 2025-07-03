@@ -19,6 +19,7 @@ func SetupRoutes(
 	connectionController *controller.ConnectionController,
 ) *gin.Engine {
 	router := gin.New()
+	router.MaxMultipartMemory = 1 << 25
 	googleAuth := router.Group("/api/auth/google")
 	{
 		googleAuth.GET("/login", middleware.GoogleProvider, authController.LoginWithGoogle)
@@ -39,6 +40,8 @@ func SetupRoutes(
 
 	{
 		postsInfo.GET("/", middleware.AuthUserMiddleware(RoleAll), postController.GetPosts)
+		postsInfo.GET("/user/", middleware.AuthUserMiddleware(RoleAll), postController.GetPostsByUserID)
+		postsInfo.GET("/me", middleware.AuthUserMiddleware(RoleAll), postController.GetMyPosts)
 		postsInfo.GET("/:id", middleware.AuthUserMiddleware(RoleAll), postController.GetPostByID)
 		postsInfo.POST("/", middleware.AuthUserMiddleware(RoleAll), postController.CreatePost)
 		postsInfo.PUT("/:id", middleware.AuthUserMiddleware(RoleAll), postController.UpdatePost)

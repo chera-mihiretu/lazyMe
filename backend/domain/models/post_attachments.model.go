@@ -10,7 +10,7 @@ import (
 type PostAttachments struct {
 	ID        primitive.ObjectID `bson:"_id,omitempty" json:"id"`
 	PostID    primitive.ObjectID `bson:"post_id" json:"post_id"`
-	FileURL   string             `bson:"file_url" json:"file_url"`
+	FilesURL  string             `bson:"file_url" json:"file_url"`
 	FileType  string             `bson:"file_type" json:"file_type"`
 	CreatedAt time.Time          `bson:"created_at" json:"created_at"`
 }

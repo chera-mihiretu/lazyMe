@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"github.com/chera-mihiretu/IKnow/domain/models"
-	"github.com/chera-mihiretu/IKnow/reposiroty"
+	"github.com/chera-mihiretu/IKnow/repository"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
@@ -15,7 +15,7 @@ type UserUseCase interface {
 }
 
 type userUseCase struct {
-	userRepository reposiroty.UserRepository
+	userRepository repository.UserRepository
 }
 
 // GetListOfUsers implements UserUseCase.
@@ -33,7 +33,7 @@ func (u *userUseCase) GetUserById(ctx context.Context, userID string) (models.Us
 	return u.userRepository.GetUserById(ctx, userID)
 }
 
-func NewUserUseCase(repository reposiroty.UserRepository) UserUseCase {
+func NewUserUseCase(repository repository.UserRepository) UserUseCase {
 	return &userUseCase{
 		userRepository: repository,
 	}
