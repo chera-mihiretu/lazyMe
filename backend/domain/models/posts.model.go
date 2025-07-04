@@ -25,7 +25,7 @@ type Posts struct {
 
 type PostView struct {
 	ID              primitive.ObjectID `bson:"_id" json:"id"`
-	UserID          UserView           `bson:"user_id" json:"user_id"`
+	UserID          UserView           `bson:"user_id" json:"user"`
 	Content         string             `bson:"content" json:"content"`
 	PostAttachments []string           `bson:"post_attachments" json:"post_attachments"`
 	IsAnnouncement  bool               `bson:"is_announcement" json:"is_announcement"`

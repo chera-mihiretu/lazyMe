@@ -31,9 +31,6 @@ func RegisterValidationEmail(user models.User) error {
 		return errors.New("school is not")
 	}
 
-	if user.Department != "" && Department(user.Department).IsValid() {
-		return errors.New("department is not valid")
-	}
 	if user.AcedemicYear <= 0 && user.AcedemicYear >= 6 {
 		return errors.New("acedemic year must be between 1 and 5")
 	}

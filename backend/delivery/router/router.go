@@ -42,10 +42,10 @@ func SetupRoutes(
 		postsInfo.GET("/", middleware.AuthUserMiddleware(RoleAll), postController.GetPosts)
 		postsInfo.GET("/user/", middleware.AuthUserMiddleware(RoleAll), postController.GetPostsByUserID)
 		postsInfo.GET("/me", middleware.AuthUserMiddleware(RoleAll), postController.GetMyPosts)
-		postsInfo.GET("/:id", middleware.AuthUserMiddleware(RoleAll), postController.GetPostByID)
+		postsInfo.GET("/post", middleware.AuthUserMiddleware(RoleAll), postController.GetPostByID)
 		postsInfo.POST("/", middleware.AuthUserMiddleware(RoleAll), postController.CreatePost)
-		postsInfo.PUT("/:id", middleware.AuthUserMiddleware(RoleAll), postController.UpdatePost)
-		postsInfo.DELETE("/:id", middleware.AuthUserMiddleware(RoleAll), postController.DeletePost)
+		postsInfo.PUT("/", middleware.AuthUserMiddleware(RoleAll), postController.UpdatePost)
+		postsInfo.DELETE("/", middleware.AuthUserMiddleware(RoleAll), postController.DeletePost)
 	}
 
 	connection := router.Group("/api/connections")

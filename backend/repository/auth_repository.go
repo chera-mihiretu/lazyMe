@@ -3,6 +3,7 @@ package repository
 import (
 	"context"
 	"errors"
+	"fmt"
 	"time"
 
 	"github.com/chera-mihiretu/IKnow/domain/constants"
@@ -112,17 +113,18 @@ func (repo *authRepository) SignInWithGoogle(ctx context.Context, user models.Us
 	userExists, err := repo.UsersCollection.CountDocuments(ctx, map[string]interface{}{
 		"email": user.Email,
 	})
+
 	if err != nil {
 		return "", errors.New("cannot check if user exists")
 	}
+	fmt.Println("User conut ", userExists)
 
 	if userExists > 0 {
 		filter := bson.M{"email": user.Email}
 		var foundUser models.User
 		err := repo.UsersCollection.FindOne(ctx, filter).Decode(&foundUser)
-
 		if err != nil {
-			return "", errors.New("user not found")
+			return "", errors.New("user not found" + err.Error())
 		}
 
 		token, err := middleware.GenerateJWT(foundUser.ID.Hex(), foundUser.Role)

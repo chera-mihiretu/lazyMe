@@ -70,6 +70,7 @@ func (c *ConnectionController) GetConnections(ctx *gin.Context) {
 	}
 
 	ctx.JSON(200, gin.H{
+		"user":        userIDStr,
 		"connections": users,
 		"page":        page,
 	})

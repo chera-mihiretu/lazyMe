@@ -81,13 +81,16 @@ func (c *connectRepository) GetConnectRequests(ctx context.Context, userID strin
 
 func (c *connectRepository) GetConnects(ctx context.Context, userID string) ([]models.Connects, error) {
 	var connects []models.Connects
-
+	userIDPri, err := primitive.ObjectIDFromHex(userID)
+	if err != nil {
+		return nil, err
+	}
 	filter := bson.M{
 		"$and": []bson.M{
 			{
 				"$or": []bson.M{
-					{"connectee_id": userID},
-					{"connector_id": userID},
+					{"connectee_id": userIDPri},
+					{"connector_id": userIDPri},
 				},
 			},
 			{"accepted": true},

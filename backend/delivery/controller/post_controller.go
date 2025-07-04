@@ -32,10 +32,83 @@ func NewPostController(
 }
 
 func (p *PostController) GetPosts(ctx *gin.Context) {
+	page := ctx.Query("page")
+	if page == "" {
+		ctx.JSON(
+			http.StatusBadRequest,
+			gin.H{
+				"error": "page is requried",
+			},
+		)
+		return
+	}
+	pageInt, err := strconv.Atoi(page)
+	if err != nil || pageInt < 1 {
+		ctx.JSON(
+			http.StatusBadRequest,
+			gin.H{
+				"error": "Invalid page number",
+			},
+		)
+		return
+	}
+	userID, exist := ctx.Get("user_id")
+	if !exist {
+		ctx.JSON(400, gin.H{"error": "User ID not found in context"})
+		return
+	}
+	userIDStr, ok := userID.(string)
+	if !ok {
+		ctx.JSON(400, gin.H{"error": "Invalid user ID type"})
+		return
+	}
+
+	post, err := p.postUseCase.GetPosts(ctx, userIDStr, pageInt)
+
+	userViewPost, err := p.GetPostWithUsers(ctx, post)
+
+	if err != nil {
+		ctx.JSON(500,
+			gin.H{
+				"message": "There is problem converting post into json" + err.Error(),
+			})
+		return
+	}
+
+	ctx.JSON(
+		200,
+		gin.H{
+			"message": "Post are fetched",
+			"posts":   userViewPost,
+		},
+	)
 
 }
 
 func (p *PostController) GetPostByID(ctx *gin.Context) {
+
+	postID := ctx.Query("id")
+
+	if postID == "" {
+		ctx.JSON(400, gin.H{"error": "Post ID is required"})
+		return
+	}
+
+	post, err := p.postUseCase.GetPostByID(ctx, postID)
+
+	if err != nil {
+		ctx.JSON(500, gin.H{"error": "Failed to get post " + err.Error()})
+		return
+	}
+
+	postView, err := p.GetPostWithUsers(ctx, []models.Posts{post})
+
+	if err != nil {
+		ctx.JSON(500, gin.H{"error": "Failed to get post " + err.Error()})
+		return
+	}
+
+	ctx.JSON(200, gin.H{"message": "Post fetched successfully", "post": postView[0]})
 
 }
 func (p *PostController) CreatePost(ctx *gin.Context) {
@@ -133,10 +206,84 @@ func (p *PostController) CreatePost(ctx *gin.Context) {
 }
 
 func (p *PostController) UpdatePost(ctx *gin.Context) {
+	var post models.Posts
+	if err := ctx.ShouldBind(&post); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"error":   "Invalid or missing form data. Ensure all required fields are provided and correctly formatted.",
+			"details": err.Error(),
+		})
+		return
+	}
+
+	userID, exist := ctx.Get("user_id")
+	if !exist {
+		ctx.JSON(400, gin.H{"error": "User ID not found in context"})
+		return
+	}
+
+	userIDStr, ok := userID.(string)
+	if !ok {
+		ctx.JSON(400, gin.H{"error": "Invalid user ID type"})
+		return
+	}
+
+	userIDPrimitive, err := primitive.ObjectIDFromHex(userIDStr)
+
+	if err != nil {
+		ctx.JSON(
+			500, gin.H{
+				"error": "Cannot work with the id",
+			},
+		)
+	}
+
+	post.UserID = userIDPrimitive
+	post, err = p.postUseCase.UpdatePost(ctx, post)
+
+	if err != nil {
+		ctx.JSON(500, gin.H{"error": "Failed to get post " + err.Error()})
+		return
+	}
+
+	postView, err := p.GetPostWithUsers(ctx, []models.Posts{post})
+
+	if err != nil {
+		ctx.JSON(500, gin.H{"error": "Failed to get post " + err.Error()})
+		return
+	}
+
+	ctx.JSON(200, gin.H{"message": "Post updated successfully", "post": postView[0]})
 
 }
 
 func (p *PostController) DeletePost(ctx *gin.Context) {
+
+	postID := ctx.Query("id")
+
+	if postID == "" {
+		ctx.JSON(400, gin.H{"error": "Post ID is required"})
+		return
+	}
+
+	userID, exist := ctx.Get("user_id")
+	if !exist {
+		ctx.JSON(400, gin.H{"error": "User ID not found in context"})
+		return
+	}
+	userIDStr, ok := userID.(string)
+	if !ok {
+		ctx.JSON(400, gin.H{"error": "Invalid user ID type"})
+		return
+	}
+
+	err := p.postUseCase.DeletePost(ctx, userIDStr, postID)
+
+	if err != nil {
+		ctx.JSON(500, gin.H{"error": "Failed to delete post " + err.Error()})
+		return
+	}
+
+	ctx.JSON(200, gin.H{"message": "Post deleted successfully"})
 
 }
 
@@ -147,6 +294,7 @@ func (p *PostController) GetMyPosts(ctx *gin.Context) {
 		ctx.JSON(400, gin.H{"error": "Invalid page number"})
 		return
 	}
+
 	userID, exist := ctx.Get("user_id")
 	if !exist {
 		ctx.JSON(400, gin.H{"error": "User ID not found in context"})
@@ -160,12 +308,18 @@ func (p *PostController) GetMyPosts(ctx *gin.Context) {
 
 	posts, err := p.postUseCase.GetPostsByUserID(ctx, userIDStr, page)
 	if err != nil {
-		ctx.JSON(500, gin.H{"error": "Failed to get posts"})
+		ctx.JSON(500, gin.H{"error": "Failed to get posts" + err.Error()})
+		return
+	}
+
+	postViews, err := p.GetPostWithUsers(ctx, posts)
+	if err != nil {
+		ctx.JSON(500, gin.H{"error": "Failed to get posts " + err.Error()})
 		return
 	}
 
 	ctx.JSON(200, gin.H{
-		"posts": posts,
+		"posts": postViews,
 		"page":  page,
 	})
 }
@@ -182,12 +336,66 @@ func (p *PostController) GetPostsByUserID(ctx *gin.Context) {
 
 	posts, err := p.postUseCase.GetPostsByUserID(ctx, userID, page)
 	if err != nil {
-		ctx.JSON(500, gin.H{"error" : "Failed to get posts " + err.Error()})
+		ctx.JSON(500, gin.H{"error": "Failed to get posts " + err.Error()})
+		return
+	}
+
+	postViews, err := p.GetPostWithUsers(ctx, posts)
+
+	if err != nil {
+		ctx.JSON(500, gin.H{"error": "Failed to get posts " + err.Error()})
 		return
 	}
 
 	ctx.JSON(200, gin.H{
-		"posts": posts,
+		"posts": postViews,
 		"page":  page,
 	})
+}
+
+func (p *PostController) GetPostWithUsers(ctx *gin.Context, posts []models.Posts) ([]models.PostView, error) {
+	// Collect user IDs
+	userIDSet := make(map[string]struct{})
+	for _, post := range posts {
+		userIDSet[post.UserID.Hex()] = struct{}{}
+	}
+	userIDs := make([]primitive.ObjectID, 0, len(userIDSet))
+	for id := range userIDSet {
+		objID, err := primitive.ObjectIDFromHex(id)
+		if err == nil {
+			userIDs = append(userIDs, objID)
+		}
+	}
+
+	// Fetch user info
+	users, err := p.userUseCase.GetListOfUsers(ctx, userIDs)
+	if err != nil {
+		return []models.PostView{}, err
+	}
+	userMap := make(map[string]models.UserView)
+	for _, user := range users {
+		userMap[user.ID.Hex()] = user
+	}
+
+	// Pair posts with user info
+	postViews := make([]models.PostView, 0, len(posts))
+	for _, post := range posts {
+		userView, ok := userMap[post.UserID.Hex()]
+		if !ok {
+			continue // or handle missing user
+		}
+		postViews = append(postViews, models.PostView{
+			ID:              post.ID,
+			UserID:          userView,
+			Content:         post.Content,
+			PostAttachments: post.PostAttachments,
+			IsAnnouncement:  post.IsAnnouncement,
+			IsValidated:     post.IsValidated,
+			IsFlagged:       post.IsFlagged,
+			Likes:           post.Likes,
+			Comments:        post.Comments,
+			CreatedAt:       post.CreatedAt,
+		})
+	}
+	return postViews, nil
 }
