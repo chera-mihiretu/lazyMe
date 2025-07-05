@@ -28,6 +28,11 @@ func NewMaterialsRepository(db *mongo.Database) MaterialsRepository {
 	}
 }
 
+// Helper for error messages
+func matError(msg string) error {
+	return mongo.CommandError{Message: msg}
+}
+
 // GetMaterials implements MaterialsRepository.
 func (r *materialsRepository) GetMaterials(ctx context.Context, userID primitive.ObjectID, page int) ([]models.Materials, error) {
 	var materialss []models.Materials
@@ -37,20 +42,20 @@ func (r *materialsRepository) GetMaterials(ctx context.Context, userID primitive
 
 	cursor, err := r.materialss.Find(ctx, bson.M{}, options.Find().SetSkip(int64(skip)).SetLimit(pageSizeL))
 	if err != nil {
-		return nil, err
+		return nil, matError("failed to find materials: " + err.Error())
 	}
 	defer cursor.Close(ctx)
 
 	for cursor.Next(ctx) {
 		var materials models.Materials
 		if err := cursor.Decode(&materials); err != nil {
-			return nil, err
+			return nil, matError("failed to decode material: " + err.Error())
 		}
 		materialss = append(materialss, materials)
 	}
 
 	if err := cursor.Err(); err != nil {
-		return nil, err
+		return nil, matError("cursor error: " + err.Error())
 	}
 
 	return materialss, nil
@@ -63,7 +68,7 @@ func (r *materialsRepository) GetMaterialsByID(ctx context.Context, id primitive
 		if err == mongo.ErrNoDocuments {
 			return models.Materials{}, nil // Return an empty materials if not found
 		}
-		return models.Materials{}, err
+		return models.Materials{}, matError("failed to find material by ID: " + err.Error())
 	}
 	return materials, nil
 }
@@ -71,7 +76,7 @@ func (r *materialsRepository) GetMaterialsByID(ctx context.Context, id primitive
 func (r *materialsRepository) CreateMaterials(ctx context.Context, materials models.Materials) (models.Materials, error) {
 	result, err := r.materialss.InsertOne(ctx, materials)
 	if err != nil {
-		return models.Materials{}, err
+		return models.Materials{}, matError("failed to insert material: " + err.Error())
 	}
 	materials.ID = result.InsertedID.(primitive.ObjectID)
 	return materials, nil
@@ -82,7 +87,7 @@ func (r *materialsRepository) UpdateMaterials(ctx context.Context, materials mod
 		"title": materials.Title,
 	}})
 	if err != nil {
-		return models.Materials{}, err
+		return models.Materials{}, matError("failed to update material: " + err.Error())
 	}
 	if res.MatchedCount == 0 {
 		return models.Materials{}, mongo.ErrNoDocuments // No document found to update
@@ -92,7 +97,7 @@ func (r *materialsRepository) UpdateMaterials(ctx context.Context, materials mod
 func (r *materialsRepository) DeleteMaterials(ctx context.Context, userID primitive.ObjectID, id primitive.ObjectID) error {
 	res, err := r.materialss.DeleteOne(ctx, bson.M{"_id": id, "uploaded_by": userID})
 	if err != nil {
-		return err
+		return matError("failed to delete material: " + err.Error())
 	}
 
 	if res.DeletedCount == 0 {

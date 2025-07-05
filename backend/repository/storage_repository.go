@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"errors"
 	"mime/multipart"
 
 	"github.com/chera-mihiretu/IKnow/infrastructure/storage"
@@ -20,6 +21,15 @@ func NewStorageRepository(blackblazeStorage storage.BlackblazeStorage) StorageRe
 	}
 }
 
+// Helper for error messages
+func storageError(msg string) error {
+	return errors.New(msg)
+}
+
 func (s *storageRepository) UploadFile(file []*multipart.FileHeader) ([]string, error) {
-	return s.BlackblazeStorage.UploadFiles(file)
+	urls, err := s.BlackblazeStorage.UploadFiles(file)
+	if err != nil {
+		return nil, storageError("failed to upload files: " + err.Error())
+	}
+	return urls, nil
 }

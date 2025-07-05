@@ -19,10 +19,30 @@ func NewDepartmentController(departmentUsecase usecases.DepartmentUseCase) *Depa
 	}
 }
 
+// Helper for error responses
+func respondDeptWithError(ctx *gin.Context, code int, errMsg string) {
+	ctx.JSON(code, gin.H{"error": errMsg})
+}
+
+// Helper to extract user ID from context
+func getDeptUserID(ctx *gin.Context) (string, bool) {
+	userID, exists := ctx.Get("user_id")
+	if !exists {
+		respondDeptWithError(ctx, 401, "Unauthorized")
+		return "", false
+	}
+	userIDString, ok := userID.(string)
+	if !ok {
+		respondDeptWithError(ctx, 400, "Invalid user ID type")
+		return "", false
+	}
+	return userIDString, true
+}
+
 func (d *DepartmentController) GetDepartments(ctx *gin.Context) {
 	departments, err := d.DepartmentUsecase.GetDepartments(ctx)
 	if err != nil {
-		ctx.JSON(500, gin.H{"error": "Failed to get departments"})
+		respondDeptWithError(ctx, 500, "Failed to get departments")
 		return
 	}
 	ctx.JSON(200, gin.H{
@@ -34,19 +54,19 @@ func (d *DepartmentController) GetDepartments(ctx *gin.Context) {
 func (d *DepartmentController) GetDepartmentByID(ctx *gin.Context) {
 	departmentID := ctx.Query("id")
 	if departmentID == "" {
-		ctx.JSON(400, gin.H{"error": "Department ID is required"})
+		respondDeptWithError(ctx, 400, "Department ID is required")
 		return
 	}
 
 	departmentIDPrimitive, err := primitive.ObjectIDFromHex(departmentID)
 	if err != nil {
-		ctx.JSON(400, gin.H{"error": "Invalid Department ID format"})
+		respondDeptWithError(ctx, 400, "Invalid Department ID format")
 		return
 	}
 
 	department, err := d.DepartmentUsecase.GetDepartmentByID(ctx, departmentIDPrimitive)
 	if err != nil {
-		ctx.JSON(500, gin.H{"error": "Failed to get department"})
+		respondDeptWithError(ctx, 500, "Failed to get department")
 		return
 	}
 
@@ -57,33 +77,25 @@ func (d *DepartmentController) GetDepartmentByID(ctx *gin.Context) {
 }
 
 func (d *DepartmentController) CreateDepartment(ctx *gin.Context) {
-	userID, exists := ctx.Get("user_id")
-	if !exists {
-		ctx.JSON(401, gin.H{"error": "Unauthorized"})
-		return
-	}
-	userIDString, ok := userID.(string)
+	userIDString, ok := getDeptUserID(ctx)
 	if !ok {
-		ctx.JSON(400, gin.H{"error": "Invalid user ID type"})
 		return
 	}
-	// Ensure userID is of type primitive.ObjectID
 	userIDPrimitive, err := primitive.ObjectIDFromHex(userIDString)
 	if err != nil {
-		ctx.JSON(400, gin.H{"error": "Invalid user ID" + err.Error()})
+		respondDeptWithError(ctx, 400, "Invalid user ID"+err.Error())
 		return
 	}
-
 	var department models.Departments
 	if err := ctx.ShouldBindJSON(&department); err != nil {
-		ctx.JSON(400, gin.H{"error": "Invalid input data"})
+		respondDeptWithError(ctx, 400, "Invalid input data")
 		return
 	}
 	department.CreatedBy = userIDPrimitive
 	department.CreatedAt = time.Now()
 	createdDepartment, err := d.DepartmentUsecase.CreateDepartment(ctx, department)
 	if err != nil {
-		ctx.JSON(500, gin.H{"error": "Failed to create department"})
+		respondDeptWithError(ctx, 500, "Failed to create department")
 		return
 	}
 

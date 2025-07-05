@@ -43,25 +43,30 @@ func NewPostRepository(db *mongo.Database,
 	}
 }
 
+// Helper for error messages
+func postError(msg string) error {
+	return fmt.Errorf(msg)
+}
+
 func (p *postRepository) GetRecomendedPosts(ctx context.Context, userID string, page int) ([]models.Posts, error) {
 	// Get the user to access their departments
 	user, err := p.userRepository.GetUserById(ctx, userID)
 	if err != nil {
-		return nil, err
+		return nil, postError("failed to get user: " + err.Error())
 	}
 	userDepartments := []string{user.Department} // wrap single department in a slice
 
 	// Get the user's connections
 	following, err := p.connectRepository.GetConnects(ctx, userID)
 	if err != nil {
-		return nil, err
+		return nil, postError("failed to get connects: " + err.Error())
 	}
 
 	connects := []primitive.ObjectID{}
 
 	userObjID, err := primitive.ObjectIDFromHex(userID)
 	if err != nil {
-		return nil, err
+		return nil, postError("invalid user ID format: " + err.Error())
 	}
 
 	for _, row := range following {
@@ -106,7 +111,7 @@ func (p *postRepository) GetRecomendedPosts(ctx context.Context, userID string, 
 
 	cursor, err := p.postsDB.Aggregate(ctx, pipeline)
 	if err != nil {
-		return nil, err
+		return nil, postError("failed to aggregate posts: " + err.Error())
 	}
 	defer cursor.Close(ctx)
 
@@ -114,13 +119,13 @@ func (p *postRepository) GetRecomendedPosts(ctx context.Context, userID string, 
 	for cursor.Next(ctx) {
 		var post models.Posts
 		if err := cursor.Decode(&post); err != nil {
-			return nil, err
+			return nil, postError("failed to decode post: " + err.Error())
 		}
 		posts = append(posts, post)
 	}
 
 	if err := cursor.Err(); err != nil {
-		return nil, err
+		return nil, postError("cursor error: " + err.Error())
 	}
 
 	return posts, nil
@@ -133,13 +138,13 @@ func (p *postRepository) GetPosts(ctx context.Context, userID string, page int) 
 func (p *postRepository) GetPostByID(ctx context.Context, id string) (models.Posts, error) {
 	newId, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
-		return models.Posts{}, fmt.Errorf("invalid post ID format: %v", err)
+		return models.Posts{}, postError("invalid post ID format: " + err.Error())
 	}
 	filter := bson.M{"_id": newId}
 	var post models.Posts
 	err = p.postsDB.FindOne(ctx, filter).Decode(&post)
 	if err != nil {
-		return models.Posts{}, err
+		return models.Posts{}, postError("failed to find post: " + err.Error())
 	}
 	return post, nil
 }
@@ -149,7 +154,7 @@ func (p *postRepository) CreatePost(ctx context.Context, post models.Posts) (mod
 	post.ID = id
 	_, err := p.postsDB.InsertOne(ctx, post)
 	if err != nil {
-		return models.Posts{}, err
+		return models.Posts{}, postError("failed to insert post: " + err.Error())
 	}
 	return post, nil
 }
@@ -166,7 +171,7 @@ func (p *postRepository) UpdatePost(ctx context.Context, post models.Posts) (mod
 
 	res, err := p.postsDB.UpdateOne(ctx, filter, postUpdate)
 	if err != nil {
-		return models.Posts{}, err
+		return models.Posts{}, postError("failed to update post: " + err.Error())
 	}
 
 	if res.MatchedCount == 0 {
@@ -180,14 +185,14 @@ func (p *postRepository) DeletePost(ctx context.Context, userID string, postID s
 
 	newId, err := primitive.ObjectIDFromHex(postID)
 	if err != nil {
-		return fmt.Errorf("invalid post ID format: %v", err)
+		return postError("invalid post ID format: " + err.Error())
 	}
 
 	filter := bson.M{"_id": newId, "user_id": userID}
 
 	res, err := p.postsDB.DeleteOne(ctx, filter)
 	if err != nil {
-		return err
+		return postError("failed to delete post: " + err.Error())
 	}
 
 	if res.DeletedCount == 0 {
@@ -202,7 +207,7 @@ func (p *postRepository) DeletePost(ctx context.Context, userID string, postID s
 func (p *postRepository) GetPostsByUserID(ctx context.Context, userID string, page int) ([]models.Posts, error) {
 	id, err := primitive.ObjectIDFromHex(userID)
 	if err != nil {
-		return nil, fmt.Errorf("invalid user ID format: %v", err)
+		return nil, postError("invalid user ID format: " + err.Error())
 	}
 	filter := bson.M{"user_id": id}
 
@@ -214,7 +219,7 @@ func (p *postRepository) GetPostsByUserID(ctx context.Context, userID string, pa
 
 	cursor, err := p.postsDB.Find(ctx, filter, findOptions)
 	if err != nil {
-		return nil, err
+		return nil, postError("failed to find posts: " + err.Error())
 	}
 	defer cursor.Close(ctx)
 
@@ -222,13 +227,13 @@ func (p *postRepository) GetPostsByUserID(ctx context.Context, userID string, pa
 	for cursor.Next(ctx) {
 		var post models.Posts
 		if err := cursor.Decode(&post); err != nil {
-			return nil, err
+			return nil, postError("failed to decode post: " + err.Error())
 		}
 		posts = append(posts, post)
 	}
 
 	if err := cursor.Err(); err != nil {
-		return nil, err
+		return nil, postError("cursor error: " + err.Error())
 	}
 
 	return posts, nil

@@ -25,24 +25,29 @@ func NewDepartmentRepository(db *mongo.Database) DepartmentRepository {
 	}
 }
 
+// Helper for error messages
+func deptError(msg string) error {
+	return mongo.CommandError{Message: msg}
+}
+
 func (r *departmentRepository) GetDepartments(ctx context.Context) ([]models.Departments, error) {
 	var departments []models.Departments
 	cursor, err := r.departments.Find(ctx, bson.M{})
 	if err != nil {
-		return nil, err
+		return nil, deptError("failed to find departments: " + err.Error())
 	}
 	defer cursor.Close(ctx)
 
 	for cursor.Next(ctx) {
 		var department models.Departments
 		if err := cursor.Decode(&department); err != nil {
-			return nil, err
+			return nil, deptError("failed to decode department: " + err.Error())
 		}
 		departments = append(departments, department)
 	}
 
 	if err := cursor.Err(); err != nil {
-		return nil, err
+		return nil, deptError("cursor error: " + err.Error())
 	}
 
 	return departments, nil
@@ -55,7 +60,7 @@ func (r *departmentRepository) GetDepartmentByID(ctx context.Context, id primiti
 		if err == mongo.ErrNoDocuments {
 			return models.Departments{}, nil // Return an empty department if not found
 		}
-		return models.Departments{}, err
+		return models.Departments{}, deptError("failed to find department by ID: " + err.Error())
 	}
 	return department, nil
 }
@@ -64,7 +69,7 @@ func (r *departmentRepository) CreateDepartment(ctx context.Context, department 
 	department.ID = primitive.NewObjectID() // Ensure the ID is set before insertion
 	_, err := r.departments.InsertOne(ctx, department)
 	if err != nil {
-		return models.Departments{}, err
+		return models.Departments{}, deptError("failed to insert department: " + err.Error())
 	}
 	return department, nil
 }

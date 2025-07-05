@@ -24,18 +24,25 @@ func NewAuthUseCase(repository repository.AuthRepository) AuthUseCase {
 	}
 }
 
+// Helper for error forwarding (for future extensibility)
+func forwardError(err error) error {
+	return err
+}
+
 func (auth *authUseCase) RegisterUserEmail(ctx context.Context, user models.User) error {
-	return auth.AuthRepository.RegisterUserWithEmail(ctx, user)
+	return forwardError(auth.AuthRepository.RegisterUserWithEmail(ctx, user))
 }
 
 func (auth *authUseCase) SignInWithGoogle(ctx context.Context, user models.User) (string, error) {
-	return auth.AuthRepository.SignInWithGoogle(ctx, user)
+	token, err := auth.AuthRepository.SignInWithGoogle(ctx, user)
+	return token, forwardError(err)
 }
 
 func (auth *authUseCase) LoginWithEmail(ctx context.Context, user models.User) (string, error) {
-	return auth.AuthRepository.LoginWithEmail(ctx, user)
+	token, err := auth.AuthRepository.LoginWithEmail(ctx, user)
+	return token, forwardError(err)
 }
 
 func (auth *authUseCase) VerifyEmail(ctx context.Context, token models.EmailVerification) error {
-	return auth.AuthRepository.VerifyEmail(ctx, token)
+	return forwardError(auth.AuthRepository.VerifyEmail(ctx, token))
 }

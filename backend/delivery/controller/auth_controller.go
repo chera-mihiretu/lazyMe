@@ -25,29 +25,33 @@ func NewAuthController(authUseCase usecases.AuthUseCase) *AuthController {
 	}
 }
 
+// Helper for error responses
+func respondWithError(ctx *gin.Context, code int, errMsg string) {
+	ctx.JSON(code, gin.H{"error": errMsg})
+}
+
 func (auth *AuthController) LoginWithGoogle(c *gin.Context) {
 
 	gothic.BeginAuthHandler(c.Writer, c.Request)
-
 }
 
 func (auth *AuthController) HandleCallback(c *gin.Context) {
 	// Complete the OAuth2 authentication
 	user, err := gothic.CompleteUserAuth(c.Writer, c.Request)
 	if err != nil {
-		c.JSON(500, gin.H{"error": "Failed to authenticate with Google: " + err.Error()})
+		respondWithError(c, 500, "Failed to authenticate with Google: "+err.Error())
 		return
 	}
 
 	verified := helpers.VerifyCallback(user)
 	if !verified {
-		c.JSON(400, gin.H{"error": "Google authentication failed"})
+		respondWithError(c, 400, "Google authentication failed")
 		return
 	}
 
 	user_email := user.Email
 	if user_email == "" {
-		c.JSON(400, gin.H{"error": "Email not provided by Google"})
+		respondWithError(c, 400, "Email not provided by Google")
 		return
 	}
 
@@ -60,7 +64,7 @@ func (auth *AuthController) HandleCallback(c *gin.Context) {
 	token, err := auth.authUseCase.SignInWithGoogle(c, myUser)
 
 	if err != nil {
-		c.JSON(500, gin.H{"error": "Failed to register user with Google: " + err.Error()})
+		respondWithError(c, 500, "Failed to register user with Google: "+err.Error())
 		return
 	}
 
@@ -74,21 +78,21 @@ func (auth *AuthController) LoginWithEmail(ctx *gin.Context) {
 	var user models.User
 
 	if err := ctx.ShouldBindJSON(&user); err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		respondWithError(ctx, http.StatusBadRequest, err.Error())
 		return
 	}
 
 	err := validation.ValidateLoginInput(user)
 
 	if err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid input " + err.Error()})
+		respondWithError(ctx, http.StatusBadRequest, "Invalid input "+err.Error())
 		return
 	}
 
 	token, err := auth.authUseCase.LoginWithEmail(ctx, user)
 
 	if err != nil {
-		ctx.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+		respondWithError(ctx, http.StatusUnauthorized, err.Error())
 		return
 	}
 
@@ -99,14 +103,14 @@ func (auth *AuthController) RegisterWithEmail(ctx *gin.Context) {
 	var user models.User
 
 	if err := ctx.ShouldBindJSON(&user); err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		respondWithError(ctx, http.StatusBadRequest, err.Error())
 		return
 	}
 
 	err := validation.RegisterValidationEmail(user)
 
 	if err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid input " + err.Error()})
+		respondWithError(ctx, http.StatusBadRequest, "Invalid input "+err.Error())
 		return
 	}
 
@@ -114,7 +118,7 @@ func (auth *AuthController) RegisterWithEmail(ctx *gin.Context) {
 
 	if err != nil {
 		log.Println("Error hashing password: ", err)
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Something Went Wrong Please Try again "})
+		respondWithError(ctx, http.StatusInternalServerError, "Something Went Wrong Please Try again ")
 		return
 	}
 
@@ -124,7 +128,7 @@ func (auth *AuthController) RegisterWithEmail(ctx *gin.Context) {
 
 	if err != nil {
 		log.Println("Error creating user: ", err)
-		ctx.JSON(http.StatusConflict, gin.H{"error": err.Error()})
+		respondWithError(ctx, http.StatusConflict, err.Error())
 		return
 	}
 
@@ -135,7 +139,7 @@ func (auth *AuthController) VerifyEmail(ctx *gin.Context) {
 	token := ctx.DefaultQuery("token", "")
 	front_url, exist := os.LookupEnv("FRONT_BASE_URL")
 	if !exist {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Front Url Token is required"})
+		respondWithError(ctx, http.StatusBadRequest, "Front Url Token is required")
 		return
 	}
 
@@ -146,7 +150,7 @@ func (auth *AuthController) VerifyEmail(ctx *gin.Context) {
 	email, err := middleware.VerificationTokenValidate(token)
 
 	if err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid token: " + err.Error()})
+		respondWithError(ctx, http.StatusBadRequest, "Invalid token: "+err.Error())
 		return
 	}
 
@@ -156,7 +160,7 @@ func (auth *AuthController) VerifyEmail(ctx *gin.Context) {
 	err = auth.authUseCase.VerifyEmail(ctx, tokenModel)
 
 	if err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		respondWithError(ctx, http.StatusBadRequest, err.Error())
 		return
 	}
 	ctx.Redirect(http.StatusFound, front_url)

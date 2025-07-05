@@ -123,7 +123,7 @@ func (c *connectRepository) GetConnections(ctx context.Context, userID string, p
 	var connects []models.Connects
 	userIDprimitive, err := primitive.ObjectIDFromHex(userID)
 	if err != nil {
-		return nil, errors.New("invalid user ID format")
+		return nil, connectError("invalid user ID format")
 	}
 	filter := bson.M{
 		"$and": []bson.M{
@@ -165,7 +165,6 @@ func (c *connectRepository) GetConnections(ctx context.Context, userID string, p
 
 // CreateConnect implements the logic to create a connect relationship.
 func (c *connectRepository) CreateConnection(ctx context.Context, connect models.Connects) error {
-	// Check if the connect already exists
 	filter := bson.M{
 		"$or": []bson.M{
 			{"connector_id": connect.ConnectorID, "connectee_id": connect.ConnecteeID},
@@ -179,10 +178,9 @@ func (c *connectRepository) CreateConnection(ctx context.Context, connect models
 		return err
 	}
 	if existingConnect > 0 {
-		return errors.New("connection already sent") // Connect already exists, no need to create
+		return connectError("connection already sent")
 	}
 
-	// Insert the new connect relationship
 	connect.CreatedAt = time.Now()
 	connect.Accepted = false
 	_, err = c.connects.InsertOne(ctx, connect)
@@ -194,7 +192,6 @@ func (c *connectRepository) CreateConnection(ctx context.Context, connect models
 
 // DeleteConnect implements the logic to delete a connect relationship.
 func (c *connectRepository) DeleteConnection(ctx context.Context, connect models.Connects) error {
-	// Create a filter to find the connect relationship
 	filter := bson.M{
 		"$or": []bson.M{
 			{"connector_id": connect.ConnectorID, "connectee_id": connect.ConnecteeID},
@@ -202,13 +199,12 @@ func (c *connectRepository) DeleteConnection(ctx context.Context, connect models
 		},
 	}
 
-	// Delete the connect relationship
 	result, err := c.connects.DeleteOne(ctx, filter)
 	if err != nil {
 		return err
 	}
 	if result.DeletedCount == 0 {
-		return mongo.ErrNoDocuments // No document found to delete
+		return mongo.ErrNoDocuments
 	}
 	return nil
 }
@@ -234,24 +230,17 @@ func (c *connectRepository) IsConnected(ctx context.Context, connect models.Conn
 func (c *connectRepository) GetConnectionsCount(ctx context.Context, userID string) (int64, error) {
 	id, err := primitive.ObjectIDFromHex(userID)
 	if err != nil {
-		return 0, errors.New("invalid user ID format")
+		return 0, connectError("invalid user ID format")
 	}
-	filter := bson.M{
-		"_id": id,
-	}
+	filter := bson.M{"_id": id}
 	var user models.User
-	err = c.usersCollection.FindOne(ctx, filter).Decode(&user)
-	if err != nil {
+	if err := c.usersCollection.FindOne(ctx, filter).Decode(&user); err != nil {
 		return 0, err
-
 	}
-
 	return int64(user.FollowCount), nil
-
 }
 
 func (c *connectRepository) AcceptConnection(ctx context.Context, connect models.Connects) error {
-	// Create a filter to find the connect relationship
 	filter := bson.M{
 		"connector_id": connect.ConnectorID,
 		"connectee_id": connect.ConnecteeID,
@@ -270,7 +259,12 @@ func (c *connectRepository) AcceptConnection(ctx context.Context, connect models
 		return err
 	}
 	if result.MatchedCount == 0 {
-		return mongo.ErrNoDocuments // No document found to update
+		return mongo.ErrNoDocuments
 	}
 	return nil
+}
+
+// Helper for error messages
+func connectError(msg string) error {
+	return errors.New(msg)
 }
