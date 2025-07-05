@@ -164,9 +164,13 @@ func (p *postRepository) UpdatePost(ctx context.Context, post models.Posts) (mod
 		},
 	}
 
-	_, err := p.postsDB.UpdateOne(ctx, filter, postUpdate)
+	res, err := p.postsDB.UpdateOne(ctx, filter, postUpdate)
 	if err != nil {
 		return models.Posts{}, err
+	}
+
+	if res.MatchedCount == 0 {
+		return models.Posts{}, mongo.ErrNoDocuments // No document found to update
 	}
 
 	return post, nil
@@ -181,9 +185,13 @@ func (p *postRepository) DeletePost(ctx context.Context, userID string, postID s
 
 	filter := bson.M{"_id": newId, "user_id": userID}
 
-	_, err = p.postsDB.DeleteOne(ctx, filter)
+	res, err := p.postsDB.DeleteOne(ctx, filter)
 	if err != nil {
 		return err
+	}
+
+	if res.DeletedCount == 0 {
+		return mongo.ErrNoDocuments // No document found to delete
 	}
 
 	// TODO : Delete The Images from the storage

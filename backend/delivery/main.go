@@ -52,6 +52,7 @@ func main() {
 	// department dependencies
 	departmentRepository := repository.NewDepartmentRepository(myDatabase)
 	departmentUsecase := usecases.NewDepartmentUseCase(departmentRepository)
+	departmentController := controller.NewDepartmentController(departmentUsecase)
 	// post dependencies
 	postRepository := repository.NewPostRepository(myDatabase,
 		departmentRepository,
@@ -59,11 +60,17 @@ func main() {
 		*userRepository)
 	postUseCase := usecases.NewPostUseCase(postRepository)
 	PostController := controller.NewPostController(postUseCase, userUseCase, departmentUsecase, storageUseCase)
+	// material dependencies
+	materialRepository := repository.NewMaterialsRepository(myDatabase)
+	materialUseCase := usecases.NewMaterialUseCase(materialRepository)
+	MaterialController := controller.NewMaterialController(materialUseCase, storageUseCase)
 
 	router := router.SetupRoutes(
 		AuthController,
 		PostController,
 		connectionController,
+		departmentController,
+		MaterialController,
 	)
 
 	if err := router.Run(":3000"); err != nil {

@@ -111,6 +111,7 @@ func (p *PostController) GetPostByID(ctx *gin.Context) {
 	ctx.JSON(200, gin.H{"message": "Post fetched successfully", "post": postView[0]})
 
 }
+
 func (p *PostController) CreatePost(ctx *gin.Context) {
 	// Grab user id
 	userID, exist := ctx.Get("user_id")
@@ -215,6 +216,12 @@ func (p *PostController) UpdatePost(ctx *gin.Context) {
 		return
 	}
 
+	postID := ctx.Param("id")
+	if postID == "" {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Post ID is required"})
+		return
+	}
+
 	userID, exist := ctx.Get("user_id")
 	if !exist {
 		ctx.JSON(400, gin.H{"error": "User ID not found in context"})
@@ -235,6 +242,17 @@ func (p *PostController) UpdatePost(ctx *gin.Context) {
 				"error": "Cannot work with the id",
 			},
 		)
+	}
+	if postID != "" {
+		postIDPrimitive, err := primitive.ObjectIDFromHex(postID)
+		if err != nil {
+			ctx.JSON(400, gin.H{"error": "Invalid Post ID format"})
+			return
+		}
+		post.ID = postIDPrimitive
+	} else {
+		ctx.JSON(400, gin.H{"error": "Post ID is required"})
+		return
 	}
 
 	post.UserID = userIDPrimitive

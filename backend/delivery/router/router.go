@@ -17,6 +17,8 @@ func SetupRoutes(
 	authController *controller.AuthController,
 	postController *controller.PostController,
 	connectionController *controller.ConnectionController,
+	departmentController *controller.DepartmentController,
+	materialController *controller.MaterialController,
 ) *gin.Engine {
 	router := gin.New()
 	router.MaxMultipartMemory = 1 << 25
@@ -44,7 +46,7 @@ func SetupRoutes(
 		postsInfo.GET("/me", middleware.AuthUserMiddleware(RoleAll), postController.GetMyPosts)
 		postsInfo.GET("/post", middleware.AuthUserMiddleware(RoleAll), postController.GetPostByID)
 		postsInfo.POST("/", middleware.AuthUserMiddleware(RoleAll), postController.CreatePost)
-		postsInfo.PUT("/", middleware.AuthUserMiddleware(RoleAll), postController.UpdatePost)
+		postsInfo.PUT("/:id", middleware.AuthUserMiddleware(RoleAll), postController.UpdatePost)
 		postsInfo.DELETE("/", middleware.AuthUserMiddleware(RoleAll), postController.DeletePost)
 	}
 
@@ -58,6 +60,23 @@ func SetupRoutes(
 		connection.GET("/count", middleware.AuthUserMiddleware(RoleStudent), connectionController.GetConnectionsCount)
 		connection.POST("/accept", middleware.AuthUserMiddleware(RoleStudent), connectionController.AcceptConnection)
 	}
+
+	department := router.Group("/api/department")
+
+	{
+		department.GET("/", departmentController.GetDepartments)
+		department.POST("/create", middleware.AuthUserMiddleware(RoleAdmin), departmentController.CreateDepartment)
+	}
+
+	material := router.Group("/api/materials")
+	{
+		material.GET("/", middleware.AuthUserMiddleware(RoleAll), materialController.GetMaterials)
+		material.GET("/:id", middleware.AuthUserMiddleware(RoleAll), materialController.GetMaterialByID)
+		material.POST("/", middleware.AuthUserMiddleware(RoleAdmin), materialController.CreateMaterial)
+		material.PUT("/:id", middleware.AuthUserMiddleware(RoleAdmin), materialController.UpdateMaterial)
+		material.DELETE("/:id", middleware.AuthUserMiddleware(RoleAdmin), materialController.DeleteMaterial)
+	}
+
 	router.GET("api/health", func(c *gin.Context) {
 		c.JSON(200, gin.H{
 			"message": "Server is running",

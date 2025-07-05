@@ -9,16 +9,28 @@ import (
 )
 
 type DepartmentUseCase interface {
-	GetListOfDepartments(ctx context.Context, ids []primitive.ObjectID) ([]models.Departments, error)
+	GetDepartments(ctx context.Context) ([]models.Departments, error)
+	GetDepartmentByID(ctx context.Context, id primitive.ObjectID) (models.Departments, error)
+	CreateDepartment(ctx context.Context, department models.Departments) (models.Departments, error)
 }
 
 type departmentUseCase struct {
 	departmentRepository repository.DepartmentRepository
 }
 
-// GetListOfDepartments implements DepartmentUseCase.
-func (d *departmentUseCase) GetListOfDepartments(ctx context.Context, ids []primitive.ObjectID) ([]models.Departments, error) {
-	return d.departmentRepository.GetListOfDepartments(ctx, ids)
+// CreateDepartment implements DepartmentUseCase.
+func (d *departmentUseCase) CreateDepartment(ctx context.Context, department models.Departments) (models.Departments, error) {
+	return d.departmentRepository.CreateDepartment(ctx, department)
+}
+
+// GetDepartmentByID implements DepartmentUseCase.
+func (d *departmentUseCase) GetDepartmentByID(ctx context.Context, id primitive.ObjectID) (models.Departments, error) {
+	return d.departmentRepository.GetDepartmentByID(ctx, id)
+}
+
+// GetDepartments implements DepartmentUseCase.
+func (d *departmentUseCase) GetDepartments(ctx context.Context) ([]models.Departments, error) {
+	return d.departmentRepository.GetDepartments(ctx)
 }
 
 func NewDepartmentUseCase(departmentRepository repository.DepartmentRepository) DepartmentUseCase {
