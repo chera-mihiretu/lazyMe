@@ -1,0 +1,145 @@
+'use client';
+import React, { useState } from 'react';
+import { COLORS, FONT_FAMILY } from '../../utils/color';
+import Link from 'next/link';
+
+const LoginForm: React.FC = () => {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [remember, setRemember] = useState(false);
+  const [error, setError] = useState('');
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    // Simple validation
+    if (!email || !password) {
+      setError('Please enter both email and password.');
+      return;
+    }
+    setError('');
+    // TODO: handle login
+  };
+
+  return (
+    <form onSubmit={handleSubmit} style={{ width: '100%', maxWidth: 380, margin: '0 auto' }}>
+      
+      <div style={{ marginBottom: 18 }}>
+        <input
+          type="email"
+          placeholder="Enter your university email"
+          value={email}
+          onChange={e => setEmail(e.target.value)}
+          style={{
+            width: '100%',
+            padding: '0.85rem 1rem',
+            border: `1.5px solid ${error ? COLORS.error : COLORS.inputBorder}`,
+            borderRadius: 8,
+            fontFamily: FONT_FAMILY.poppins,
+            fontSize: '1rem',
+            outline: 'none',
+            marginBottom: 8,
+            background: COLORS.inputBg,
+            color: '#171717', // black text
+            boxShadow: error ? `0 0 0 2px ${COLORS.error}33, 0 2px 8px #e0e0e0` : '0 2px 8px #e0e0e0',
+            transition: 'border 0.2s, box-shadow 0.2s',
+          }}
+          aria-label="University Email"
+        />
+      </div>
+      <div style={{ marginBottom: 8 }}>
+        <input
+          type="password"
+          placeholder="Enter your password"
+          value={password}
+          onChange={e => setPassword(e.target.value)}
+          style={{
+            width: '100%',
+            padding: '0.85rem 1rem',
+            border: `1.5px solid ${error ? COLORS.error : COLORS.inputBorder}`,
+            borderRadius: 8,
+            fontFamily: FONT_FAMILY.poppins,
+            fontSize: '1rem',
+            outline: 'none',
+            background: COLORS.inputBg,
+            color: '#171717', // black text
+            boxShadow: error ? `0 0 0 2px ${COLORS.error}33, 0 2px 8px #e0e0e0` : '0 2px 8px #e0e0e0',
+            transition: 'border 0.2s, box-shadow 0.2s',
+          }}
+          aria-label="Password"
+        />
+      </div>
+      {error && <div style={{ color: COLORS.error, fontSize: '0.98rem', marginBottom: 10 }}>{error}</div>}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
+        <label style={{ display: 'flex', alignItems: 'center', fontFamily: FONT_FAMILY.poppins, fontSize: '0.98rem', color: COLORS.foreground }}>
+          <input
+            type="checkbox"
+            checked={remember}
+            onChange={e => setRemember(e.target.checked)}
+            style={{ marginRight: 7 }}
+          />
+          Remember me
+        </label>
+        <a href="#" style={{ color: COLORS.primary, fontSize: '0.98rem', textDecoration: 'underline', opacity: 0.85 }}>Forgot Password?</a>
+      </div>
+      <button
+        type="submit"
+        style={{
+          width: '100%',
+          background: COLORS.primary,
+          color: '#fff',
+          fontFamily: FONT_FAMILY.poppins,
+          fontWeight: 600,
+          fontSize: '1.08rem',
+          borderRadius: 8,
+          padding: '0.85rem 0',
+          border: 'none',
+          marginTop: 8,
+          marginBottom: 18,
+          boxShadow: '0 2px 8px rgba(67,24,209,0.07)',
+          cursor: 'pointer',
+          transition: 'background 0.2s',
+        }}
+      >
+        Sign In
+      </button>
+      <div style={{ display: 'flex', alignItems: 'center', margin: '18px 0' }}>
+        <div style={{ flex: 1, height: 1, background: COLORS.inputBorder, opacity: 0.5 }} />
+        <span style={{ margin: '0 12px', color: '#171717', fontFamily: FONT_FAMILY.poppins, fontSize: '0.98rem' }}>Or continue with</span>
+        <div style={{ flex: 1, height: 1, background: COLORS.inputBorder, opacity: 0.5 }} />
+      </div>
+      <button
+        type="button"
+        style={{
+          width: '100%',
+          background: '#fff',
+          color: COLORS.foreground,
+          fontFamily: FONT_FAMILY.poppins,
+          fontWeight: 600,
+          fontSize: '1.08rem',
+          borderRadius: 8,
+          padding: '0.85rem 0',
+          border: `1.5px solid ${COLORS.inputBorder}`,
+          marginBottom: 10,
+          boxShadow: '0 1px 4px rgba(0,0,0,0.03)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          gap: 10,
+          cursor: 'pointer',
+          transition: 'border 0.2s',
+        }}
+      >
+        <img src="/icons/google.png" alt="Google" width={22} height={22} style={{ marginRight: 8 }} />
+        Continue with Google
+      </button>
+      <div style={{ textAlign: 'center', marginTop: 10 }}>
+        <span style={{ color: '#171717', fontFamily: FONT_FAMILY.poppins, fontSize: '0.98rem' }}>
+          New to iKnow?{' '}
+          <Link href="/auth/signup" prefetch={false} style={{ color: COLORS.primary, textDecoration: 'underline', fontWeight: 500 }}>Sign Up</Link>
+        </span>
+      </div>
+    </form>
+  );
+};
+
+export default LoginForm;
