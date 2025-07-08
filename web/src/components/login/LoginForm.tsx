@@ -19,10 +19,8 @@ const LoginForm: React.FC = () => {
       return;
     }
     setError('');
-    // Use NEXT_PUBLIC_BASE_URL for client-side env
     const baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
     if (!baseUrl) {
-      
       setError('Server configuration error. Please try again later.');
       return;
     }
@@ -30,24 +28,25 @@ const LoginForm: React.FC = () => {
     fetch(`${baseUrl}/auth/email/login`, {
       method: 'POST',
       headers: {
-      'Content-Type': 'application/json',
+        'Content-Type': 'application/json',
       },
       body: JSON.stringify({ email, password }),
     })
       .then(async (response) => {
-      const data = await response.json();
-      if (response.status === 200) {
-        // Handle successful login
-        console.log('Login successful. Token:', data.token);
-        // You can store the token in localStorage or handle it as needed
-      } else {
-        // Handle errors
-        setError(data.error || 'An unknown error occurred.');
-      }
+        const data = await response.json();
+        if (response.status === 200 && data.token) {
+          // Save token and redirect
+          if (typeof window !== 'undefined') {
+            localStorage.setItem('token', data.token);
+            window.location.href = '/home';
+          }
+        } else {
+          setError(data.error || 'An unknown error occurred.');
+        }
       })
       .catch((err) => {
-      setError('Network error. Please try again later.');
-      console.error(err);
+        setError('Network error. Please try again later.');
+        console.error(err);
       });
   };
 
