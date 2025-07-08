@@ -1,8 +1,12 @@
 package router
 
 import (
+	"fmt"
+	"os"
+
 	"github.com/chera-mihiretu/IKnow/delivery/controller"
 	"github.com/chera-mihiretu/IKnow/infrastructure/middleware"
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 )
 
@@ -20,9 +24,19 @@ func SetupRoutes(
 	departmentController *controller.DepartmentController,
 	materialController *controller.MaterialController,
 ) *gin.Engine {
-	router := gin.New()
-	router.MaxMultipartMemory = 1 << 25
-	googleAuth := router.Group("/api/auth/google")
+	fmt.Println("FRONT_BASE_URL:", os.Getenv("FRONT_BASE_URL"))
+	r := gin.Default()
+	r.Use(
+		cors.New(cors.Config{
+			AllowOrigins:     []string{"*"}, // Allow all origins
+			AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+			AllowHeaders:     []string{"Origin", "Content-Type", "Authorization"},
+			ExposeHeaders:    []string{"Content-Length"},
+			AllowCredentials: true,
+			MaxAge:           12 * 60 * 60, // 12 hours
+		}),
+	)
+	googleAuth := r.Group("/api/auth/google")
 	{
 		googleAuth.GET("/login", middleware.GoogleProvider, authController.LoginWithGoogle)
 		googleAuth.GET("/logout", middleware.GoogleProvider, func(c *gin.Context) {})
@@ -31,26 +45,27 @@ func SetupRoutes(
 
 	}
 
-	emailAuth := router.Group("/api/auth/email")
+	emailAuth := r.Group("/api/auth/email")
 	{
 		emailAuth.POST("/register", authController.RegisterWithEmail)
 		emailAuth.POST("/login", authController.LoginWithEmail)
 		emailAuth.GET("/verify-email", authController.VerifyEmail)
 	}
 
-	postsInfo := router.Group("/api/posts")
+	postsInfo := r.Group("/api/posts")
 
 	{
-		postsInfo.GET("/", middleware.AuthUserMiddleware(RoleAll), postController.GetPosts)
-		postsInfo.GET("/user/", middleware.AuthUserMiddleware(RoleAll), postController.GetPostsByUserID)
-		postsInfo.GET("/me", middleware.AuthUserMiddleware(RoleAll), postController.GetMyPosts)
-		postsInfo.GET("/post", middleware.AuthUserMiddleware(RoleAll), postController.GetPostByID)
-		postsInfo.POST("/", middleware.AuthUserMiddleware(RoleAll), postController.CreatePost)
-		postsInfo.PUT("/:id", middleware.AuthUserMiddleware(RoleAll), postController.UpdatePost)
-		postsInfo.DELETE("/", middleware.AuthUserMiddleware(RoleAll), postController.DeletePost)
+		postsInfo.Use(middleware.AuthUserMiddleware(RoleAll))
+		postsInfo.GET("/", postController.GetPosts)
+		postsInfo.GET("/user/", postController.GetPostsByUserID)
+		postsInfo.GET("/me", postController.GetMyPosts)
+		postsInfo.GET("/post", postController.GetPostByID)
+		postsInfo.POST("/", postController.CreatePost)
+		postsInfo.PUT("/:id", postController.UpdatePost)
+		postsInfo.DELETE("/", postController.DeletePost)
 	}
 
-	connection := router.Group("/api/connections")
+	connection := r.Group("/api/connections")
 	{
 		connection.GET("/", middleware.AuthUserMiddleware(RoleStudent), connectionController.GetConnections)
 		connection.GET("/requests/", middleware.AuthUserMiddleware(RoleStudent), connectionController.GetConnectRequests)
@@ -61,14 +76,14 @@ func SetupRoutes(
 		connection.POST("/accept", middleware.AuthUserMiddleware(RoleStudent), connectionController.AcceptConnection)
 	}
 
-	department := router.Group("/api/department")
+	department := r.Group("/api/department")
 
 	{
 		department.GET("/", departmentController.GetDepartments)
 		department.POST("/create", middleware.AuthUserMiddleware(RoleAdmin), departmentController.CreateDepartment)
 	}
 
-	material := router.Group("/api/materials")
+	material := r.Group("/api/materials")
 	{
 		material.GET("/", middleware.AuthUserMiddleware(RoleAll), materialController.GetMaterials)
 		material.GET("/:id", middleware.AuthUserMiddleware(RoleAll), materialController.GetMaterialByID)
@@ -77,11 +92,11 @@ func SetupRoutes(
 		material.DELETE("/:id", middleware.AuthUserMiddleware(RoleAdmin), materialController.DeleteMaterial)
 	}
 
-	router.GET("api/health", func(c *gin.Context) {
+	r.GET("api/health", func(c *gin.Context) {
 		c.JSON(200, gin.H{
 			"message": "Server is running",
 		})
 	})
 
-	return router
+	return r
 }

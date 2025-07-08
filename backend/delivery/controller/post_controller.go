@@ -3,7 +3,6 @@ package controller
 import (
 	"net/http"
 	"strconv"
-
 	"github.com/chera-mihiretu/IKnow/domain/models"
 	"github.com/chera-mihiretu/IKnow/usecases"
 	"github.com/gin-gonic/gin"

@@ -1,8 +1,10 @@
 package controller
 
 import (
+	"fmt"
 	"log"
 	"net/http"
+	"net/url"
 	"os"
 
 	"github.com/chera-mihiretu/IKnow/delivery/helpers"
@@ -63,11 +65,10 @@ func (auth *AuthController) HandleCallback(c *gin.Context) {
 		c.JSON(500, gin.H{"error": "Failed to register user with Google: " + err.Error()})
 		return
 	}
+	redirectURL := fmt.Sprintf("%s/auth/callback?token=%s", os.Getenv("FRONT_BASE_URL"), url.QueryEscape(token))
+	fmt.Println("Redirecting to:", redirectURL)
 
-	c.JSON(200, gin.H{
-		"message": "Google authentication successful",
-		"token":   token,
-	})
+	c.Redirect(http.StatusFound, redirectURL)
 }
 
 func (auth *AuthController) LoginWithEmail(ctx *gin.Context) {

@@ -34,8 +34,3 @@ func GothSetup() {
 		),
 	)
 }
-
-func mongoSetup() {
-	// MongoDB setup code would go here
-	// This is a placeholder for the actual MongoDB connection logic
-}

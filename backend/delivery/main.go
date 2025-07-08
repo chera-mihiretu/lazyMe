@@ -73,7 +73,7 @@ func main() {
 		MaterialController,
 	)
 
-	if err := router.Run(":3000"); err != nil {
+	if err := router.Run(":8080"); err != nil {
 		log.Fatal("Failed to start server:", err)
 	}
 }

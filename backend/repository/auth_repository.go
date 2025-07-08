@@ -3,7 +3,6 @@ package repository
 import (
 	"context"
 	"errors"
-	"fmt"
 	"time"
 
 	"github.com/chera-mihiretu/IKnow/domain/constants"
@@ -117,7 +116,6 @@ func (repo *authRepository) SignInWithGoogle(ctx context.Context, user models.Us
 	if err != nil {
 		return "", errors.New("cannot check if user exists")
 	}
-	fmt.Println("User conut ", userExists)
 
 	if userExists > 0 {
 		filter := bson.M{"email": user.Email}
