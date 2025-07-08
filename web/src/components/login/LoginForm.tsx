@@ -3,11 +3,13 @@ import React, { useState } from 'react';
 import { COLORS, FONT_FAMILY } from '../../utils/color';
 import Link from 'next/link';
 
+
 const LoginForm: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [remember, setRemember] = useState(false);
   const [error, setError] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -17,8 +19,39 @@ const LoginForm: React.FC = () => {
       return;
     }
     setError('');
-    // TODO: handle login
+    // Use NEXT_PUBLIC_BASE_URL for client-side env
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
+    if (!baseUrl) {
+      
+      setError('Server configuration error. Please try again later.');
+      return;
+    }
+
+    fetch(`${baseUrl}/auth/email/login`, {
+      method: 'POST',
+      headers: {
+      'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ email, password }),
+    })
+      .then(async (response) => {
+      const data = await response.json();
+      if (response.status === 200) {
+        // Handle successful login
+        console.log('Login successful. Token:', data.token);
+        // You can store the token in localStorage or handle it as needed
+      } else {
+        // Handle errors
+        setError(data.error || 'An unknown error occurred.');
+      }
+      })
+      .catch((err) => {
+      setError('Network error. Please try again later.');
+      console.error(err);
+      });
   };
+
+  
 
   return (
     <form onSubmit={handleSubmit} style={{ width: '100%', maxWidth: 380, margin: '0 auto' }}>
@@ -46,9 +79,9 @@ const LoginForm: React.FC = () => {
           aria-label="University Email"
         />
       </div>
-      <div style={{ marginBottom: 8 }}>
+      <div style={{ marginBottom: 8, position: 'relative' }}>
         <input
-          type="password"
+          type={showPassword ? 'text' : 'password'}
           placeholder="Enter your password"
           value={password}
           onChange={e => setPassword(e.target.value)}
@@ -67,6 +100,27 @@ const LoginForm: React.FC = () => {
           }}
           aria-label="Password"
         />
+        <button
+          type="button"
+          onClick={() => setShowPassword(v => !v)}
+          aria-label={showPassword ? 'Hide password' : 'Show password'}
+          style={{
+            position: 'absolute',
+            right: 12,
+            top: '50%',
+            transform: 'translateY(-50%)',
+            background: 'none',
+            border: 'none',
+            cursor: 'pointer',
+            padding: 0,
+            color: COLORS.muted,
+            fontSize: '1.1rem',
+            fontFamily: FONT_FAMILY.poppins,
+            opacity: 0.8,
+          }}
+        >
+          {showPassword ? 'Hide' : 'Show'}
+        </button>
       </div>
       {error && <div style={{ color: COLORS.error, fontSize: '0.98rem', marginBottom: 10 }}>{error}</div>}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
@@ -107,8 +161,9 @@ const LoginForm: React.FC = () => {
         <span style={{ margin: '0 12px', color: '#171717', fontFamily: FONT_FAMILY.poppins, fontSize: '0.98rem' }}>Or continue with</span>
         <div style={{ flex: 1, height: 1, background: COLORS.inputBorder, opacity: 0.5 }} />
       </div>
-      <button
-        type="button"
+      <a
+        href="http://localhost:3000/api/auth/google/login"
+        target='_blank'
         style={{
           width: '100%',
           background: '#fff',
@@ -127,11 +182,12 @@ const LoginForm: React.FC = () => {
           gap: 10,
           cursor: 'pointer',
           transition: 'border 0.2s',
+          textDecoration: 'none',
         }}
       >
         <img src="/icons/google.png" alt="Google" width={22} height={22} style={{ marginRight: 8 }} />
         Continue with Google
-      </button>
+      </a>
       <div style={{ textAlign: 'center', marginTop: 10 }}>
         <span style={{ color: '#171717', fontFamily: FONT_FAMILY.poppins, fontSize: '0.98rem' }}>
           New to iKnow?{' '}
