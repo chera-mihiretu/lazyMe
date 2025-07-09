@@ -1,10 +1,16 @@
 "use client";
-import React from 'react';
+import React, { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import dynamic from 'next/dynamic';
 const ProtectedRoute = dynamic(() => import('../ProtectedRoute'), { ssr: false });
 import HomeNavBar from '@/components/home/HomeNavBar';
 
 const HomePage = () => {
+  const router = useRouter();
+  useEffect(() => {
+    router.replace("/home/posts");
+  }, [router]);
+
   return (
     <ProtectedRoute>
       <div style={{ minHeight: '100vh', background: '#f7f7fb' }}>

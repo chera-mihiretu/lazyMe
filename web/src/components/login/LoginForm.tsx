@@ -10,18 +10,22 @@ const LoginForm: React.FC = () => {
   const [remember, setRemember] = useState(false);
   const [error, setError] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (loading) return;
     // Simple validation
     if (!email || !password) {
       setError('Please enter both email and password.');
       return;
     }
     setError('');
+    setLoading(true);
     const baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
     if (!baseUrl) {
       setError('Server configuration error. Please try again later.');
+      setLoading(false);
       return;
     }
 
@@ -35,17 +39,18 @@ const LoginForm: React.FC = () => {
       .then(async (response) => {
         const data = await response.json();
         if (response.status === 200 && data.token) {
-          // Save token and redirect
           if (typeof window !== 'undefined') {
             localStorage.setItem('token', data.token);
             window.location.href = '/home';
           }
         } else {
           setError(data.error || 'An unknown error occurred.');
+          setLoading(false);
         }
       })
       .catch((err) => {
         setError('Network error. Please try again later.');
+        setLoading(false);
         console.error(err);
       });
   };
@@ -136,9 +141,10 @@ const LoginForm: React.FC = () => {
       </div>
       <button
         type="submit"
+        disabled={loading}
         style={{
           width: '100%',
-          background: COLORS.primary,
+          background: loading ? COLORS.muted : COLORS.primary,
           color: '#fff',
           fontFamily: FONT_FAMILY.poppins,
           fontWeight: 600,
@@ -149,11 +155,22 @@ const LoginForm: React.FC = () => {
           marginTop: 8,
           marginBottom: 18,
           boxShadow: '0 2px 8px rgba(67,24,209,0.07)',
-          cursor: 'pointer',
+          cursor: loading ? 'not-allowed' : 'pointer',
           transition: 'background 0.2s',
+          opacity: loading ? 0.7 : 1,
         }}
       >
-        Sign In
+        {loading ? (
+          <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
+            <span className="spinner" style={{
+              width: 18, height: 18, border: '2.5px solid #fff', borderTop: `2.5px solid ${COLORS.primary}`,
+              borderRadius: '50%', display: 'inline-block', marginRight: 8,
+              animation: 'spin 0.8s linear infinite',
+            }} />
+            Signing In...
+            <style>{`@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }`}</style>
+          </span>
+        ) : 'Sign In'}
       </button>
       <div style={{ display: 'flex', alignItems: 'center', margin: '18px 0' }}>
         <div style={{ flex: 1, height: 1, background: COLORS.inputBorder, opacity: 0.5 }} />

@@ -16,6 +16,7 @@ const CallbackPage = () => {
         const hashParams = new URLSearchParams(url.hash.replace(/^#/, ''));
         token = hashParams.get('token');
       }
+      console.log('OAuth token:', token);
       if (token) {
         // If opened in a popup, send token to opener and close
         if (window.opener) {
