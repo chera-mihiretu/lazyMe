@@ -11,6 +11,7 @@ import (
 )
 
 func AuthUserMiddleware(role string) gin.HandlerFunc {
+	fmt.Println("AuthUserMiddleware called with role:", role)
 	load_key, exist := os.LookupEnv("JWT_SECRET_KEY")
 	if !exist {
 		panic("No JWT_SECRET_KEY found")
@@ -18,13 +19,11 @@ func AuthUserMiddleware(role string) gin.HandlerFunc {
 	jwtKey := []byte(load_key)
 
 	return func(c *gin.Context) {
-		// ✅ Allow CORS preflight requests to pass through
+		// Allow preflight OPTIONS requests to pass through
 		if c.Request.Method == "OPTIONS" {
-
 			c.Next()
 			return
 		}
-
 		tokenString := c.GetHeader("Authorization")
 
 		if tokenString == "" {
