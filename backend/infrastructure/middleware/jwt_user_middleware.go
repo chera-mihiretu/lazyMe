@@ -10,7 +10,14 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func AuthUserMiddleware(role string) gin.HandlerFunc {
+var RoleMap = map[string]int{
+	"admin":   3,
+	"student": 1,
+	"teacher": 2,
+	"all":     0,
+}
+
+func AuthUserMiddleware(role int) gin.HandlerFunc {
 	fmt.Println("AuthUserMiddleware called with role:", role)
 	load_key, exist := os.LookupEnv("JWT_SECRET_KEY")
 	if !exist {
@@ -20,6 +27,7 @@ func AuthUserMiddleware(role string) gin.HandlerFunc {
 
 	return func(c *gin.Context) {
 		// Allow preflight OPTIONS requests to pass through
+
 		if c.Request.Method == "OPTIONS" {
 			c.Next()
 			return
@@ -57,7 +65,7 @@ func AuthUserMiddleware(role string) gin.HandlerFunc {
 			return
 		}
 
-		if role != "all" && claims.Role != role {
+		if RoleMap[claims.Role] <= role {
 
 			c.JSON(403, gin.H{"error": "Forbidden: insufficient permissions"})
 			c.Abort()

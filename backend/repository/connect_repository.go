@@ -27,6 +27,7 @@ type ConnectRepository interface {
 	IsConnected(ctx context.Context, connect models.Connects) (bool, error)
 	GetConnectionsCount(ctx context.Context, userID string) (int64, error)
 	AcceptConnection(ctx context.Context, connect models.Connects) error
+	GetConnectionSuggestions(ctx context.Context, userID string, page int) ([]string, error)
 }
 
 type connectRepository struct {
@@ -41,7 +42,126 @@ func NewConnectRepository(db *mongo.Database) ConnectRepository {
 		usersCollection: db.Collection("users"),
 	}
 }
+func (c *connectRepository) GetConnectionSuggestions(ctx context.Context, userID string, page int) ([]string, error) {
+	// Step 1: Get the user's followers (users who follow userID)
+	userObjID, err := primitive.ObjectIDFromHex(userID)
+	if err != nil {
+		return nil, err
+	}
 
+	// Followers: users where connectee_id == userID and accepted == true
+	followerFilter := bson.M{
+		"$or": []bson.M{
+			{"connectee_id": userObjID, "accepted": true},
+			{"connector_id": userObjID, "accepted": true},
+		},
+	}
+	followerCursor, err := c.connects.Find(ctx, followerFilter)
+	if err != nil {
+		return nil, err
+	}
+	defer followerCursor.Close(ctx)
+
+	followerIDs := []primitive.ObjectID{}
+	for followerCursor.Next(ctx) {
+		var conn models.Connects
+		if err := followerCursor.Decode(&conn); err != nil {
+			return nil, err
+		}
+		if conn.ConnectorID == userObjID {
+			followerIDs = append(followerIDs, conn.ConnecteeID)
+		} else {
+			followerIDs = append(followerIDs, conn.ConnectorID)
+		}
+	}
+
+	// Step 2: Get users connected with the followers collected
+	secondDegreeFilter := bson.M{
+		"$or": []bson.M{
+			{"connector_id": bson.M{"$in": followerIDs}, "accepted": true},
+			{"connectee_id": bson.M{"$in": followerIDs}, "accepted": true},
+		},
+		"$nor": []bson.M{
+			{"connector_id": userObjID},
+			{"connectee_id": userObjID},
+		},
+	}
+
+	halfPageSize := ConnectPageSize / 2
+	skip := (page - 1) * halfPageSize
+	limit := halfPageSize
+
+	findOptions := options.Find().SetSkip(int64(skip)).SetLimit(int64(limit))
+	secondDegreeCursor, err := c.connects.Find(ctx, secondDegreeFilter, findOptions)
+	if err != nil {
+		return nil, err
+	}
+	defer secondDegreeCursor.Close(ctx)
+
+	suggestionSet := make(map[primitive.ObjectID]struct{})
+	for secondDegreeCursor.Next(ctx) {
+		var conn models.Connects
+		if err := secondDegreeCursor.Decode(&conn); err != nil {
+			return nil, err
+		}
+		// Exclude self and already-followed users
+		if conn.ConnecteeID != userObjID {
+			suggestionSet[conn.ConnecteeID] = struct{}{}
+		}
+	}
+
+	// Remove the original user from suggestions if present
+	delete(suggestionSet, userObjID)
+
+	// Convert ObjectIDs to hex string for return
+	suggestions := make([]string, 0, len(suggestionSet))
+	for id := range suggestionSet {
+		suggestions = append(suggestions, id.Hex())
+	}
+
+	// Step 3: Collect users ordered by the count of followers, excluding followerIDs
+	pipeline := mongo.Pipeline{
+		// Match users not in followerIDs
+		{{Key: "$match", Value: bson.M{"_id": bson.M{"$nin": followerIDs}}}},
+		// Lookup followers count
+		{{Key: "$lookup", Value: bson.M{
+			"from":         "connects",
+			"localField":   "_id",
+			"foreignField": "connectee_id",
+			"as":           "followers",
+		}}},
+		// Project followers count
+		{{Key: "$project", Value: bson.M{
+			"_id":            1,
+			"followersCount": bson.M{"$size": "$followers"},
+		}}},
+		// Sort by followers count descending
+		{{Key: "$sort", Value: bson.M{"followersCount": -1}}},
+		// Pagination
+		{{Key: "$skip", Value: int64(skip)}},
+		{{Key: "$limit", Value: int64(limit)}},
+	}
+
+	cursor, err := c.usersCollection.Aggregate(ctx, pipeline)
+	if err != nil {
+		return nil, err
+	}
+	defer cursor.Close(ctx)
+
+	for cursor.Next(ctx) {
+		var user struct {
+			ID string `bson:"_id"`
+		}
+		if err := cursor.Decode(&user); err != nil {
+			return nil, err
+		}
+		suggestions = append(suggestions, user.ID)
+	}
+
+	return suggestions, nil
+}
+
+// GetConnectRequests returns a paginated list of connect requests for a user.
 func (c *connectRepository) GetConnectRequests(ctx context.Context, userID string, page int) ([]models.Connects, error) {
 	var connects []models.Connects
 	key, err := primitive.ObjectIDFromHex(userID)
@@ -210,6 +330,27 @@ func (c *connectRepository) DeleteConnection(ctx context.Context, connect models
 	if result.DeletedCount == 0 {
 		return mongo.ErrNoDocuments // No document found to delete
 	}
+
+	// Update the connector's follow count
+	connectorUpdateResult, err := c.usersCollection.UpdateOne(ctx, bson.M{"_id": connect.ConnectorID},
+		bson.M{"$inc": bson.M{"follow_count": -1}})
+	if err != nil {
+		return fmt.Errorf("failed to update connector's follow count: %v", err)
+	}
+	if connectorUpdateResult.MatchedCount == 0 {
+		return mongo.ErrNoDocuments // No document found to update
+	}
+
+	// Update the connectee's follow count
+	connecteeUpdateResult, err := c.usersCollection.UpdateOne(ctx, bson.M{"_id": connect.ConnecteeID},
+		bson.M{"$inc": bson.M{"follow_count": -1}})
+	if err != nil {
+		return fmt.Errorf("failed to update connectee's follow count: %v", err)
+	}
+	if connecteeUpdateResult.MatchedCount == 0 {
+		return mongo.ErrNoDocuments // No document found to update
+	}
+
 	return nil
 }
 
@@ -269,8 +410,30 @@ func (c *connectRepository) AcceptConnection(ctx context.Context, connect models
 	if err != nil {
 		return err
 	}
+
 	if result.MatchedCount == 0 {
 		return mongo.ErrNoDocuments // No document found to update
 	}
+
+	// Increment the connector's follow count
+	connectorUpdateResult, err := c.usersCollection.UpdateOne(ctx, bson.M{"_id": connect.ConnectorID},
+		bson.M{"$inc": bson.M{"follow_count": 1}})
+	if err != nil {
+		return fmt.Errorf("failed to update connector's follow count: %v", err)
+	}
+	if connectorUpdateResult.MatchedCount == 0 {
+		return mongo.ErrNoDocuments // No document found to update
+	}
+
+	// Increment the connectee's follow count
+	connecteeUpdateResult, err := c.usersCollection.UpdateOne(ctx, bson.M{"_id": connect.ConnecteeID},
+		bson.M{"$inc": bson.M{"follow_count": 1}})
+	if err != nil {
+		return fmt.Errorf("failed to update connectee's follow count: %v", err)
+	}
+	if connecteeUpdateResult.MatchedCount == 0 {
+		return mongo.ErrNoDocuments // No document found to update
+	}
+
 	return nil
 }

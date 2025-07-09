@@ -16,6 +16,7 @@ type ConnectUsecase interface {
 	IsConnected(ctx context.Context, connect models.Connects) (bool, error)
 	GetConnectionsCount(ctx context.Context, userID string) (int64, error)
 	AcceptConnection(ctx context.Context, connect models.Connects) error
+	GetConnectionSuggestions(ctx context.Context, userID string, page int) ([]string, error)
 }
 
 type followUseCase struct {
@@ -26,6 +27,10 @@ func NewConnectUsecase(repository repository.ConnectRepository) ConnectUsecase {
 	return &followUseCase{
 		connect: repository,
 	}
+}
+
+func (f *followUseCase) GetConnectionSuggestions(ctx context.Context, userID string, page int) ([]string, error) {
+	return f.connect.GetConnectionSuggestions(ctx, userID, page)
 }
 
 func (f *followUseCase) GetConnects(ctx context.Context, userID string) ([]models.Connects, error) {

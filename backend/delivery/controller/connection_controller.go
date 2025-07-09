@@ -22,6 +22,61 @@ func NewConnectController(connect usecases.ConnectUsecase, userUsecase usecases.
 	}
 }
 
+func (c *ConnectionController) GetConnectionSuggestions(ctx *gin.Context) {
+	pageStr := ctx.Query("page")
+	page, err := strconv.Atoi(pageStr)
+	if err != nil {
+		ctx.JSON(400, gin.H{"error": "Invalid page number"})
+		return
+	}
+	// Get the user ID from the context
+	if page <= 0 {
+		page = 1
+	}
+
+	userID, exist := ctx.Get("user_id")
+	if !exist {
+		ctx.JSON(400, gin.H{"error": "User ID not found in context"})
+		return
+	}
+	userIDStr, ok := userID.(string)
+	if !ok {
+		ctx.JSON(400, gin.H{"error": "Invalid user ID type"})
+		return
+	}
+
+	suggestions, err := c.connectionUsecase.GetConnectionSuggestions(ctx, userIDStr, page)
+	if err != nil {
+		ctx.JSON(500, gin.H{"error": "Failed to get connection suggestions"})
+		return
+	}
+
+	if len(suggestions) == 0 {
+		ctx.JSON(200, gin.H{"suggestions": []string{}})
+		return
+	}
+
+	objectIDs := []primitive.ObjectID{}
+	for _, suggestion := range suggestions {
+		id, err := primitive.ObjectIDFromHex(suggestion)
+		if err != nil {
+			ctx.JSON(400, gin.H{"error": "Invalid suggestion ID format"})
+			return
+		}
+		objectIDs = append(objectIDs, id)
+	}
+	users, err := c.userUsecase.GetListOfUsers(ctx, objectIDs)
+
+	if err != nil {
+		ctx.JSON(500, gin.H{"error": "Failed to get user details"})
+		return
+	}
+
+	ctx.JSON(200, gin.H{
+		"suggestions": users,
+	})
+}
+
 func (c *ConnectionController) GetConnections(ctx *gin.Context) {
 
 	userID, exist := ctx.Get("user_id")

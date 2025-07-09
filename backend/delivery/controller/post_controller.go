@@ -1,8 +1,10 @@
 package controller
 
 import (
+	"fmt"
 	"net/http"
 	"strconv"
+
 	"github.com/chera-mihiretu/IKnow/domain/models"
 	"github.com/chera-mihiretu/IKnow/usecases"
 	"github.com/gin-gonic/gin"
@@ -41,7 +43,7 @@ func (p *PostController) GetPosts(ctx *gin.Context) {
 		)
 		return
 	}
-	pageInt, err := strconv.Atoi(page)
+	pageInt, err := strconv.Atoi("1")
 	if err != nil || pageInt < 1 {
 		ctx.JSON(
 			http.StatusBadRequest,
@@ -63,7 +65,13 @@ func (p *PostController) GetPosts(ctx *gin.Context) {
 	}
 
 	post, err := p.postUseCase.GetPosts(ctx, userIDStr, pageInt)
-
+	if err != nil {
+		ctx.JSON(500,
+			gin.H{
+				"message": "There is problem fetching posts" + err.Error(),
+			})
+		return
+	}
 	userViewPost, err := p.GetPostWithUsers(ctx, post)
 
 	if err != nil {
@@ -73,7 +81,7 @@ func (p *PostController) GetPosts(ctx *gin.Context) {
 			})
 		return
 	}
-
+	ctx.Header("Access-Control-Allow-Origin", "*")
 	ctx.JSON(
 		200,
 		gin.H{
@@ -112,6 +120,7 @@ func (p *PostController) GetPostByID(ctx *gin.Context) {
 }
 
 func (p *PostController) CreatePost(ctx *gin.Context) {
+
 	// Grab user id
 	userID, exist := ctx.Get("user_id")
 	if !exist {
@@ -120,6 +129,7 @@ func (p *PostController) CreatePost(ctx *gin.Context) {
 	}
 	userIDStr, ok := userID.(string)
 	if !ok {
+		fmt.Println("Invalid user ID type:", userID)
 		ctx.JSON(400, gin.H{"error": "Invalid user ID type"})
 		return
 	}
@@ -133,6 +143,7 @@ func (p *PostController) CreatePost(ctx *gin.Context) {
 	ctx.Request.Body = http.MaxBytesReader(ctx.Writer, ctx.Request.Body, 20<<20) // 10 MB limit
 	form, err := ctx.MultipartForm()
 	if err != nil {
+		fmt.Println("Error parsing multipart form:", err)
 		ctx.JSON(http.StatusBadRequest, gin.H{
 			"error":   "Failed to parse multipart form",
 			"details": err.Error(),
@@ -141,12 +152,15 @@ func (p *PostController) CreatePost(ctx *gin.Context) {
 	}
 	var post models.Posts
 	if err := ctx.ShouldBind(&post); err != nil {
+		fmt.Println("Error parsing multipart form:", err)
+
 		ctx.JSON(http.StatusBadRequest, gin.H{
 			"error":   "Invalid or missing form data. Ensure all required fields are provided and correctly formatted.",
 			"details": err.Error(),
 		})
 		return
 	}
+
 	post.UserID = obId
 	// Increase the maximum memory for multipart form parsing to handle larger files
 
@@ -199,7 +213,7 @@ func (p *PostController) CreatePost(ctx *gin.Context) {
 	}
 
 	ctx.JSON(http.StatusCreated, gin.H{
-		"message": "Post created successfully",
+		"message": "Post created succef mobile clients fail silentlyssfully",
 		"post":    uploadedPost,
 	})
 

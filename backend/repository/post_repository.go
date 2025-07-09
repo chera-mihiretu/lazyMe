@@ -78,6 +78,8 @@ func (p *postRepository) GetRecomendedPosts(ctx context.Context, userID string, 
 	skip := (page - 1) * Pagesize
 	limit := Pagesize
 
+	fmt.Println("User departments:", userDepartments)
+
 	// Build the aggregation pipeline
 	pipeline := mongo.Pipeline{
 		// Stage 1: Add a priority field
@@ -86,7 +88,7 @@ func (p *postRepository) GetRecomendedPosts(ctx context.Context, userID string, 
 				{Key: "$switch", Value: bson.D{
 					{Key: "branches", Value: bson.A{
 						bson.D{{Key: "case", Value: bson.D{{Key: "$in", Value: bson.A{"$user_id", connects}}}}, {Key: "then", Value: 1}},
-						bson.D{{Key: "case", Value: bson.D{{Key: "$gt", Value: bson.A{bson.D{{Key: "$size", Value: bson.D{{Key: "$setIntersection", Value: bson.A{"$departements", userDepartments}}}}}, 0}}}}, {Key: "then", Value: 2}},
+						bson.D{{Key: "case", Value: bson.D{{Key: "$gt", Value: bson.A{bson.D{{Key: "$size", Value: bson.D{{Key: "$setIntersection", Value: bson.A{bson.D{{Key: "$ifNull", Value: bson.A{"$departements", bson.A{}}}}, userDepartments}}}}}, 0}}}}, {Key: "then", Value: 2}},
 					}},
 					{Key: "default", Value: 3},
 				}},
@@ -106,6 +108,7 @@ func (p *postRepository) GetRecomendedPosts(ctx context.Context, userID string, 
 
 	cursor, err := p.postsDB.Aggregate(ctx, pipeline)
 	if err != nil {
+		fmt.Println("Error in aggregation pipeline:", err)
 		return nil, err
 	}
 	defer cursor.Close(ctx)
