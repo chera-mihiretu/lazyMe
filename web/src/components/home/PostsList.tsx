@@ -15,12 +15,15 @@ const PostsList: React.FC<PostsListProps> = ({ initialSearch = "" }) => {
   const [search, setSearch] = useState(initialSearch);
 
   const handleAddPost = () => {
-    // Add post logic here
+    // Redirect to create post page
+    if (typeof window !== "undefined") {
+      window.location.href = "/home/posts/create";
+    }
   };
 
   useEffect(() => {
     const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
-    fetch(`${baseUrl}/posts/?page=`, {
+    fetch(`${baseUrl}/posts/?page=1`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
