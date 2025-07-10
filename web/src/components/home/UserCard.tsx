@@ -9,71 +9,111 @@ interface UserCardProps {
   acedemic_year: number;
 }
 
-const UserCard: React.FC<UserCardProps> = React.memo(
-  ({ name, email, profile_image_url, follow_count, acedemic_year }) => {
-    return (
-      <div
-        className="user-card-responsive"
+const UserCard: React.FC<UserCardProps> = React.memo(({
+  id,
+  name,
+  email,
+  profile_image_url,
+  follow_count,
+  acedemic_year,
+}) => {
+  const [sent, setSent] = React.useState(false);
+  const [loading, setLoading] = React.useState(false);
+
+  const handleConnect = async () => {
+    if (sent || loading) return;
+    setLoading(true);
+    const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
+    fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/connections/`, {
+      method: "POST",
+      headers: {
+      "Content-Type": "application/json",
+      Authorization: token ? `Bearer ${token}` : "",
+      },
+      body: JSON.stringify({ connectee_id: id }),
+    })
+      .then((res) => {
+      if (!res.ok) {
+        throw new Error("Failed to send connection request");
+      }
+      setSent(true);
+      })
+      .catch((e) => {
+      // Optionally show error
+      })
+      .finally(() => {
+      setLoading(false);
+      });
+  };
+  return (
+    <div
+      className="user-card-responsive"
+      style={{
+        display: "flex",
+        flexDirection: "row",
+        alignItems: "center",
+        background: "#f3f6fb",
+        borderRadius: 18,
+        boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
+        padding: "1.5rem 2.5rem 1.5rem 1.5rem",
+        marginBottom: 28,
+        minWidth: 420,
+        maxWidth: 820,
+        width: "100%",
+        gap: 36,
+        border: "1.5px solid #e3e6ef",
+        transition: "box-shadow 0.2s, border 0.2s",
+      }}
+    >
+      <img
+        src={profile_image_url || "/icons/avatar.png"}
+        alt={name + " avatar"}
         style={{
-          display: "flex",
-          flexDirection: "row",
-          alignItems: "center",
-          background: "#f3f6fb",
-          borderRadius: 16,
-          boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
-          padding: "1rem 1.2rem",
-          marginBottom: 18,
-          minWidth: 320,
-          maxWidth: 520,
-          width: "100%",
-          gap: 24,
-          border: "1.5px solid #e3e6ef",
-          transition: "box-shadow 0.2s, border 0.2s",
+          width: 64,
+          height: 64,
+          borderRadius: "50%",
+          objectFit: "cover",
+          background: "#f2f2f2",
+          flexShrink: 0,
+          marginRight: 18,
         }}
-      >
-        <img
-          src={profile_image_url || "/icons/avatar.png"}
-          alt={name + " avatar"}
-          style={{
-            width: 56,
-            height: 56,
-            borderRadius: "50%",
-            objectFit: "cover",
-            background: "#f2f2f2",
-            flexShrink: 0,
-          }}
-        />
-        <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "center" }}>
-          <div style={{ fontWeight: 600, fontSize: 17 }}>{name}</div>
-          <div style={{ color: "#888", fontSize: 14 }}>
-            {acedemic_year ? `Year ${acedemic_year}` : ""}
-          </div>
-          <div style={{ color: "#555", fontSize: 14 }}>
-            {follow_count} follower{follow_count === 1 ? "" : "s"}
-          </div>
-          <div style={{ color: "#888", fontSize: 13, marginTop: 2, wordBreak: "break-all" }}>{email}</div>
+      />
+      <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 8 }}>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%" }}>
+          <span style={{ fontWeight: 700, fontSize: 21, color: "#222" }}>{name}</span>
+          <button
+            onClick={handleConnect}
+            disabled={sent || loading}
+            style={{
+              marginLeft: 24,
+              padding: "8px 24px",
+              borderRadius: 8,
+              border: "none",
+              background: sent ? "#b3b3b3" : loading ? "#2563eb99" : "#2563eb",
+              color: "#fff",
+              fontWeight: 600,
+              fontSize: 16,
+              cursor: sent || loading ? "not-allowed" : "pointer",
+              transition: "background 0.2s",
+              boxShadow: "0 1px 4px rgba(0,0,0,0.04)",
+            }}
+          >
+            {sent ? "Sent" : loading ? "Sending..." : "Connect"}
+          </button>
         </div>
-        <button
-          style={{
-            marginLeft: 12,
-            padding: "7px 18px",
-            borderRadius: 8,
-            border: "none",
-            background: "#2563eb",
-            color: "#fff",
-            fontWeight: 600,
-            fontSize: 15,
-            cursor: "pointer",
-            transition: "background 0.2s",
-            boxShadow: "0 1px 4px rgba(0,0,0,0.04)",
-          }}
-        >
-          Connect
-        </button>
+        <div style={{ color: "#2563eb", fontSize: 15, fontWeight: 500, margin: "2px 0 0 0" }}>
+          {acedemic_year ? `Year ${acedemic_year}` : ""}
+        </div>
+        <div style={{ color: "#4320d1", fontWeight: 600, fontSize: 16, background: "#e8eafd", borderRadius: 6, padding: "2px 10px", margin: "10px 0 0 0", display: "inline-block", width: "fit-content" }}>
+          Follow: {follow_count}
+        </div>
+        <div style={{ color: "#888", fontSize: 16, marginTop: 14, padding: "7px 0 0 0", borderTop: "1px solid #e3e6ef", wordBreak: "break-all" }}>
+          {email}
+        </div>
       </div>
-    );
-  }
-);
+    </div>
+  );
+});
 
 
 // Responsive style: hide on mobile

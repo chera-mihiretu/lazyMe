@@ -65,7 +65,7 @@ const PostsList: React.FC<PostsListProps> = ({ initialSearch = "" }) => {
       ) : (
         <div
           style={{
-            maxWidth: 650,
+            maxWidth: 900,
             margin: "2.5rem auto 0 auto",
             padding: "0 1.5rem",
             fontFamily: "Poppins, sans-serif",
