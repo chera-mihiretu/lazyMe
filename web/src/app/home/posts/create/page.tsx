@@ -1,5 +1,6 @@
 "use client";
 import React, { useState, useEffect } from "react";
+import type { Department } from "@/types/Department";
 import { useRouter } from "next/navigation";
 
 const baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
@@ -7,80 +8,81 @@ const baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
 const CreatePostPage: React.FC = () => {
   const router = useRouter();
   const [content, setContent] = useState("");
-  const [departments, setDepartments] = useState<{ id: string; name: string }[]>([]);
-  const [selectedDepartment, setSelectedDepartment] = useState("");
+  const [departments, setDepartments] = useState<Department[]>([]);
+  const [selectedDepartments, setSelectedDepartments] = useState<string[]>([]);
   const [images, setImages] = useState<File[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    fetch(`${baseUrl}/department/`)
+    const token = localStorage.getItem("token");
+    fetch(`${baseUrl}/departments/`, {
+      headers: {
+        Authorization:  `Bearer ${token}`,
+      },
+    })
       .then((res) => res.json())
       .then((data) => {
-        if (Array.isArray(data.departments)) {
-          setDepartments(data.departments.map((d: any) => ({ id: d.id, name: d.name })));
-        } else {
-          setDepartments([]);
-        }
-      })
+        setDepartments(data.departments || [])})
       .catch(() => setDepartments([]));
   }, []);
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files) return;
     const files = Array.from(e.target.files);
-    setImages((prev) => {
+    setImages(prev => {
       const newImages = [...prev, ...files];
-      return newImages.slice(0, 3); // Only allow up to 3 images
+      if (newImages.length > 3) {
+        return newImages.slice(0, 3);
+      }
+      return newImages;
     });
-  };
-
-  const handleRemoveImage = (idx: number) => {
-    setImages((prev) => prev.filter((_, i) => i !== idx));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
-    // Images are now optional
     if (!content.trim()) {
       setError("Content is required.");
       return;
     }
-    if (!selectedDepartment) {
-      setError("Please select a department.");
+    if (selectedDepartments.length === 0) {
+      setError("Please select at least one department.");
       return;
     }
     setLoading(true);
     try {
-      const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
+      const token = localStorage.getItem("token");
       const formData = new FormData();
       formData.append("content", content);
-      formData.append("department_id", selectedDepartment);
-      images.forEach((img, idx) => {
-        formData.append("images", img);
+      images.forEach((file) => {
+        formData.append("files", file);
       });
+      selectedDepartments.forEach((id) => {
+        formData.append("department_id", id);
+      });
+
       const res = await fetch(`${baseUrl}/posts/`, {
         method: "POST",
         headers: {
-          Authorization: token ? `Bearer ${token}` : "",
+          Authorization: `Bearer ${token}`
         },
         body: formData,
       });
       if (!res.ok) {
-        const err = await res.json().catch(() => ({}));
-        throw new Error(err.message || "Failed to create post");
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data?.message || "Failed to create post");
       }
       setLoading(false);
       router.push("/home/posts");
     } catch (err: any) {
       setLoading(false);
-      setError(err?.message || "Failed to create post. Please try again.");
+      setError(err.message || "Failed to create post");
     }
   };
 
   return (
-    <div style={{ maxWidth: 720, margin: "3rem auto", background: "#fff", borderRadius: 16, boxShadow: "0 2px 16px #4320d10a", padding: 40 }}>
+    <div style={{ maxWidth: 800, margin: "3rem auto", background: "#fff", borderRadius: 16, boxShadow: "0 2px 16px #4320d10a", padding: 40 }}>
       <h2 style={{ fontWeight: 700, fontSize: 24, marginBottom: 24 }}>Create Post</h2>
       <form onSubmit={handleSubmit}>
         <div style={{ marginBottom: 18 }}>
@@ -95,86 +97,161 @@ const CreatePostPage: React.FC = () => {
           />
         </div>
         <div style={{ marginBottom: 18 }}>
-          <label style={{ fontWeight: 600, fontSize: 16 }}>Department</label>
-          <select
-            value={selectedDepartment}
-            onChange={(e) => setSelectedDepartment(e.target.value)}
-            style={{ width: "100%", borderRadius: 8, border: "1.5px solid #e3e6ef", padding: 10, fontSize: 15, marginTop: 6 }}
-            required
-          >
-            <option value="">Select department</option>
-            {departments.map((dep) => (
-              <option key={dep.id} value={dep.id}>{dep.name}</option>
-            ))}
-          </select>
+          <label style={{ fontWeight: 600, fontSize: 16 }}>Your Department Concern With</label>
+          <div style={{
+            borderRadius: 10,
+            border: selectedDepartments.length === 0 ? '2px solid #d32f2f' : '2px solid #6366f1',
+            background: 'linear-gradient(90deg, #f7f7fb 60%, #e0e7ff 100%)',
+            boxShadow: selectedDepartments.length === 0 ? '0 2px 8px #d32f2f22' : '0 2px 8px #6366f122',
+            padding: 8,
+            marginTop: 6,
+            transition: 'border 0.2s, box-shadow 0.2s',
+          }}>
+            <select
+              multiple
+              value={selectedDepartments}
+              onChange={e => {
+                const options = Array.from(e.target.selectedOptions).map(opt => opt.value);
+                setSelectedDepartments(options);
+              }}
+              style={{
+                width: "100%",
+                border: 'none',
+                outline: 'none',
+                background: 'transparent',
+                fontSize: 15,
+                minHeight: 80,
+                color: '#222',
+                fontWeight: 500,
+                fontFamily: 'inherit',
+                cursor: 'pointer',
+                padding: 0,
+                boxShadow: 'none',
+                appearance: 'none',
+                WebkitAppearance: 'none',
+                MozAppearance: 'none',
+              }}
+              required
+            >
+              {departments.map((dep) => (
+                <option key={dep.id} value={dep.id} title={dep.description} style={{
+                  background: selectedDepartments.includes(dep.id) ? 'linear-gradient(90deg, #6366f1 60%, #7c3aed 100%)' : '#fff',
+                  color: selectedDepartments.includes(dep.id) ? '#fff' : '#222',
+                  borderRadius: 6,
+                  margin: 2,
+                  padding: 6,
+                  fontWeight: selectedDepartments.includes(dep.id) ? 700 : 500,
+                  fontSize: 15,
+                  transition: 'background 0.2s, color 0.2s',
+                }}>{dep.name}</option>
+              ))}
+            </select>
+          </div>
+          {/* Show selected departments as chips */}
+          {selectedDepartments.length > 0 && (
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginTop: 10 }}>
+              {selectedDepartments.map(depId => {
+                const dep = departments.find(d => d.id === depId);
+                if (!dep) return null;
+                return (
+                  <span key={dep.id} style={{
+                    background: 'linear-gradient(90deg, #6366f1 60%, #7c3aed 100%)',
+                    color: '#fff',
+                    borderRadius: 8,
+                    padding: '4px 14px',
+                    fontWeight: 600,
+                    fontSize: 14,
+                    boxShadow: '0 1px 4px #6366f133',
+                  }}>
+                    {dep.name}
+                  </span>
+                );
+              })}
+            </div>
+          )}
         </div>
         <div style={{ marginBottom: 18 }}>
-          <label style={{ fontWeight: 600, fontSize: 16, display: "block", marginBottom: 8 }}>Images (at least 3)</label>
-          <label
-            htmlFor="image-upload"
-            style={{
-              display: "inline-block",
-              padding: "14px 32px",
-              background: images.length >= 3 ? "#e3e6ef" : "#f3f6fb",
-              color: images.length >= 3 ? "#888" : "#2563eb",
-              borderRadius: 10,
-              border: images.length >= 3 ? "2px dashed #e3e6ef" : "2px dashed #2563eb",
-              fontWeight: 600,
-              fontSize: 17,
-              cursor: images.length >= 3 ? "not-allowed" : "pointer",
-              marginBottom: 8,
-              transition: "background 0.2s, border 0.2s",
-              pointerEvents: images.length >= 3 ? "none" : "auto",
-            }}
-          >
-            {images.length > 0 ? (images.length >= 3 ? "Max 3 Images" : "Change Images") : "Pick Images"}
+          <label style={{ fontWeight: 600, fontSize: 16 }}>Images (at least 3)</label>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginTop: 8 }}>
+            <button
+              type="button"
+              onClick={() => document.getElementById('image-input')?.click()}
+              style={{
+                background: 'linear-gradient(90deg, #6366f1 60%, #7c3aed 100%)',
+                color: '#fff',
+                border: 'none',
+                borderRadius: 8,
+                padding: '8px 22px',
+                fontWeight: 600,
+                fontSize: 15,
+                cursor: 'pointer',
+                boxShadow: '0 1px 4px #6366f133',
+                transition: 'background 0.2s, box-shadow 0.2s',
+              }}
+            >
+              📷 Pick Image
+            </button>
             <input
-              id="image-upload"
+              id="image-input"
               type="file"
               accept="image/*"
               multiple
               onChange={handleImageChange}
-              style={{ display: "none" }}
-              disabled={images.length >= 3}
+              style={{ display: 'none' }}
             />
-          </label>
-          
+          </div>
+          <div style={{ fontSize: 13, color: images.length < 3 ? "#d32f2f" : images.length === 3 ? "#22a06b" : "#888", marginTop: 4, fontWeight: 500 }}>
+            {images.length} image(s) selected {images.length === 3 && "(max reached)"}
+          </div>
           {images.length > 0 && (
-            <div style={{ display: "flex", gap: 18, flexWrap: "wrap", marginTop: 10, justifyContent: "center" }}>
+            <div style={{
+              display: 'flex',
+              flexDirection: 'row',
+              gap: 20,
+              marginTop: 18,
+              justifyContent: 'flex-start',
+              overflowX: 'auto',
+              paddingBottom: 8,
+              scrollbarWidth: 'thin',
+              WebkitOverflowScrolling: 'touch',
+            }}>
               {images.map((img, idx) => {
                 const url = URL.createObjectURL(img);
                 return (
-                  <div key={idx} style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
+                  <div key={idx} style={{ position: 'relative', borderRadius: 14, overflow: 'hidden', boxShadow: '0 2px 12px #4320d122', border: '2px solid #6366f1', background: '#f7f7fb', width: 220, height: 220, display: 'flex', alignItems: 'center', justifyContent: 'center', flex: '0 0 auto' }}>
                     <img
                       src={url}
-                      alt={`selected-${idx}`}
-                      style={{
-                        width: 180,
-                        height: 180,
-                        objectFit: "cover",
-                        borderRadius: 12,
-                        border: "2px solid #e3e6ef",
-                        background: "#f7f8fa",
-                      }}
-                      onLoad={() => URL.revokeObjectURL(url)}
+                      alt={`Selected ${idx + 1}`}
+                      style={{ width: 220, height: 220, objectFit: 'cover', display: 'block' }}
                     />
                     <button
                       type="button"
-                      onClick={() => handleRemoveImage(idx)}
-                      style={{
-                        marginTop: 8,
-                        padding: "4px 18px",
-                        borderRadius: 8,
-                        border: "none",
-                        background: "#e53e3e",
-                        color: "#fff",
-                        fontWeight: 600,
-                        fontSize: 15,
-                        cursor: "pointer",
-                        transition: "background 0.2s",
+                      onClick={() => {
+                        setImages(prev => prev.filter((_, i) => i !== idx));
                       }}
+                      style={{
+                        position: 'absolute',
+                        top: 8,
+                        right: 8,
+                        background: 'rgba(255,255,255,0.85)',
+                        border: 'none',
+                        borderRadius: '50%',
+                        width: 32,
+                        height: 32,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        cursor: 'pointer',
+                        boxShadow: '0 1px 4px #4320d133',
+                        fontSize: 18,
+                        fontWeight: 700,
+                        color: '#d32f2f',
+                        zIndex: 2,
+                        transition: 'background 0.2s',
+                      }}
+                      aria-label={`Remove image ${idx + 1}`}
                     >
-                      Remove
+                      ×
                     </button>
                   </div>
                 );

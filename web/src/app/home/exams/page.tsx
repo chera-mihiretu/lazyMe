@@ -4,6 +4,8 @@ import dynamic from 'next/dynamic';
 const ProtectedRoute = dynamic(() => import('../../ProtectedRoute'), { ssr: false });
 import HomeNavBar from '@/components/home/HomeNavBar';
 
+import ExamsTree from './ExamsTree';
+
 const ExamsPage = () => (
   <ProtectedRoute>
     <div style={{ minHeight: '100vh', background: '#f7f7fb' }}>
@@ -15,7 +17,7 @@ const ExamsPage = () => (
         <p style={{ color: '#222', fontSize: '1.13rem', marginBottom: 32, fontFamily: 'Poppins, sans-serif' }}>
           Find past exams, practice questions, and exam tips here.
         </p>
-        {/* Exams content goes here */}
+        <ExamsTree />
       </div>
     </div>
   </ProtectedRoute>
