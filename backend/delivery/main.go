@@ -64,6 +64,14 @@ func main() {
 	materialRepository := repository.NewMaterialsRepository(myDatabase)
 	materialUseCase := usecases.NewMaterialUseCase(materialRepository)
 	MaterialController := controller.NewMaterialController(materialUseCase, storageUseCase)
+	// school dependencies
+	schoolRepository := repository.NewSchoolRepository(myDatabase)
+	schoolUseCase := usecases.NewSchoolUsecase(schoolRepository)
+	schoolController := controller.NewSchoolController(schoolUseCase)
+	// university dependencies
+	universityRepository := repository.NewUniversityRepository(myDatabase)
+	universityUseCase := usecases.NewUniversityUsecase(universityRepository)
+	universityController := controller.NewUniversityController(universityUseCase)
 
 	router := router.SetupRoutes(
 		AuthController,
@@ -71,6 +79,8 @@ func main() {
 		connectionController,
 		departmentController,
 		MaterialController,
+		schoolController,
+		universityController,
 	)
 
 	if err := router.Run(":8080"); err != nil {

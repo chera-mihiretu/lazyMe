@@ -52,8 +52,8 @@ func (c *connectRepository) GetConnectionSuggestions(ctx context.Context, userID
 	// Followers: users where connectee_id == userID and accepted == true
 	followerFilter := bson.M{
 		"$or": []bson.M{
-			{"connectee_id": userObjID, "accepted": true},
-			{"connector_id": userObjID, "accepted": true},
+			{"connectee_id": userObjID},
+			{"connector_id": userObjID},
 		},
 	}
 	followerCursor, err := c.connects.Find(ctx, followerFilter)

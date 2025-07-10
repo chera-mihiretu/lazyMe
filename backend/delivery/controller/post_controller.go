@@ -35,6 +35,7 @@ func NewPostController(
 func (p *PostController) GetPosts(ctx *gin.Context) {
 	page := ctx.Query("page")
 	if page == "" {
+		fmt.Println("Error: page is required")
 		ctx.JSON(
 			http.StatusBadRequest,
 			gin.H{
@@ -43,8 +44,9 @@ func (p *PostController) GetPosts(ctx *gin.Context) {
 		)
 		return
 	}
-	pageInt, err := strconv.Atoi("1")
+	pageInt, err := strconv.Atoi(page)
 	if err != nil || pageInt < 1 {
+		fmt.Println("Error: Invalid page number:", err)
 		ctx.JSON(
 			http.StatusBadRequest,
 			gin.H{
@@ -55,17 +57,20 @@ func (p *PostController) GetPosts(ctx *gin.Context) {
 	}
 	userID, exist := ctx.Get("user_id")
 	if !exist {
+		fmt.Println("Error: User ID not found in context")
 		ctx.JSON(400, gin.H{"error": "User ID not found in context"})
 		return
 	}
 	userIDStr, ok := userID.(string)
 	if !ok {
+		fmt.Println("Error: Invalid user ID type:", userID)
 		ctx.JSON(400, gin.H{"error": "Invalid user ID type"})
 		return
 	}
 
 	post, err := p.postUseCase.GetPosts(ctx, userIDStr, pageInt)
 	if err != nil {
+		fmt.Println("Error fetching posts:", err)
 		ctx.JSON(500,
 			gin.H{
 				"message": "There is problem fetching posts" + err.Error(),
@@ -75,6 +80,7 @@ func (p *PostController) GetPosts(ctx *gin.Context) {
 	userViewPost, err := p.GetPostWithUsers(ctx, post)
 
 	if err != nil {
+		fmt.Println("Error converting post into json:", err)
 		ctx.JSON(500,
 			gin.H{
 				"message": "There is problem converting post into json" + err.Error(),
@@ -97,6 +103,7 @@ func (p *PostController) GetPostByID(ctx *gin.Context) {
 	postID := ctx.Query("id")
 
 	if postID == "" {
+		fmt.Println("Error: Post ID is required")
 		ctx.JSON(400, gin.H{"error": "Post ID is required"})
 		return
 	}
@@ -104,6 +111,7 @@ func (p *PostController) GetPostByID(ctx *gin.Context) {
 	post, err := p.postUseCase.GetPostByID(ctx, postID)
 
 	if err != nil {
+		fmt.Println("Error: Failed to get post:", err)
 		ctx.JSON(500, gin.H{"error": "Failed to get post " + err.Error()})
 		return
 	}
@@ -111,6 +119,7 @@ func (p *PostController) GetPostByID(ctx *gin.Context) {
 	postView, err := p.GetPostWithUsers(ctx, []models.Posts{post})
 
 	if err != nil {
+		fmt.Println("Error: Failed to get post (user view):", err)
 		ctx.JSON(500, gin.H{"error": "Failed to get post " + err.Error()})
 		return
 	}
@@ -136,6 +145,7 @@ func (p *PostController) CreatePost(ctx *gin.Context) {
 
 	obId, err := primitive.ObjectIDFromHex(userIDStr)
 	if err != nil {
+		fmt.Println("Invalid user ID format:", err)
 		ctx.JSON(400, gin.H{"error": "Invalid user ID format"})
 		return
 	}
@@ -153,7 +163,6 @@ func (p *PostController) CreatePost(ctx *gin.Context) {
 	var post models.Posts
 	if err := ctx.ShouldBind(&post); err != nil {
 		fmt.Println("Error parsing multipart form:", err)
-
 		ctx.JSON(http.StatusBadRequest, gin.H{
 			"error":   "Invalid or missing form data. Ensure all required fields are provided and correctly formatted.",
 			"details": err.Error(),
@@ -165,7 +174,8 @@ func (p *PostController) CreatePost(ctx *gin.Context) {
 	// Increase the maximum memory for multipart form parsing to handle larger files
 
 	files := form.File["files"]
-	if len(files) == 0 {
+	if len(files) > 3 {
+		fmt.Println("You can only upload a maximum of 3 files")
 		ctx.JSON(http.StatusBadRequest, gin.H{
 			"error": "No files uploaded",
 		})
@@ -173,6 +183,7 @@ func (p *PostController) CreatePost(ctx *gin.Context) {
 	}
 
 	if post.Content == "" {
+		fmt.Println("Content is required")
 		ctx.JSON(http.StatusBadRequest, gin.H{
 			"error": "Content is required",
 		})
@@ -183,6 +194,7 @@ func (p *PostController) CreatePost(ctx *gin.Context) {
 	for _, file := range files {
 		contentType := file.Header.Get("Content-Type")
 		if contentType != "image/jpeg" && contentType != "image/png" && contentType != "image/gif" {
+			fmt.Println("Only image files are allowed. Got:", contentType)
 			ctx.JSON(http.StatusBadRequest, gin.H{
 				"error": "Only image files are allowed",
 			})
@@ -193,6 +205,7 @@ func (p *PostController) CreatePost(ctx *gin.Context) {
 	urls, err := p.storage.UploadFile(files)
 
 	if err != nil {
+		fmt.Println("Failed to upload files:", err)
 		ctx.JSON(http.StatusInternalServerError, gin.H{
 			"error":   "Failed to upload files",
 			"details": err.Error(),
@@ -205,6 +218,7 @@ func (p *PostController) CreatePost(ctx *gin.Context) {
 	uploadedPost, err := p.postUseCase.CreatePost(ctx, post)
 
 	if err != nil {
+		fmt.Println("Failed to create post:", err)
 		ctx.JSON(http.StatusInternalServerError, gin.H{
 			"error":   "Failed to create post",
 			"details": err.Error(),
@@ -222,6 +236,7 @@ func (p *PostController) CreatePost(ctx *gin.Context) {
 func (p *PostController) UpdatePost(ctx *gin.Context) {
 	var post models.Posts
 	if err := ctx.ShouldBind(&post); err != nil {
+		fmt.Println("Error binding post data:", err)
 		ctx.JSON(http.StatusBadRequest, gin.H{
 			"error":   "Invalid or missing form data. Ensure all required fields are provided and correctly formatted.",
 			"details": err.Error(),
@@ -231,18 +246,21 @@ func (p *PostController) UpdatePost(ctx *gin.Context) {
 
 	postID := ctx.Param("id")
 	if postID == "" {
+		fmt.Println("Error: Post ID is required")
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Post ID is required"})
 		return
 	}
 
 	userID, exist := ctx.Get("user_id")
 	if !exist {
+		fmt.Println("Error: User ID not found in context")
 		ctx.JSON(400, gin.H{"error": "User ID not found in context"})
 		return
 	}
 
 	userIDStr, ok := userID.(string)
 	if !ok {
+		fmt.Println("Error: Invalid user ID type:", userID)
 		ctx.JSON(400, gin.H{"error": "Invalid user ID type"})
 		return
 	}
@@ -250,20 +268,24 @@ func (p *PostController) UpdatePost(ctx *gin.Context) {
 	userIDPrimitive, err := primitive.ObjectIDFromHex(userIDStr)
 
 	if err != nil {
+		fmt.Println("Error: Cannot work with the id:", err)
 		ctx.JSON(
 			500, gin.H{
 				"error": "Cannot work with the id",
 			},
 		)
+		return
 	}
 	if postID != "" {
 		postIDPrimitive, err := primitive.ObjectIDFromHex(postID)
 		if err != nil {
+			fmt.Println("Error: Invalid Post ID format:", err)
 			ctx.JSON(400, gin.H{"error": "Invalid Post ID format"})
 			return
 		}
 		post.ID = postIDPrimitive
 	} else {
+		fmt.Println("Error: Post ID is required")
 		ctx.JSON(400, gin.H{"error": "Post ID is required"})
 		return
 	}
@@ -272,6 +294,7 @@ func (p *PostController) UpdatePost(ctx *gin.Context) {
 	post, err = p.postUseCase.UpdatePost(ctx, post)
 
 	if err != nil {
+		fmt.Println("Error: Failed to update post:", err)
 		ctx.JSON(500, gin.H{"error": "Failed to get post " + err.Error()})
 		return
 	}
@@ -279,6 +302,7 @@ func (p *PostController) UpdatePost(ctx *gin.Context) {
 	postView, err := p.GetPostWithUsers(ctx, []models.Posts{post})
 
 	if err != nil {
+		fmt.Println("Error: Failed to get post (user view):", err)
 		ctx.JSON(500, gin.H{"error": "Failed to get post " + err.Error()})
 		return
 	}
@@ -292,17 +316,20 @@ func (p *PostController) DeletePost(ctx *gin.Context) {
 	postID := ctx.Query("id")
 
 	if postID == "" {
+		fmt.Println("Error: Post ID is required")
 		ctx.JSON(400, gin.H{"error": "Post ID is required"})
 		return
 	}
 
 	userID, exist := ctx.Get("user_id")
 	if !exist {
+		fmt.Println("Error: User ID not found in context")
 		ctx.JSON(400, gin.H{"error": "User ID not found in context"})
 		return
 	}
 	userIDStr, ok := userID.(string)
 	if !ok {
+		fmt.Println("Error: Invalid user ID type:", userID)
 		ctx.JSON(400, gin.H{"error": "Invalid user ID type"})
 		return
 	}
@@ -310,6 +337,7 @@ func (p *PostController) DeletePost(ctx *gin.Context) {
 	err := p.postUseCase.DeletePost(ctx, userIDStr, postID)
 
 	if err != nil {
+		fmt.Println("Error: Failed to delete post:", err)
 		ctx.JSON(500, gin.H{"error": "Failed to delete post " + err.Error()})
 		return
 	}
@@ -322,29 +350,34 @@ func (p *PostController) GetMyPosts(ctx *gin.Context) {
 	pageStr := ctx.Query("page")
 	page, err := strconv.Atoi(pageStr)
 	if err != nil || page < 1 {
+		fmt.Println("Error: Invalid page number:", err)
 		ctx.JSON(400, gin.H{"error": "Invalid page number"})
 		return
 	}
 
 	userID, exist := ctx.Get("user_id")
 	if !exist {
+		fmt.Println("Error: User ID not found in context")
 		ctx.JSON(400, gin.H{"error": "User ID not found in context"})
 		return
 	}
 	userIDStr, ok := userID.(string)
 	if !ok {
+		fmt.Println("Error: Invalid user ID type:", userID)
 		ctx.JSON(400, gin.H{"error": "Invalid user ID type"})
 		return
 	}
 
 	posts, err := p.postUseCase.GetPostsByUserID(ctx, userIDStr, page)
 	if err != nil {
+		fmt.Println("Error: Failed to get posts:", err)
 		ctx.JSON(500, gin.H{"error": "Failed to get posts" + err.Error()})
 		return
 	}
 
 	postViews, err := p.GetPostWithUsers(ctx, posts)
 	if err != nil {
+		fmt.Println("Error: Failed to get posts (user view):", err)
 		ctx.JSON(500, gin.H{"error": "Failed to get posts " + err.Error()})
 		return
 	}
@@ -361,12 +394,14 @@ func (p *PostController) GetPostsByUserID(ctx *gin.Context) {
 
 	page, err := strconv.Atoi(pageStr)
 	if err != nil || page < 1 {
+		fmt.Println("Error: Invalid page number:", err)
 		ctx.JSON(400, gin.H{"error": "Invalid page number"})
 		return
 	}
 
 	posts, err := p.postUseCase.GetPostsByUserID(ctx, userID, page)
 	if err != nil {
+		fmt.Println("Error: Failed to get posts:", err)
 		ctx.JSON(500, gin.H{"error": "Failed to get posts " + err.Error()})
 		return
 	}
@@ -374,6 +409,7 @@ func (p *PostController) GetPostsByUserID(ctx *gin.Context) {
 	postViews, err := p.GetPostWithUsers(ctx, posts)
 
 	if err != nil {
+		fmt.Println("Error: Failed to get posts (user view):", err)
 		ctx.JSON(500, gin.H{"error": "Failed to get posts " + err.Error()})
 		return
 	}

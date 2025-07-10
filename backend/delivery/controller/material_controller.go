@@ -24,6 +24,7 @@ func NewMaterialController(materialUsecase usecases.MaterialUseCase, storage use
 }
 
 func (mc *MaterialController) GetMaterials(ctx *gin.Context) {
+
 	userID, exist := ctx.Get("user_id")
 	if !exist {
 		ctx.JSON(400, gin.H{"error": "User ID not found in context"})
@@ -202,7 +203,10 @@ func (mc *MaterialController) UpdateMaterial(ctx *gin.Context) {
 		return
 	}
 	userIDPrimitive, err := primitive.ObjectIDFromHex(userIDStr)
-
+	if err != nil {
+		ctx.JSON(400, gin.H{"error": "Invalid User ID format"})
+		return
+	}
 	material.UploadedBy = userIDPrimitive
 
 	material.UpdatedAt = time.Now()
@@ -256,5 +260,51 @@ func (mc *MaterialController) DeleteMaterial(ctx *gin.Context) {
 
 	ctx.JSON(204, gin.H{
 		"message": "Material deleted successfully",
+	})
+}
+
+func (mc *MaterialController) GetMaterialsInTree(ctx *gin.Context) {
+	departmentID := ctx.Query("department_id")
+	if departmentID == "" {
+		ctx.JSON(400, gin.H{"error": "Department ID is required"})
+		return
+	}
+
+	departmentIDPrimitive, err := primitive.ObjectIDFromHex(departmentID)
+	if err != nil {
+		ctx.JSON(400, gin.H{"error": "Invalid Department ID format"})
+		return
+	}
+
+	yearStr := ctx.Query("year")
+	if yearStr == "" {
+		ctx.JSON(400, gin.H{"error": "Year is required"})
+		return
+	}
+	year, err := strconv.Atoi(yearStr)
+	if err != nil || year < 1 {
+		ctx.JSON(400, gin.H{"error": "Invalid year"})
+		return
+	}
+
+	semesterStr := ctx.Query("semester")
+	if semesterStr == "" {
+		ctx.JSON(400, gin.H{"error": "Semester is required"})
+		return
+	}
+	semester, err := strconv.Atoi(semesterStr)
+	if err != nil || (semester != 1 && semester != 2) {
+		ctx.JSON(400, gin.H{"error": "Invalid semester"})
+		return
+	}
+
+	materials, err := mc.MaterialUsecase.GetMaterialsInTree(ctx, departmentIDPrimitive, year, semester)
+	if err != nil {
+		ctx.JSON(500, gin.H{"error": "Failed to retrieve materials"})
+		return
+	}
+
+	ctx.JSON(200, gin.H{
+		"materials": materials,
 	})
 }

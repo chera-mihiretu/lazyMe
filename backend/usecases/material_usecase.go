@@ -15,6 +15,7 @@ type MaterialUseCase interface {
 
 	UpdateMaterial(ctx context.Context, material models.Materials) (models.Materials, error)
 	DeleteMaterial(ctx context.Context, userID primitive.ObjectID, id primitive.ObjectID) error
+	GetMaterialsInTree(ctx context.Context, departmentID primitive.ObjectID, year int, semester int) ([]models.Materials, error)
 }
 
 type materialUseCase struct {
@@ -35,6 +36,9 @@ func (m *materialUseCase) UpdateMaterial(ctx context.Context, material models.Ma
 }
 func (m *materialUseCase) DeleteMaterial(ctx context.Context, userID primitive.ObjectID, id primitive.ObjectID) error {
 	return m.materialRepository.DeleteMaterials(ctx, userID, id)
+}
+func (m *materialUseCase) GetMaterialsInTree(ctx context.Context, departmentID primitive.ObjectID, year int, semester int) ([]models.Materials, error) {
+	return m.materialRepository.GetMaterialsInTree(ctx, departmentID, year, semester)
 }
 func NewMaterialUseCase(materialRepository repository.MaterialsRepository) MaterialUseCase {
 	return &materialUseCase{

@@ -8,13 +8,15 @@ const PostCard: React.FC<{ post: Post }> = ({ post }) => {
   return (
     <div
       style={{
-        background: "#fff",
-        borderRadius: 16,
+        background: "#f7f8fa",
+        borderRadius: 18,
         boxShadow: "0 2px 16px #4320d10a",
         padding: 32,
         position: "relative",
         marginBottom: 32,
         fontFamily: "Poppins, sans-serif",
+        border: "1.5px solid #e3e6ef",
+        transition: "box-shadow 0.2s, border 0.2s",
       }}
     >
       {/* Header: Avatar, Name, Academic Year, Time */}
@@ -47,8 +49,6 @@ const PostCard: React.FC<{ post: Post }> = ({ post }) => {
       {/* Title */}
       <div
         style={{
-          fontWeight: 700,
-          fontSize: "1.45rem",
           color: "#222",
           marginBottom: 10,
           lineHeight: 1.2,
