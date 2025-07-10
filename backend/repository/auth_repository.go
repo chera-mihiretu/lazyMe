@@ -3,6 +3,7 @@ package repository
 import (
 	"context"
 	"errors"
+	"fmt"
 	"time"
 
 	"github.com/chera-mihiretu/IKnow/domain/constants"
@@ -90,7 +91,7 @@ func (repo *authRepository) LoginWithEmail(ctx context.Context, user models.User
 	filter := bson.M{"email": user.Email}
 	var foundUser models.User
 	err := repo.UsersCollection.FindOne(ctx, filter).Decode(&foundUser)
-
+	fmt.Println("Found user:", foundUser, "Error:", err)
 	if err != nil {
 		return "", errors.New("user not found")
 	}

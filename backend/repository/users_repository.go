@@ -3,6 +3,7 @@ package repository
 import (
 	"context"
 	"errors"
+	"fmt"
 
 	"github.com/chera-mihiretu/IKnow/domain/models"
 	"go.mongodb.org/mongo-driver/bson"
@@ -14,6 +15,7 @@ type UserRepository interface {
 	GetUserById(ctx context.Context, userID string) (models.UserView, error)
 	GetUserByEmail(ctx context.Context, email string) (models.UserView, error)
 	GetListOfUsers(ctx context.Context, ids []primitive.ObjectID) ([]models.UserView, error)
+	CompleteUser(ctx context.Context, user models.User) (models.UserView, error)
 }
 
 type userRepository struct {
@@ -74,4 +76,28 @@ func (c *userRepository) GetListOfUsers(ctx context.Context, ids []primitive.Obj
 	}
 
 	return users, nil
+}
+
+func (c *userRepository) CompleteUser(ctx context.Context, user models.User) (models.UserView, error) {
+	fmt.Println("Completing user:", user.ID)
+	res, err := c.users.UpdateOne(ctx,
+		bson.M{"_id": user.ID},
+		bson.M{"$set": bson.M{
+			"profile_image_url": user.ProfileImageURL,
+			"department_id":     user.DepartmentID,
+			"school_id":         user.SchoolID,
+			"is_complete":       true,
+		},
+		})
+
+	fmt.Println("Update result:", res, "Error:", err)
+	if err != nil {
+		return models.UserView{}, err
+	}
+	if res.MatchedCount == 0 {
+		return models.UserView{}, mongo.ErrNoDocuments
+	}
+	var updatedUser models.UserView
+
+	return updatedUser, nil
 }

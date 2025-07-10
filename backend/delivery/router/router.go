@@ -25,6 +25,8 @@ func SetupRoutes(
 	materialController *controller.MaterialController,
 	schoolController *controller.SchoolController,
 	universityController *controller.UniversityController,
+	jobController *controller.JobController,
+	userController *controller.UserController,
 ) *gin.Engine {
 	fmt.Println("FRONT_BASE_URL:", os.Getenv("FRONT_BASE_URL"))
 	r := gin.New()
@@ -39,6 +41,7 @@ func SetupRoutes(
 	}
 
 	r.Use(cors.New(corsConfig))
+
 	googleAuth := r.Group("/api/auth/google")
 	{
 		googleAuth.GET("/login", middleware.GoogleProvider, authController.LoginWithGoogle)
@@ -123,6 +126,21 @@ func SetupRoutes(
 		university.DELETE("/:id", middleware.AuthUserMiddleware(RoleAdmin), universityController.DeleteUniversity)
 	}
 
+	// Jobs endpoints
+	job := r.Group("/api/jobs")
+	{
+		job.GET("/", middleware.AuthUserMiddleware(RoleAll), jobController.GetJobs)
+		job.GET("/:id", middleware.AuthUserMiddleware(RoleAll), jobController.GetJobByID)
+		job.POST("/", middleware.AuthUserMiddleware(RoleAdmin), jobController.CreateJob)
+		job.PUT("/:id", middleware.AuthUserMiddleware(RoleAdmin), jobController.UpdateJob)
+		job.DELETE("/:id", middleware.AuthUserMiddleware(RoleAdmin), jobController.DeleteJob)
+	}
+	user := r.Group("/api/users")
+	{
+
+		user.GET("/me", middleware.AuthUserMiddleware(RoleAll), userController.Me)
+		user.POST("/complete-account", middleware.AuthUserMiddleware(RoleAll), userController.CompleteUser)
+	}
 	r.GET("api/health", func(c *gin.Context) {
 		c.JSON(200, gin.H{
 			"message": "Server is running",

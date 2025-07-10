@@ -27,9 +27,6 @@ func RegisterValidationEmail(user models.User) error {
 	if len(user.PasswordHash) < 6 {
 		return errors.New("password must be at least 6 characters long")
 	}
-	if user.School != "" && School(user.School).IsValid() {
-		return errors.New("school is not")
-	}
 
 	if user.AcedemicYear <= 0 && user.AcedemicYear >= 6 {
 		return errors.New("acedemic year must be between 1 and 5")

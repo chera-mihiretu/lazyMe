@@ -45,6 +45,7 @@ func main() {
 	// user dependencies
 	userRepository := repository.NewUserRepository(myDatabase)
 	userUseCase := usecases.NewUserUseCase(userRepository)
+	userController := controller.NewUserController(userUseCase, storageUseCase)
 	// follow dependencies
 	connectionRepository := repository.NewConnectRepository(myDatabase)
 	connectionUsecase := usecases.NewConnectUsecase(connectionRepository)
@@ -72,7 +73,10 @@ func main() {
 	universityRepository := repository.NewUniversityRepository(myDatabase)
 	universityUseCase := usecases.NewUniversityUsecase(universityRepository)
 	universityController := controller.NewUniversityController(universityUseCase)
-
+	// job dependencies
+	jobRepository := repository.NewJobRepository(myDatabase)
+	jobUsecase := usecases.NewJobUsecase(jobRepository)
+	jobController := controller.NewJobController(jobUsecase)
 	router := router.SetupRoutes(
 		AuthController,
 		PostController,
@@ -81,6 +85,8 @@ func main() {
 		MaterialController,
 		schoolController,
 		universityController,
+		jobController,
+		userController,
 	)
 
 	if err := router.Run(":8080"); err != nil {
