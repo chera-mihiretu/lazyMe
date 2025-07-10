@@ -9,9 +9,12 @@ import (
 )
 
 type DepartmentUseCase interface {
-	GetDepartments(ctx context.Context) ([]models.Departments, error)
+	GetDepartments(ctx context.Context, page int) ([]models.Departments, error)
 	GetDepartmentByID(ctx context.Context, id primitive.ObjectID) (models.Departments, error)
 	CreateDepartment(ctx context.Context, department models.Departments) (models.Departments, error)
+	UpdateDepartment(ctx context.Context, department models.Departments) (models.Departments, error)
+	DeleteDepartment(ctx context.Context, id primitive.ObjectID) error
+	GetDepartmentsInTree(ctx context.Context, schoolID primitive.ObjectID) ([]models.Departments, error)
 }
 
 type departmentUseCase struct {
@@ -29,8 +32,23 @@ func (d *departmentUseCase) GetDepartmentByID(ctx context.Context, id primitive.
 }
 
 // GetDepartments implements DepartmentUseCase.
-func (d *departmentUseCase) GetDepartments(ctx context.Context) ([]models.Departments, error) {
-	return d.departmentRepository.GetDepartments(ctx)
+func (d *departmentUseCase) GetDepartments(ctx context.Context, page int) ([]models.Departments, error) {
+	return d.departmentRepository.GetDepartments(ctx, page)
+}
+
+// GetDepartmentInTree implements DepartmentUseCase.
+func (d *departmentUseCase) GetDepartmentsInTree(ctx context.Context, schoolID primitive.ObjectID) ([]models.Departments, error) {
+	return d.departmentRepository.GetDepartmentsInTree(ctx, schoolID)
+}
+
+// UpdateDepartment implements DepartmentUseCase.
+func (d *departmentUseCase) UpdateDepartment(ctx context.Context, department models.Departments) (models.Departments, error) {
+	return d.departmentRepository.UpdateDepartment(ctx, department)
+}
+
+// DeleteDepartment implements DepartmentUseCase.
+func (d *departmentUseCase) DeleteDepartment(ctx context.Context, id primitive.ObjectID) error {
+	return d.departmentRepository.DeleteDepartment(ctx, id)
 }
 
 func NewDepartmentUseCase(departmentRepository repository.DepartmentRepository) DepartmentUseCase {

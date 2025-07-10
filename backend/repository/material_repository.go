@@ -16,6 +16,7 @@ type MaterialsRepository interface {
 	CreateMaterials(ctx context.Context, materials models.Materials) (models.Materials, error)
 	UpdateMaterials(ctx context.Context, materials models.Materials) (models.Materials, error)
 	DeleteMaterials(ctx context.Context, userID primitive.ObjectID, id primitive.ObjectID) error
+	GetMaterialsInTree(ctx context.Context, departmentID primitive.ObjectID, year int, semester int) ([]models.Materials, error)
 }
 
 type materialsRepository struct {
@@ -100,4 +101,26 @@ func (r *materialsRepository) DeleteMaterials(ctx context.Context, userID primit
 	}
 
 	return nil
+}
+
+// GetMaterialsInTree retrieves materials for a department filtered by year and semester
+func (r *materialsRepository) GetMaterialsInTree(ctx context.Context, departmentID primitive.ObjectID, year int, semester int) ([]models.Materials, error) {
+	filter := bson.M{"departmentid": departmentID, "year": year, "semister": semester}
+	var materials []models.Materials
+	cursor, err := r.materialss.Find(ctx, filter)
+	if err != nil {
+		return nil, err
+	}
+	defer cursor.Close(ctx)
+	for cursor.Next(ctx) {
+		var material models.Materials
+		if err := cursor.Decode(&material); err != nil {
+			return nil, err
+		}
+		materials = append(materials, material)
+	}
+	if err := cursor.Err(); err != nil {
+		return nil, err
+	}
+	return materials, nil
 }

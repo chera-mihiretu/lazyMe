@@ -23,6 +23,8 @@ func SetupRoutes(
 	connectionController *controller.ConnectionController,
 	departmentController *controller.DepartmentController,
 	materialController *controller.MaterialController,
+	schoolController *controller.SchoolController,
+	universityController *controller.UniversityController,
 ) *gin.Engine {
 	fmt.Println("FRONT_BASE_URL:", os.Getenv("FRONT_BASE_URL"))
 	r := gin.New()
@@ -79,20 +81,46 @@ func SetupRoutes(
 		connection.POST("/accept", middleware.AuthUserMiddleware(RoleStudent), connectionController.AcceptConnection)
 	}
 
-	department := r.Group("/api/department")
-
-	{
-		department.GET("/", departmentController.GetDepartments)
-		department.POST("/create", middleware.AuthUserMiddleware(RoleAdmin), departmentController.CreateDepartment)
-	}
-
+	// Materials endpoints
 	material := r.Group("/api/materials")
 	{
 		material.GET("/", middleware.AuthUserMiddleware(RoleAll), materialController.GetMaterials)
+		material.GET("/tree", middleware.AuthUserMiddleware(RoleAll), materialController.GetMaterialsInTree)
 		material.GET("/:id", middleware.AuthUserMiddleware(RoleAll), materialController.GetMaterialByID)
 		material.POST("/", middleware.AuthUserMiddleware(RoleAdmin), materialController.CreateMaterial)
 		material.PUT("/:id", middleware.AuthUserMiddleware(RoleAdmin), materialController.UpdateMaterial)
 		material.DELETE("/:id", middleware.AuthUserMiddleware(RoleAdmin), materialController.DeleteMaterial)
+	}
+
+	// Departments endpoints
+	department := r.Group("/api/departments")
+	{
+		department.GET("/", middleware.AuthUserMiddleware(RoleAll), departmentController.GetDepartments)
+		department.GET("/tree", middleware.AuthUserMiddleware(RoleAll), departmentController.GetDepartmentsInTree)
+		department.GET("/:id", middleware.AuthUserMiddleware(RoleAll), departmentController.GetDepartmentByID)
+		department.POST("/", middleware.AuthUserMiddleware(RoleAdmin), departmentController.CreateDepartment)
+		department.PUT("/:id", middleware.AuthUserMiddleware(RoleAdmin), departmentController.UpdateDepartment)
+		department.DELETE("/:id", middleware.AuthUserMiddleware(RoleAdmin), departmentController.DeleteDepartment)
+	}
+
+	// Schools endpoints
+	school := r.Group("/api/schools")
+	{
+		school.GET("/", middleware.AuthUserMiddleware(RoleAll), schoolController.GetSchools)
+		school.GET("/:id", middleware.AuthUserMiddleware(RoleAll), schoolController.GetSchoolByID)
+		school.POST("/", middleware.AuthUserMiddleware(RoleAdmin), schoolController.CreateSchool)
+		school.PUT("/:id", middleware.AuthUserMiddleware(RoleAdmin), schoolController.UpdateSchool)
+		school.DELETE("/:id", middleware.AuthUserMiddleware(RoleAdmin), schoolController.DeleteSchool)
+	}
+
+	// Universities endpoints
+	university := r.Group("/api/universities")
+	{
+		university.GET("/", middleware.AuthUserMiddleware(RoleAll), universityController.GetUniversities)
+		university.GET("/:id", middleware.AuthUserMiddleware(RoleAll), universityController.GetUniversityByID)
+		university.POST("/", middleware.AuthUserMiddleware(RoleAdmin), universityController.CreateUniversity)
+		university.PUT("/:id", middleware.AuthUserMiddleware(RoleAdmin), universityController.UpdateUniversity)
+		university.DELETE("/:id", middleware.AuthUserMiddleware(RoleAdmin), universityController.DeleteUniversity)
 	}
 
 	r.GET("api/health", func(c *gin.Context) {

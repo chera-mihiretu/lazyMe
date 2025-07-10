@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"strconv"
 	"time"
 
 	"github.com/chera-mihiretu/IKnow/domain/models"
@@ -20,7 +21,12 @@ func NewDepartmentController(departmentUsecase usecases.DepartmentUseCase) *Depa
 }
 
 func (d *DepartmentController) GetDepartments(ctx *gin.Context) {
-	departments, err := d.DepartmentUsecase.GetDepartments(ctx)
+	page := ctx.Query("page")
+	pageInt, err := strconv.Atoi(page)
+	if pageInt <= 0 || err != nil {
+		pageInt = 1
+	}
+	departments, err := d.DepartmentUsecase.GetDepartments(ctx, pageInt)
 	if err != nil {
 		ctx.JSON(500, gin.H{"error": "Failed to get departments"})
 		return
@@ -89,5 +95,87 @@ func (d *DepartmentController) CreateDepartment(ctx *gin.Context) {
 
 	ctx.JSON(201, gin.H{
 		"department": createdDepartment,
+	})
+}
+
+func (d *DepartmentController) UpdateDepartment(ctx *gin.Context) {
+	departmentID := ctx.Query("id")
+	if departmentID == "" {
+		ctx.JSON(400, gin.H{"error": "Department ID is required"})
+		return
+	}
+
+	departmentIDPrimitive, err := primitive.ObjectIDFromHex(departmentID)
+	if err != nil {
+		ctx.JSON(400, gin.H{"error": "Invalid Department ID format"})
+		return
+	}
+
+	var department models.Departments
+	if err := ctx.ShouldBindJSON(&department); err != nil {
+		ctx.JSON(400, gin.H{"error": "Invalid input data"})
+		return
+	}
+	department.ID = departmentIDPrimitive
+
+	updatedDepartment, err := d.DepartmentUsecase.UpdateDepartment(ctx, department)
+	if err != nil {
+		ctx.JSON(500, gin.H{"error": "Failed to update department"})
+		return
+	}
+
+	ctx.JSON(200, gin.H{
+		"message":    "Department updated successfully",
+		"department": updatedDepartment,
+	})
+}
+
+// DeleteDepartment deletes a department by its ID
+func (d *DepartmentController) DeleteDepartment(ctx *gin.Context) {
+	departmentID := ctx.Query("id")
+	if departmentID == "" {
+		ctx.JSON(400, gin.H{"error": "Department ID is required"})
+		return
+	}
+
+	departmentIDPrimitive, err := primitive.ObjectIDFromHex(departmentID)
+	if err != nil {
+		ctx.JSON(400, gin.H{"error": "Invalid Department ID format"})
+		return
+	}
+
+	err = d.DepartmentUsecase.DeleteDepartment(ctx, departmentIDPrimitive)
+	if err != nil {
+		ctx.JSON(500, gin.H{"error": "Failed to delete department"})
+		return
+	}
+
+	ctx.JSON(200, gin.H{
+		"message": "Department deleted successfully",
+	})
+}
+
+func (d *DepartmentController) GetDepartmentsInTree(ctx *gin.Context) {
+	schoolID := ctx.Query("school_id")
+	if schoolID == "" {
+		ctx.JSON(400, gin.H{"error": "School ID is required"})
+		return
+	}
+
+	schoolIDPrimitive, err := primitive.ObjectIDFromHex(schoolID)
+	if err != nil {
+		ctx.JSON(400, gin.H{"error": "Invalid School ID format"})
+		return
+	}
+
+	departments, err := d.DepartmentUsecase.GetDepartmentsInTree(ctx, schoolIDPrimitive)
+	if err != nil {
+		ctx.JSON(500, gin.H{"error": "Failed to get departments in tree"})
+		return
+	}
+
+	ctx.JSON(200, gin.H{
+		"message":     "Departments in tree retrieved successfully",
+		"departments": departments,
 	})
 }
