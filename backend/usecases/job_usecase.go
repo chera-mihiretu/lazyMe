@@ -14,7 +14,7 @@ type JobUsecase interface {
 	GetJobByID(ctx context.Context, id primitive.ObjectID) (models.Opportunities, error)
 	UpdateJob(ctx context.Context, job models.Opportunities) (models.Opportunities, error)
 	DeleteJob(ctx context.Context, id primitive.ObjectID) error
-	GetRecommendedJobs(ctx context.Context, userDepartmentID primitive.ObjectID) ([]models.Opportunities, error)
+	GetRecommendedJobs(ctx context.Context, userDepartmentID primitive.ObjectID, userSchoolID primitive.ObjectID, page int) ([]models.Opportunities, error)
 }
 
 type jobUsecase struct {
@@ -45,6 +45,6 @@ func (u *jobUsecase) DeleteJob(ctx context.Context, id primitive.ObjectID) error
 	return u.jobRepo.DeleteJob(ctx, id)
 }
 
-func (u *jobUsecase) GetRecommendedJobs(ctx context.Context, userDepartmentID primitive.ObjectID) ([]models.Opportunities, error) {
-	return u.jobRepo.GetRecommendedJobs(ctx, userDepartmentID)
+func (u *jobUsecase) GetRecommendedJobs(ctx context.Context, userDepartmentID primitive.ObjectID, userSchoolID primitive.ObjectID, page int) ([]models.Opportunities, error) {
+	return u.jobRepo.GetRecommendedJobs(ctx, userDepartmentID, userSchoolID, page)
 }

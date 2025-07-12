@@ -8,6 +8,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 type JobRepository interface {
@@ -16,16 +17,19 @@ type JobRepository interface {
 	GetJobByID(ctx context.Context, id primitive.ObjectID) (models.Opportunities, error)
 	UpdateJob(ctx context.Context, job models.Opportunities) (models.Opportunities, error)
 	DeleteJob(ctx context.Context, id primitive.ObjectID) error
-	GetRecommendedJobs(ctx context.Context, userDepartmentID primitive.ObjectID) ([]models.Opportunities, error)
+	GetRecommendedJobs(ctx context.Context, userDepartmentID primitive.ObjectID, userSchoolID primitive.ObjectID, page int) ([]models.Opportunities, error)
 }
 
 type jobRepository struct {
-	jobs *mongo.Collection
+	jobs           *mongo.Collection
+	departmentRepo DepartmentRepository
 }
 
-func NewJobRepository(db *mongo.Database) JobRepository {
+func NewJobRepository(db *mongo.Database,
+	departmentRepo DepartmentRepository) JobRepository {
 	return &jobRepository{
-		jobs: db.Collection("jobs"),
+		jobs:           db.Collection("jobs"),
+		departmentRepo: departmentRepo,
 	}
 }
 
@@ -101,24 +105,29 @@ func (r *jobRepository) DeleteJob(ctx context.Context, id primitive.ObjectID) er
 }
 
 // GetRecommendedJobs prioritizes jobs by department match and likes
-func (r *jobRepository) GetRecommendedJobs(ctx context.Context, userDepartmentID primitive.ObjectID) ([]models.Opportunities, error) {
-	pipeline := mongo.Pipeline{
-		bson.D{{Key: "$addFields", Value: bson.D{
-			{Key: "priority", Value: bson.D{
-				{Key: "$cond", Value: bson.A{
-					bson.D{{Key: "$in", Value: bson.A{userDepartmentID, "$department_ids"}}},
-					1,
-					2,
-				}},
-			}},
-		}}},
-		bson.D{{Key: "$sort", Value: bson.D{
-			{Key: "priority", Value: 1},
-			{Key: "like", Value: -1},
-			{Key: "created_at", Value: -1},
-		}}},
+func (r *jobRepository) GetRecommendedJobs(ctx context.Context, userDepartmentID primitive.ObjectID, userSchoolID primitive.ObjectID, page int) ([]models.Opportunities, error) {
+	var departmentIDs []primitive.ObjectID
+	if userDepartmentID != primitive.NilObjectID {
+		departmentIDs = []primitive.ObjectID{userDepartmentID}
+	} else if userSchoolID != primitive.NilObjectID {
+		departments, err := r.departmentRepo.GetDepartmentsInTree(ctx, userSchoolID)
+		if err != nil {
+			return nil, err
+		}
+		for _, dept := range departments {
+			departmentIDs = append(departmentIDs, dept.ID)
+		}
+		if len(departmentIDs) == 0 {
+			return []models.Opportunities{}, nil
+		}
+	} else {
+		return []models.Opportunities{}, nil
 	}
-	cursor, err := r.jobs.Aggregate(ctx, pipeline)
+
+	filter := bson.M{"department_ids": bson.M{"$in": departmentIDs}}
+	findOptions := options.Find().SetSort(bson.D{{Key: "like", Value: -1}, {Key: "created_at", Value: -1}}).
+		SetSkip(int64((page - 1) * 10)).SetLimit(10)
+	cursor, err := r.jobs.Find(ctx, filter, findOptions)
 	if err != nil {
 		return nil, err
 	}

@@ -16,19 +16,22 @@ type PostController struct {
 	userUseCase       usecases.UserUseCase
 	departmentUsecase usecases.DepartmentUseCase
 	storage           usecases.StorageUseCase
+	likeUseCase       usecases.LikeUsecase
 }
 
 func NewPostController(
 	post usecases.PostUseCase,
 	user usecases.UserUseCase,
 	department usecases.DepartmentUseCase,
-	storage usecases.StorageUseCase) *PostController {
+	storage usecases.StorageUseCase,
+	liked usecases.LikeUsecase) *PostController {
 
 	return &PostController{
 		postUseCase:       post,
 		userUseCase:       user,
 		departmentUsecase: department,
 		storage:           storage,
+		likeUseCase:       liked,
 	}
 }
 
@@ -444,12 +447,28 @@ func (p *PostController) GetPostWithUsers(ctx *gin.Context, posts []models.Posts
 		userMap[user.ID.Hex()] = user
 	}
 
+	likes, err := p.likeUseCase.CheckListOfLikes(ctx, p.GetPostAndUserPairList(posts))
+	if err != nil {
+		fmt.Println("Error checking likes:", err)
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to check likes " + err.Error()})
+		return nil, err
+	}
+	fmt.Println("Likes checked successfully, count:", likes)
 	// Pair posts with user info
 	postViews := make([]models.PostView, 0, len(posts))
 	for _, post := range posts {
+
 		userView, ok := userMap[post.UserID.Hex()]
 		if !ok {
 			continue // or handle missing user
+		}
+		thisLiked := false
+
+		for _, like := range likes {
+			if like.PostID == post.ID && like.UserID == userView.ID {
+				thisLiked = true
+				break
+			}
 		}
 		postViews = append(postViews, models.PostView{
 			ID:              post.ID,
@@ -460,9 +479,21 @@ func (p *PostController) GetPostWithUsers(ctx *gin.Context, posts []models.Posts
 			IsValidated:     post.IsValidated,
 			IsFlagged:       post.IsFlagged,
 			Likes:           post.Likes,
+			Liked:           thisLiked,
 			Comments:        post.Comments,
 			CreatedAt:       post.CreatedAt,
 		})
+
 	}
 	return postViews, nil
+}
+
+func (p *PostController) GetPostAndUserPairList(post []models.Posts) [][]primitive.ObjectID {
+	var listOfLikes [][]primitive.ObjectID
+	for _, post := range post {
+		listOfLikes = append(listOfLikes, []primitive.ObjectID{post.ID, post.UserID})
+	}
+
+	return listOfLikes
+
 }

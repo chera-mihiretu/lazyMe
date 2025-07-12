@@ -52,9 +52,13 @@ func (repo *authRepository) RegisterUserWithEmail(ctx context.Context, user mode
 		return errors.New("user already exists with this email")
 	}
 	user.Role = string(constants.UserRoleStudent)
+	if user.AcedemicYear == 0 {
+		user.AcedemicYear = 1
+	}
 	user.IsVerified = false
 	user.IsTeacher = false
 	user.BlueBadge = false
+	user.IsComplete = true
 	user.CreatedAt = time.Now()
 	user.UpdatedAt = time.Now()
 

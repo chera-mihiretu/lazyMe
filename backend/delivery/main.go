@@ -54,13 +54,18 @@ func main() {
 	departmentRepository := repository.NewDepartmentRepository(myDatabase)
 	departmentUsecase := usecases.NewDepartmentUseCase(departmentRepository)
 	departmentController := controller.NewDepartmentController(departmentUsecase)
+	// like dependencies
+	likeRepository := repository.NewLikeRepository(myDatabase)
+	likeUsecase := usecases.NewLikeUsecase(likeRepository)
+	likeController := controller.NewLikeController(likeUsecase)
 	// post dependencies
-	postRepository := repository.NewPostRepository(myDatabase,
+	postRepository := repository.NewPostRepository(
+		myDatabase,
 		departmentRepository,
 		connectionRepository,
 		*userRepository)
 	postUseCase := usecases.NewPostUseCase(postRepository)
-	PostController := controller.NewPostController(postUseCase, userUseCase, departmentUsecase, storageUseCase)
+	PostController := controller.NewPostController(postUseCase, userUseCase, departmentUsecase, storageUseCase, likeUsecase)
 	// material dependencies
 	materialRepository := repository.NewMaterialsRepository(myDatabase)
 	materialUseCase := usecases.NewMaterialUseCase(materialRepository)
@@ -74,9 +79,9 @@ func main() {
 	universityUseCase := usecases.NewUniversityUsecase(universityRepository)
 	universityController := controller.NewUniversityController(universityUseCase)
 	// job dependencies
-	jobRepository := repository.NewJobRepository(myDatabase)
+	jobRepository := repository.NewJobRepository(myDatabase, departmentRepository)
 	jobUsecase := usecases.NewJobUsecase(jobRepository)
-	jobController := controller.NewJobController(jobUsecase)
+	jobController := controller.NewJobController(jobUsecase, userUseCase)
 	router := router.SetupRoutes(
 		AuthController,
 		PostController,
@@ -87,6 +92,7 @@ func main() {
 		universityController,
 		jobController,
 		userController,
+		likeController,
 	)
 
 	if err := router.Run(":8080"); err != nil {

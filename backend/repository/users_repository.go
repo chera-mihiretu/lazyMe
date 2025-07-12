@@ -12,6 +12,8 @@ import (
 )
 
 type UserRepository interface {
+	// GetUserById retrieves a user by their ID.
+	GetUserByIdNoneView(ctx context.Context, userID string) (models.User, error)
 	GetUserById(ctx context.Context, userID string) (models.UserView, error)
 	GetUserByEmail(ctx context.Context, email string) (models.UserView, error)
 	GetListOfUsers(ctx context.Context, ids []primitive.ObjectID) ([]models.UserView, error)
@@ -100,4 +102,17 @@ func (c *userRepository) CompleteUser(ctx context.Context, user models.User) (mo
 	var updatedUser models.UserView
 
 	return updatedUser, nil
+}
+
+func (c *userRepository) GetUserByIdNoneView(ctx context.Context, userID string) (models.User, error) {
+	var user models.User
+	id, err := primitive.ObjectIDFromHex(userID)
+	if err != nil {
+		return models.User{}, errors.New("invalid user ID format")
+	}
+	err = c.users.FindOne(ctx, bson.M{"_id": id}).Decode(&user)
+	if err != nil {
+		return models.User{}, err
+	}
+	return user, nil
 }

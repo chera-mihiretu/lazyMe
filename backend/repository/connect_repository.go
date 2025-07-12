@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"sort"
 	"time"
 
 	"github.com/chera-mihiretu/IKnow/domain/models"
@@ -43,122 +44,128 @@ func NewConnectRepository(db *mongo.Database) ConnectRepository {
 	}
 }
 func (c *connectRepository) GetConnectionSuggestions(ctx context.Context, userID string, page int) ([]string, error) {
-	// Step 1: Get the user's followers (users who follow userID)
 	userObjID, err := primitive.ObjectIDFromHex(userID)
 	if err != nil {
 		return nil, err
 	}
 
-	// Followers: users where connectee_id == userID and accepted == true
-	followerFilter := bson.M{
+	// Step 1: Get all users the current user is already connected to (including self)
+	connectedIDs := map[primitive.ObjectID]struct{}{userObjID: {}} // start with self
+	connFilter := bson.M{
 		"$or": []bson.M{
 			{"connectee_id": userObjID},
 			{"connector_id": userObjID},
 		},
+		"accepted": true,
 	}
-	followerCursor, err := c.connects.Find(ctx, followerFilter)
+	connCursor, err := c.connects.Find(ctx, connFilter)
 	if err != nil {
 		return nil, err
 	}
-	defer followerCursor.Close(ctx)
-
-	followerIDs := []primitive.ObjectID{}
-	for followerCursor.Next(ctx) {
+	defer connCursor.Close(ctx)
+	for connCursor.Next(ctx) {
 		var conn models.Connects
-		if err := followerCursor.Decode(&conn); err != nil {
+		if err := connCursor.Decode(&conn); err != nil {
 			return nil, err
 		}
-		if conn.ConnectorID == userObjID {
-			followerIDs = append(followerIDs, conn.ConnecteeID)
-		} else {
-			followerIDs = append(followerIDs, conn.ConnectorID)
-		}
+		connectedIDs[conn.ConnectorID] = struct{}{}
+		connectedIDs[conn.ConnecteeID] = struct{}{}
 	}
 
-	// Step 2: Get users connected with the followers collected
+	// Step 2: Find second-degree connections (friends of friends), excluding already connected and self
 	secondDegreeFilter := bson.M{
 		"$or": []bson.M{
-			{"connector_id": bson.M{"$in": followerIDs}, "accepted": true},
-			{"connectee_id": bson.M{"$in": followerIDs}, "accepted": true},
-		},
-		"$nor": []bson.M{
-			{"connector_id": userObjID},
-			{"connectee_id": userObjID},
+			{"connector_id": bson.M{"$in": keys(connectedIDs)}, "accepted": true},
+			{"connectee_id": bson.M{"$in": keys(connectedIDs)}, "accepted": true},
 		},
 	}
-
-	halfPageSize := ConnectPageSize / 2
-	skip := (page - 1) * halfPageSize
-	limit := halfPageSize
-
-	findOptions := options.Find().SetSkip(int64(skip)).SetLimit(int64(limit))
-	secondDegreeCursor, err := c.connects.Find(ctx, secondDegreeFilter, findOptions)
+	secondDegreeCursor, err := c.connects.Find(ctx, secondDegreeFilter)
 	if err != nil {
 		return nil, err
 	}
 	defer secondDegreeCursor.Close(ctx)
-
-	suggestionSet := make(map[primitive.ObjectID]struct{})
+	mutualCount := map[primitive.ObjectID]int{}
 	for secondDegreeCursor.Next(ctx) {
 		var conn models.Connects
 		if err := secondDegreeCursor.Decode(&conn); err != nil {
 			return nil, err
 		}
-		// Exclude self and already-followed users
-		if conn.ConnecteeID != userObjID {
-			suggestionSet[conn.ConnecteeID] = struct{}{}
+		// Only consider users not already connected and not self
+		if _, ok := connectedIDs[conn.ConnectorID]; !ok {
+			mutualCount[conn.ConnectorID]++
+		}
+		if _, ok := connectedIDs[conn.ConnecteeID]; !ok {
+			mutualCount[conn.ConnecteeID]++
 		}
 	}
 
-	// Remove the original user from suggestions if present
-	delete(suggestionSet, userObjID)
-
-	// Convert ObjectIDs to hex string for return
-	suggestions := make([]string, 0, len(suggestionSet))
-	for id := range suggestionSet {
-		suggestions = append(suggestions, id.Hex())
+	// Step 3: Aggregate users not already connected, not self, order by mutualCount and follow_count
+	candidateIDs := make([]primitive.ObjectID, 0, len(mutualCount))
+	for id := range mutualCount {
+		candidateIDs = append(candidateIDs, id)
+	}
+	if len(candidateIDs) == 0 {
+		return []string{}, nil
 	}
 
-	// Step 3: Collect users ordered by the count of followers, excluding followerIDs
 	pipeline := mongo.Pipeline{
-		// Match users not in followerIDs
-		{{Key: "$match", Value: bson.M{"_id": bson.M{"$nin": followerIDs}}}},
-		// Lookup followers count
-		{{Key: "$lookup", Value: bson.M{
-			"from":         "connects",
-			"localField":   "_id",
-			"foreignField": "connectee_id",
-			"as":           "followers",
-		}}},
-		// Project followers count
-		{{Key: "$project", Value: bson.M{
-			"_id":            1,
-			"followersCount": bson.M{"$size": "$followers"},
-		}}},
-		// Sort by followers count descending
-		{{Key: "$sort", Value: bson.M{"followersCount": -1}}},
-		// Pagination
-		{{Key: "$skip", Value: int64(skip)}},
-		{{Key: "$limit", Value: int64(limit)}},
+		{{Key: "$match", Value: bson.M{"_id": bson.M{"$in": candidateIDs}}}},
+		{{Key: "$addFields", Value: bson.M{"mutual": bson.M{"$literal": 0}}}}, // placeholder, will update below
+		{{Key: "$sort", Value: bson.M{"follow_count": -1}}},
 	}
-
-	cursor, err := c.usersCollection.Aggregate(ctx, pipeline)
+	userCursor, err := c.usersCollection.Aggregate(ctx, pipeline)
 	if err != nil {
 		return nil, err
 	}
-	defer cursor.Close(ctx)
+	defer userCursor.Close(ctx)
 
-	for cursor.Next(ctx) {
-		var user struct {
-			ID string `bson:"_id"`
-		}
-		if err := cursor.Decode(&user); err != nil {
+	type userWithMutual struct {
+		ID    primitive.ObjectID `bson:"_id"`
+		Count int                `bson:"follow_count"`
+	}
+	users := []userWithMutual{}
+	for userCursor.Next(ctx) {
+		var u userWithMutual
+		if err := userCursor.Decode(&u); err != nil {
 			return nil, err
 		}
-		suggestions = append(suggestions, user.ID)
+		// Attach mutual count from map
+		u.Count = mutualCount[u.ID]
+		users = append(users, u)
 	}
 
+	// Sort by mutual connections (desc), then by follow_count (desc)
+	sort.Slice(users, func(i, j int) bool {
+		if users[i].Count == users[j].Count {
+			return users[i].Count > users[j].Count
+		}
+		return users[i].Count > users[j].Count
+	})
+
+	// Pagination
+	start := (page - 1) * ConnectPageSize
+	end := start + ConnectPageSize
+	if start > len(users) {
+		return []string{}, nil
+	}
+	if end > len(users) {
+		end = len(users)
+	}
+
+	suggestions := make([]string, 0, end-start)
+	for _, u := range users[start:end] {
+		suggestions = append(suggestions, u.ID.Hex())
+	}
 	return suggestions, nil
+}
+
+// helper to get keys from map[primitive.ObjectID]struct{}
+func keys(m map[primitive.ObjectID]struct{}) []primitive.ObjectID {
+	ids := make([]primitive.ObjectID, 0, len(m))
+	for id := range m {
+		ids = append(ids, id)
+	}
+	return ids
 }
 
 // GetConnectRequests returns a paginated list of connect requests for a user.
