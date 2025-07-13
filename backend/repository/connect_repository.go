@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"sort"
 	"time"
 
 	"github.com/chera-mihiretu/IKnow/domain/models"
@@ -56,7 +55,7 @@ func (c *connectRepository) GetConnectionSuggestions(ctx context.Context, userID
 			{"connectee_id": userObjID},
 			{"connector_id": userObjID},
 		},
-		"accepted": true,
+		// "accepted": true,
 	}
 	connCursor, err := c.connects.Find(ctx, connFilter)
 	if err != nil {
@@ -68,15 +67,31 @@ func (c *connectRepository) GetConnectionSuggestions(ctx context.Context, userID
 		if err := connCursor.Decode(&conn); err != nil {
 			return nil, err
 		}
-		connectedIDs[conn.ConnectorID] = struct{}{}
-		connectedIDs[conn.ConnecteeID] = struct{}{}
+		if conn.ConnectorID == userObjID {
+			connectedIDs[conn.ConnecteeID] = struct{}{}
+		} else {
+			connectedIDs[conn.ConnectorID] = struct{}{}
+		}
+
 	}
 
 	// Step 2: Find second-degree connections (friends of friends), excluding already connected and self
 	secondDegreeFilter := bson.M{
 		"$or": []bson.M{
-			{"connector_id": bson.M{"$in": keys(connectedIDs)}, "accepted": true},
-			{"connectee_id": bson.M{"$in": keys(connectedIDs)}, "accepted": true},
+			{
+				"connector_id": bson.M{"$in": keys(connectedIDs)},
+				"connectee_id": bson.M{
+					"$nin": keys(connectedIDs),
+					"$ne":  userObjID,
+				},
+			},
+			{
+				"connectee_id": bson.M{
+					"$in":  keys(connectedIDs),
+					"$nin": keys(connectedIDs),
+				},
+				"connector_id": bson.M{"$ne": userObjID},
+			},
 		},
 	}
 	secondDegreeCursor, err := c.connects.Find(ctx, secondDegreeFilter)
@@ -84,6 +99,7 @@ func (c *connectRepository) GetConnectionSuggestions(ctx context.Context, userID
 		return nil, err
 	}
 	defer secondDegreeCursor.Close(ctx)
+
 	mutualCount := map[primitive.ObjectID]int{}
 	for secondDegreeCursor.Next(ctx) {
 		var conn models.Connects
@@ -104,59 +120,59 @@ func (c *connectRepository) GetConnectionSuggestions(ctx context.Context, userID
 	for id := range mutualCount {
 		candidateIDs = append(candidateIDs, id)
 	}
-	if len(candidateIDs) == 0 {
-		return []string{}, nil
+
+	var me models.User
+	err = c.usersCollection.FindOne(ctx, bson.M{"_id": userObjID}).Decode(&me)
+	if err != nil {
+		if err == mongo.ErrNoDocuments {
+			return nil, errors.New("user not found")
+		}
+		return nil, err
 	}
 
+	// Step 4: Query all users and sort them based on the criteria using aggregation pipeline
 	pipeline := mongo.Pipeline{
-		{{Key: "$match", Value: bson.M{"_id": bson.M{"$in": candidateIDs}}}},
-		{{Key: "$addFields", Value: bson.M{"mutual": bson.M{"$literal": 0}}}}, // placeholder, will update below
-		{{Key: "$sort", Value: bson.M{"follow_count": -1}}},
+		// Only consider users in candidateIDs
+		{{Key: "$match", Value: bson.M{"_id": bson.M{"$nin": keys(connectedIDs), "$ne": userObjID}}}},
+		// Add priority fields for sorting
+		{{Key: "$addFields", Value: bson.M{
+			"priority_mutual":     bson.M{"$cond": []interface{}{bson.M{"$in": []interface{}{"$_id", (candidateIDs)}}, 1, 0}},
+			"priority_school":     bson.M{"$cond": []interface{}{bson.M{"$eq": []interface{}{"$school_id", me.SchoolID}}, 1, 0}},
+			"priority_university": bson.M{"$cond": []interface{}{bson.M{"$eq": []interface{}{"$university_id", me.UniversityID}}, 1, 0}},
+		}}},
+		// Sort by: mutualCount (from Go), then school, then university, then follow_count
+		{{Key: "$sort", Value: bson.D{
+			{Key: "priority_mutual", Value: -1},
+			{Key: "priority_school", Value: -1},
+			{Key: "priority_university", Value: -1},
+			{Key: "follow_count", Value: -1},
+		}}},
+		// Pagination
+		{{Key: "$skip", Value: int64((page - 1) * ConnectPageSize)}},
+		{{Key: "$limit", Value: int64(ConnectPageSize)}},
 	}
+
 	userCursor, err := c.usersCollection.Aggregate(ctx, pipeline)
 	if err != nil {
 		return nil, err
 	}
 	defer userCursor.Close(ctx)
 
-	type userWithMutual struct {
-		ID    primitive.ObjectID `bson:"_id"`
-		Count int                `bson:"follow_count"`
-	}
-	users := []userWithMutual{}
+	var suggestions []string
 	for userCursor.Next(ctx) {
-		var u userWithMutual
-		if err := userCursor.Decode(&u); err != nil {
+		var user models.User
+		if err := userCursor.Decode(&user); err != nil {
 			return nil, err
 		}
-		// Attach mutual count from map
-		u.Count = mutualCount[u.ID]
-		users = append(users, u)
+		suggestions = append(suggestions, user.ID.Hex())
 	}
 
-	// Sort by mutual connections (desc), then by follow_count (desc)
-	sort.Slice(users, func(i, j int) bool {
-		if users[i].Count == users[j].Count {
-			return users[i].Count > users[j].Count
-		}
-		return users[i].Count > users[j].Count
-	})
-
-	// Pagination
-	start := (page - 1) * ConnectPageSize
-	end := start + ConnectPageSize
-	if start > len(users) {
-		return []string{}, nil
-	}
-	if end > len(users) {
-		end = len(users)
+	if err := userCursor.Err(); err != nil {
+		return nil, err
 	}
 
-	suggestions := make([]string, 0, end-start)
-	for _, u := range users[start:end] {
-		suggestions = append(suggestions, u.ID.Hex())
-	}
 	return suggestions, nil
+
 }
 
 // helper to get keys from map[primitive.ObjectID]struct{}

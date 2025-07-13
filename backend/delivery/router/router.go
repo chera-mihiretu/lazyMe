@@ -29,6 +29,7 @@ func SetupRoutes(
 	userController *controller.UserController,
 	postLikeController *controller.PostLikeController,
 	jobLikeController *controller.JobLikeController,
+	commentController *controller.CommentController,
 ) *gin.Engine {
 	fmt.Println("FRONT_BASE_URL:", os.Getenv("FRONT_BASE_URL"))
 	r := gin.New()
@@ -75,6 +76,11 @@ func SetupRoutes(
 		// likes
 		postsInfo.POST("/like", postLikeController.AddLike)
 		postsInfo.POST("/dislike", postLikeController.RemoveLike)
+		// comments
+		postsInfo.GET("/comments/:post_id/:page", commentController.GetComments)
+		postsInfo.POST("/comments", middleware.AuthUserMiddleware(RoleStudent), commentController.AddComment)
+		postsInfo.DELETE("/comments/:comment_id", middleware.AuthUserMiddleware(RoleStudent), commentController.DeleteComment)
+		postsInfo.PUT("/comments/:comment_id", middleware.AuthUserMiddleware(RoleStudent), commentController.EditComment)
 	}
 
 	connection := r.Group("/api/connections")

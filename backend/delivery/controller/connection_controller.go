@@ -47,6 +47,7 @@ func (c *ConnectionController) GetConnectionSuggestions(ctx *gin.Context) {
 
 	suggestions, err := c.connectionUsecase.GetConnectionSuggestions(ctx, userIDStr, page)
 	if err != nil {
+		fmt.Println("Error getting connection suggestions:", err)
 		ctx.JSON(500, gin.H{"error": "Failed to get connection suggestions"})
 		return
 	}

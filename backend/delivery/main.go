@@ -62,6 +62,10 @@ func main() {
 	jobLikeRepository := repository.NewJobLikeRepository(myDatabase)
 	jobLikeUsecase := usecases.NewJobLikeUsecase(jobLikeRepository)
 	jobLikeController := controller.NewJobLikeController(jobLikeUsecase)
+	// comment dependencies
+	commentRepository := repository.NewCommentRepository(myDatabase)
+	commentUsecase := usecases.NewCommentUsecase(commentRepository)
+	commentController := controller.NewCommentController(commentUsecase)
 
 	// post dependencies
 	postRepository := repository.NewPostRepository(
@@ -99,6 +103,7 @@ func main() {
 		userController,
 		postLikeController,
 		jobLikeController,
+		commentController,
 	)
 
 	if err := router.Run(":8080"); err != nil {
