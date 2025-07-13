@@ -12,12 +12,13 @@ import (
 )
 
 type JobController struct {
-	usecase     usecases.JobUsecase
-	userUsecase usecases.UserUseCase
+	usecase        usecases.JobUsecase
+	userUsecase    usecases.UserUseCase
+	jobLikeUsecase usecases.JobLikeUsecase
 }
 
-func NewJobController(usecase usecases.JobUsecase, users usecases.UserUseCase) *JobController {
-	return &JobController{usecase: usecase, userUsecase: users}
+func NewJobController(usecase usecases.JobUsecase, users usecases.UserUseCase, jobLike usecases.JobLikeUsecase) *JobController {
+	return &JobController{usecase: usecase, userUsecase: users, jobLikeUsecase: jobLike}
 }
 
 func (c *JobController) CreateJob(ctx *gin.Context) {
@@ -136,7 +137,6 @@ func (c *JobController) GetRecommendedJobs(ctx *gin.Context) {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-
 	pageStr := ctx.Query("page")
 	if pageStr == "" {
 		pageStr = "1"
@@ -146,6 +146,7 @@ func (c *JobController) GetRecommendedJobs(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid page number"})
 		return
 	}
+
 	jobs, err := c.usecase.GetRecommendedJobs(ctx, *user.DepartmentID, *user.SchoolID, pageInt)
 
 	if err != nil {
@@ -188,10 +189,21 @@ func (c *JobController) AppendUserInfoToJobs(ctx *gin.Context, jobs []models.Opp
 	}
 
 	var jobsWithUserInfo []models.OpportunitiesView
+	likes, err := c.jobLikeUsecase.CheckListOfLikes(ctx, c.GetPostAndUserPairList(jobs))
+	if err != nil {
+		return nil, err
+	}
 	for _, job := range jobs {
 		userView, ok := userMap[job.PostedBy.Hex()]
 		if !ok {
 			continue // Skip if user info is not found
+		}
+		liked := false
+		for _, like := range likes {
+			if like.PostID == job.ID && like.UserID == userView.ID {
+				liked = true
+				break
+			}
 		}
 		jobView := models.OpportunitiesView{
 			ID:            job.ID,
@@ -200,6 +212,7 @@ func (c *JobController) AppendUserInfoToJobs(ctx *gin.Context, jobs []models.Opp
 			Like:          job.Like,
 			Description:   job.Description,
 			Link:          job.Link,
+			Liked:         liked,
 			Type:          job.Type,
 			PostedBy:      userView,
 			CreatedAt:     job.CreatedAt,
@@ -207,5 +220,15 @@ func (c *JobController) AppendUserInfoToJobs(ctx *gin.Context, jobs []models.Opp
 		jobsWithUserInfo = append(jobsWithUserInfo, jobView)
 	}
 	return jobsWithUserInfo, nil
+
+}
+
+func (p *JobController) GetPostAndUserPairList(jobs []models.Opportunities) [][]primitive.ObjectID {
+	var listOfLikes [][]primitive.ObjectID
+	for _, job := range jobs {
+		listOfLikes = append(listOfLikes, []primitive.ObjectID{job.ID, job.PostedBy})
+	}
+
+	return listOfLikes
 
 }

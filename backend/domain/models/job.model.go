@@ -9,7 +9,7 @@ type Opportunities struct {
 	ID            primitive.ObjectID   `bson:"_id,omitempty" json:"id"`
 	DepartmentIDs []primitive.ObjectID `bson:"department_ids" json:"department_ids"`
 	Title         string               `bson:"title" json:"title"`
-	Like          int64                `bson:"like" json:"like"`
+	Like          int64                `bson:"likes" json:"likes"`
 	Description   string               `bson:"description" json:"description"`
 	Link          string               `bson:"link" json:"link"`
 	Type          string               `bson:"type" json:"type"` // internship or job
@@ -23,6 +23,7 @@ type OpportunitiesView struct {
 	Title         string               `bson:"title" json:"title"`
 	Like          int64                `bson:"like" json:"like"`
 	Description   string               `bson:"description" json:"description"`
+	Liked         bool                 `bson:"liked" json:"liked"`
 	Link          string               `bson:"link" json:"link"`
 	Type          string               `bson:"type" json:"type"` // internship or job
 	PostedBy      UserView             `bson:"user" json:"user"`

@@ -16,7 +16,7 @@ type PostController struct {
 	userUseCase       usecases.UserUseCase
 	departmentUsecase usecases.DepartmentUseCase
 	storage           usecases.StorageUseCase
-	likeUseCase       usecases.LikeUsecase
+	PostlikeUseCase   usecases.PostLikeUsecase
 }
 
 func NewPostController(
@@ -24,14 +24,14 @@ func NewPostController(
 	user usecases.UserUseCase,
 	department usecases.DepartmentUseCase,
 	storage usecases.StorageUseCase,
-	liked usecases.LikeUsecase) *PostController {
+	liked usecases.PostLikeUsecase) *PostController {
 
 	return &PostController{
 		postUseCase:       post,
 		userUseCase:       user,
 		departmentUsecase: department,
 		storage:           storage,
-		likeUseCase:       liked,
+		PostlikeUseCase:   liked,
 	}
 }
 
@@ -447,7 +447,7 @@ func (p *PostController) GetPostWithUsers(ctx *gin.Context, posts []models.Posts
 		userMap[user.ID.Hex()] = user
 	}
 
-	likes, err := p.likeUseCase.CheckListOfLikes(ctx, p.GetPostAndUserPairList(posts))
+	likes, err := p.PostlikeUseCase.CheckListOfLikes(ctx, p.GetPostAndUserPairList(posts))
 	if err != nil {
 		fmt.Println("Error checking likes:", err)
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to check likes " + err.Error()})

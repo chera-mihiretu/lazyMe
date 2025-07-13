@@ -55,9 +55,14 @@ func main() {
 	departmentUsecase := usecases.NewDepartmentUseCase(departmentRepository)
 	departmentController := controller.NewDepartmentController(departmentUsecase)
 	// like dependencies
-	likeRepository := repository.NewLikeRepository(myDatabase)
-	likeUsecase := usecases.NewLikeUsecase(likeRepository)
-	likeController := controller.NewLikeController(likeUsecase)
+	postLikeRepository := repository.NewPostLikeRepository(myDatabase)
+	postLikeUsecase := usecases.NewPostLikeUsecase(postLikeRepository)
+	postLikeController := controller.NewPostLikeController(postLikeUsecase)
+
+	jobLikeRepository := repository.NewJobLikeRepository(myDatabase)
+	jobLikeUsecase := usecases.NewJobLikeUsecase(jobLikeRepository)
+	jobLikeController := controller.NewJobLikeController(jobLikeUsecase)
+
 	// post dependencies
 	postRepository := repository.NewPostRepository(
 		myDatabase,
@@ -65,7 +70,7 @@ func main() {
 		connectionRepository,
 		*userRepository)
 	postUseCase := usecases.NewPostUseCase(postRepository)
-	PostController := controller.NewPostController(postUseCase, userUseCase, departmentUsecase, storageUseCase, likeUsecase)
+	PostController := controller.NewPostController(postUseCase, userUseCase, departmentUsecase, storageUseCase, postLikeUsecase)
 	// material dependencies
 	materialRepository := repository.NewMaterialsRepository(myDatabase)
 	materialUseCase := usecases.NewMaterialUseCase(materialRepository)
@@ -81,7 +86,7 @@ func main() {
 	// job dependencies
 	jobRepository := repository.NewJobRepository(myDatabase, departmentRepository)
 	jobUsecase := usecases.NewJobUsecase(jobRepository)
-	jobController := controller.NewJobController(jobUsecase, userUseCase)
+	jobController := controller.NewJobController(jobUsecase, userUseCase, jobLikeUsecase)
 	router := router.SetupRoutes(
 		AuthController,
 		PostController,
@@ -92,7 +97,8 @@ func main() {
 		universityController,
 		jobController,
 		userController,
-		likeController,
+		postLikeController,
+		jobLikeController,
 	)
 
 	if err := router.Run(":8080"); err != nil {

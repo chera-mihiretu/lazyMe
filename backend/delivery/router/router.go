@@ -27,7 +27,8 @@ func SetupRoutes(
 	universityController *controller.UniversityController,
 	jobController *controller.JobController,
 	userController *controller.UserController,
-	likeController *controller.LikeController,
+	postLikeController *controller.PostLikeController,
+	jobLikeController *controller.JobLikeController,
 ) *gin.Engine {
 	fmt.Println("FRONT_BASE_URL:", os.Getenv("FRONT_BASE_URL"))
 	r := gin.New()
@@ -72,8 +73,8 @@ func SetupRoutes(
 		postsInfo.PUT("/:id", postController.UpdatePost)
 		postsInfo.DELETE("/", postController.DeletePost)
 		// likes
-		postsInfo.POST("/like", likeController.AddLike)
-		postsInfo.POST("/dislike", likeController.RemoveLike)
+		postsInfo.POST("/like", postLikeController.AddLike)
+		postsInfo.POST("/dislike", postLikeController.RemoveLike)
 	}
 
 	connection := r.Group("/api/connections")
@@ -138,6 +139,9 @@ func SetupRoutes(
 		job.POST("/", middleware.AuthUserMiddleware(RoleAdmin), jobController.CreateJob)
 		job.PUT("/:id", middleware.AuthUserMiddleware(RoleAdmin), jobController.UpdateJob)
 		job.DELETE("/:id", middleware.AuthUserMiddleware(RoleAdmin), jobController.DeleteJob)
+		// likes
+		job.POST("/like", middleware.AuthUserMiddleware(RoleStudent), jobLikeController.AddLike)
+		job.POST("/dislike", middleware.AuthUserMiddleware(RoleStudent), jobLikeController.RemoveLike)
 	}
 	user := r.Group("/api/users")
 	{
