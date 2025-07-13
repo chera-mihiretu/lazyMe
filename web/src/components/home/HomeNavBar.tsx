@@ -14,6 +14,7 @@ const navLinks = [
   { label: 'Opportunities', href: '/home/opportunities', icon: '/home/creative.png' },
   { label: 'Materials', href: '/home/materials', icon: '/home/stack-of-books.png' },
   { label: 'Exams', href: '/home/exams', icon: '/home/exam.png' },
+  {}
 ];
 
 const baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
