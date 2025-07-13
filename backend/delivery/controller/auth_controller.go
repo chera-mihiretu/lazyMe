@@ -2,7 +2,6 @@ package controller
 
 import (
 	"fmt"
-	"log"
 	"net/http"
 	"net/url"
 	"os"
@@ -104,6 +103,8 @@ func (auth *AuthController) RegisterWithEmail(ctx *gin.Context) {
 		return
 	}
 
+	fmt.Println(user)
+
 	err := validation.RegisterValidationEmail(user)
 
 	if err != nil {
@@ -114,7 +115,7 @@ func (auth *AuthController) RegisterWithEmail(ctx *gin.Context) {
 	hashedPassword, err := hashing.HashPassword(user.PasswordHash)
 
 	if err != nil {
-		log.Println("Error hashing password: ", err)
+
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Something Went Wrong Please Try again "})
 		return
 	}
@@ -124,7 +125,6 @@ func (auth *AuthController) RegisterWithEmail(ctx *gin.Context) {
 	err = auth.authUseCase.RegisterUserEmail(ctx, user)
 
 	if err != nil {
-		log.Println("Error creating user: ", err)
 		ctx.JSON(http.StatusConflict, gin.H{"error": err.Error()})
 		return
 	}
@@ -139,8 +139,6 @@ func (auth *AuthController) VerifyEmail(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Front Url Token is required"})
 		return
 	}
-
-	ctx.JSON(http.StatusOK, gin.H{"message": "Verifying Email"})
 
 	var tokenModel models.EmailVerification
 
@@ -160,5 +158,6 @@ func (auth *AuthController) VerifyEmail(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	ctx.Redirect(http.StatusFound, front_url)
+
+	ctx.Redirect(http.StatusFound, front_url+"/auth/verified")
 }

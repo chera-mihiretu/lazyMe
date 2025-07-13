@@ -13,6 +13,7 @@ const PostsList: React.FC<PostsListProps> = ({ initialSearch = "" }) => {
   const [posts, setPosts] = useState<Post[] | null>(null);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState(initialSearch);
+  const [error, setError] = useState<string | null>(null);
 
   const handleAddPost = () => {
     // Redirect to create post page
@@ -32,7 +33,15 @@ const PostsList: React.FC<PostsListProps> = ({ initialSearch = "" }) => {
     })
       .then(async (res) => {
         if (!res.ok) {
-          throw new Error(`Error fetching post: ${res.status} ${res.statusText}`);
+          let msg = `Error fetching post: ${res.status} ${res.statusText}`;
+          try {
+            const data = await res.json();
+            if (data?.message) msg = data.message;
+          } catch {}
+          setError(msg);
+          setPosts([]);
+          setLoading(false);
+          return;
         }
         const data = await res.json();
         const found = data.posts;
@@ -41,6 +50,7 @@ const PostsList: React.FC<PostsListProps> = ({ initialSearch = "" }) => {
       })
       .catch((e) => {
         console.error("Error fetching posts:", e);
+        setError(e?.message || "Failed to fetch posts.");
         setLoading(false);
         setPosts([]);
       });
@@ -60,6 +70,10 @@ const PostsList: React.FC<PostsListProps> = ({ initialSearch = "" }) => {
       <PostSearchBar search={search} setSearch={setSearch} onAddPost={handleAddPost} />
       {loading ? (
         <div style={{ textAlign: "center", marginTop: 60 }}>Loading posts...</div>
+      ) : error ? (
+        <div style={{ textAlign: "center", marginTop: 60, color: "#d32f2f", fontWeight: 600, fontSize: 18 }}>
+          {error}
+        </div>
       ) : !posts || posts.length === 0 ? (
         <div style={{ textAlign: "center", marginTop: 60, color: "#888" }}>No posts found.</div>
       ) : (

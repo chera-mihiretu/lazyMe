@@ -178,8 +178,8 @@ const LoginForm: React.FC = () => {
         <div style={{ flex: 1, height: 1, background: COLORS.inputBorder, opacity: 0.5 }} />
       </div>
       <a
-        href="http://localhost:3000/api/auth/google/login"
-        target='_blank'
+        href="http://localhost:8080/api/auth/google/login"
+        
         style={{
           width: '100%',
           background: '#fff',

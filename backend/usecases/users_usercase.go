@@ -10,8 +10,11 @@ import (
 
 type UserUseCase interface {
 	GetUserById(ctx context.Context, userID string) (models.UserView, error)
+	GetUserByIdNoneView(ctx context.Context, userID string) (models.User, error)
+
 	GetUserByEmail(ctx context.Context, email string) (models.UserView, error)
 	GetListOfUsers(ctx context.Context, ids []primitive.ObjectID) ([]models.UserView, error)
+	CompleteUser(ctx context.Context, user models.User) (models.UserView, error)
 }
 
 type userUseCase struct {
@@ -31,6 +34,16 @@ func (u *userUseCase) GetUserByEmail(ctx context.Context, email string) (models.
 // GetUserById implements UserUseCase.
 func (u *userUseCase) GetUserById(ctx context.Context, userID string) (models.UserView, error) {
 	return u.userRepository.GetUserById(ctx, userID)
+}
+
+// CompleteUser implements UserUseCase.
+func (u *userUseCase) CompleteUser(ctx context.Context, user models.User) (models.UserView, error) {
+	return u.userRepository.CompleteUser(ctx, user)
+}
+
+// GetUserByIdNoneView implements UserUseCase.
+func (u *userUseCase) GetUserByIdNoneView(ctx context.Context, userID string) (models.User, error) {
+	return u.userRepository.GetUserByIdNoneView(ctx, userID)
 }
 
 func NewUserUseCase(repository repository.UserRepository) UserUseCase {

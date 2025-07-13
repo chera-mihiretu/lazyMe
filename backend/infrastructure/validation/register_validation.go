@@ -16,6 +16,14 @@ func RegisterValidationEmail(user models.User) error {
 		return errors.New("email is required")
 	}
 
+	if user.UniversityID == nil || user.UniversityID.Hex() == "" {
+		return errors.New("university ID is required")
+	}
+
+	if user.SchoolID == nil || user.SchoolID.Hex() == "" {
+		return errors.New("school ID is required")
+	}
+
 	var emailRegex = regexp.MustCompile(`^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$`)
 	if !emailRegex.MatchString(user.Email) {
 		return errors.New("invalid email format")
@@ -26,9 +34,6 @@ func RegisterValidationEmail(user models.User) error {
 	}
 	if len(user.PasswordHash) < 6 {
 		return errors.New("password must be at least 6 characters long")
-	}
-	if user.School != "" && School(user.School).IsValid() {
-		return errors.New("school is not")
 	}
 
 	if user.AcedemicYear <= 0 && user.AcedemicYear >= 6 {

@@ -6,6 +6,7 @@ import { COLORS, FONT_FAMILY } from '../../utils/color';
 import Image from 'next/image';
 import SearchBar from './SearchBar';
 import UserAvatar from './UserAvatar';
+import { useEffect, useState } from 'react';
 import NotificationBell from './NotificationBell';
 
 const navLinks = [
@@ -15,8 +16,23 @@ const navLinks = [
   { label: 'Exams', href: '/home/exams', icon: '/home/exam.png' },
 ];
 
+const baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
+
 const HomeNavBar: React.FC = () => {
   const pathname = usePathname();
+  const [user, setUser] = useState<any>(null);
+
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (!token) return;
+    fetch(`${baseUrl}/users/me`, {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+      .then(res => res.json())
+      .then(data => setUser(data))
+      .catch(() => setUser(null));
+  }, []);
+
   return (
     <nav style={{
       width: '100%',
@@ -69,7 +85,7 @@ const HomeNavBar: React.FC = () => {
       <div style={{ display: 'flex', alignItems: 'center', gap: 18 }}>
         <SearchBar />
         <NotificationBell />
-        <UserAvatar />
+        <UserAvatar user={user} />
       </div>
     </nav>
   );

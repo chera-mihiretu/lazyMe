@@ -12,8 +12,8 @@ import (
 
 var RoleMap = map[string]int{
 	"admin":   3,
-	"student": 1,
 	"teacher": 2,
+	"student": 1,
 	"all":     0,
 }
 
@@ -65,7 +65,9 @@ func AuthUserMiddleware(role int) gin.HandlerFunc {
 			return
 		}
 
-		if RoleMap[claims.Role] <= role {
+		fmt.Println("Role:", claims.Role, "Required Role:", role, "Get Role : ", RoleMap[claims.Role])
+
+		if RoleMap[claims.Role] < role {
 
 			c.JSON(403, gin.H{"error": "Forbidden: insufficient permissions"})
 			c.Abort()

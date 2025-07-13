@@ -32,6 +32,7 @@ type PostView struct {
 	IsValidated     bool               `bson:"is_validated" json:"is_validated"`
 	IsFlagged       bool               `bson:"is_flagged" json:"is_flagged"`
 	Likes           int                `bson:"likes" json:"likes"`
+	Liked           bool               `bson:"liked" json:"liked"`
 	Comments        int                `bson:"comments" json:"comments"`
 	CreatedAt       time.Time          `bson:"created_at" json:"created_at"`
 }

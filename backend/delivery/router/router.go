@@ -12,8 +12,8 @@ import (
 
 const (
 	RoleAdmin   = 3
-	RoleStudent = 1
 	RoleTeacher = 2
+	RoleStudent = 1
 	RoleAll     = 0
 )
 
@@ -25,12 +25,15 @@ func SetupRoutes(
 	materialController *controller.MaterialController,
 	schoolController *controller.SchoolController,
 	universityController *controller.UniversityController,
+	jobController *controller.JobController,
+	userController *controller.UserController,
+	likeController *controller.LikeController,
 ) *gin.Engine {
 	fmt.Println("FRONT_BASE_URL:", os.Getenv("FRONT_BASE_URL"))
 	r := gin.New()
 	r.Use(gin.Logger(), gin.Recovery())
 	corsConfig := cors.Config{
-		AllowOrigins:     []string{"http://localhost:3000"}, // Not "*"
+		AllowOrigins:     []string{"http://localhost:3000", "http://127.0.0.1:3000"}, // Not "*"
 		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
 		AllowHeaders:     []string{"Origin", "Content-Type", "Authorization"},
 		ExposeHeaders:    []string{"Content-Length"},
@@ -39,6 +42,7 @@ func SetupRoutes(
 	}
 
 	r.Use(cors.New(corsConfig))
+
 	googleAuth := r.Group("/api/auth/google")
 	{
 		googleAuth.GET("/login", middleware.GoogleProvider, authController.LoginWithGoogle)
@@ -67,6 +71,9 @@ func SetupRoutes(
 		postsInfo.POST("/", postController.CreatePost)
 		postsInfo.PUT("/:id", postController.UpdatePost)
 		postsInfo.DELETE("/", postController.DeletePost)
+		// likes
+		postsInfo.POST("/like", likeController.AddLike)
+		postsInfo.POST("/dislike", likeController.RemoveLike)
 	}
 
 	connection := r.Group("/api/connections")
@@ -95,8 +102,8 @@ func SetupRoutes(
 	// Departments endpoints
 	department := r.Group("/api/departments")
 	{
-		department.GET("/", middleware.AuthUserMiddleware(RoleAll), departmentController.GetDepartments)
-		department.GET("/tree", middleware.AuthUserMiddleware(RoleAll), departmentController.GetDepartmentsInTree)
+		department.GET("/", departmentController.GetDepartments)
+		department.GET("/tree", departmentController.GetDepartmentsInTree)
 		department.GET("/:id", middleware.AuthUserMiddleware(RoleAll), departmentController.GetDepartmentByID)
 		department.POST("/", middleware.AuthUserMiddleware(RoleAdmin), departmentController.CreateDepartment)
 		department.PUT("/:id", middleware.AuthUserMiddleware(RoleAdmin), departmentController.UpdateDepartment)
@@ -106,8 +113,8 @@ func SetupRoutes(
 	// Schools endpoints
 	school := r.Group("/api/schools")
 	{
-		school.GET("/", middleware.AuthUserMiddleware(RoleAll), schoolController.GetSchools)
-		school.GET("/:id", middleware.AuthUserMiddleware(RoleAll), schoolController.GetSchoolByID)
+		school.GET("/", schoolController.GetSchools)
+		school.GET("/:id", schoolController.GetSchoolByID)
 		school.POST("/", middleware.AuthUserMiddleware(RoleAdmin), schoolController.CreateSchool)
 		school.PUT("/:id", middleware.AuthUserMiddleware(RoleAdmin), schoolController.UpdateSchool)
 		school.DELETE("/:id", middleware.AuthUserMiddleware(RoleAdmin), schoolController.DeleteSchool)
@@ -116,13 +123,28 @@ func SetupRoutes(
 	// Universities endpoints
 	university := r.Group("/api/universities")
 	{
-		university.GET("/", middleware.AuthUserMiddleware(RoleAll), universityController.GetUniversities)
-		university.GET("/:id", middleware.AuthUserMiddleware(RoleAll), universityController.GetUniversityByID)
+		university.GET("/", universityController.GetUniversities)
+		university.GET("/:id", universityController.GetUniversityByID)
 		university.POST("/", middleware.AuthUserMiddleware(RoleAdmin), universityController.CreateUniversity)
 		university.PUT("/:id", middleware.AuthUserMiddleware(RoleAdmin), universityController.UpdateUniversity)
 		university.DELETE("/:id", middleware.AuthUserMiddleware(RoleAdmin), universityController.DeleteUniversity)
 	}
 
+	// Jobs endpoints
+	job := r.Group("/api/jobs")
+	{
+		job.GET("/", middleware.AuthUserMiddleware(RoleAll), jobController.GetRecommendedJobs)
+		job.GET("/:id", middleware.AuthUserMiddleware(RoleAll), jobController.GetJobByID)
+		job.POST("/", middleware.AuthUserMiddleware(RoleAdmin), jobController.CreateJob)
+		job.PUT("/:id", middleware.AuthUserMiddleware(RoleAdmin), jobController.UpdateJob)
+		job.DELETE("/:id", middleware.AuthUserMiddleware(RoleAdmin), jobController.DeleteJob)
+	}
+	user := r.Group("/api/users")
+	{
+
+		user.GET("/me", middleware.AuthUserMiddleware(RoleAll), userController.Me)
+		user.POST("/complete-account", middleware.AuthUserMiddleware(RoleAll), userController.CompleteUser)
+	}
 	r.GET("api/health", func(c *gin.Context) {
 		c.JSON(200, gin.H{
 			"message": "Server is running",

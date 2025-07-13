@@ -3,6 +3,7 @@ package repository
 import (
 	"context"
 	"errors"
+	"fmt"
 	"time"
 
 	"github.com/chera-mihiretu/IKnow/domain/constants"
@@ -51,9 +52,13 @@ func (repo *authRepository) RegisterUserWithEmail(ctx context.Context, user mode
 		return errors.New("user already exists with this email")
 	}
 	user.Role = string(constants.UserRoleStudent)
+	if user.AcedemicYear == 0 {
+		user.AcedemicYear = 1
+	}
 	user.IsVerified = false
 	user.IsTeacher = false
 	user.BlueBadge = false
+	user.IsComplete = true
 	user.CreatedAt = time.Now()
 	user.UpdatedAt = time.Now()
 
@@ -90,7 +95,7 @@ func (repo *authRepository) LoginWithEmail(ctx context.Context, user models.User
 	filter := bson.M{"email": user.Email}
 	var foundUser models.User
 	err := repo.UsersCollection.FindOne(ctx, filter).Decode(&foundUser)
-
+	fmt.Println("Found user:", foundUser, "Error:", err)
 	if err != nil {
 		return "", errors.New("user not found")
 	}
