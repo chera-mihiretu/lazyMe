@@ -25,4 +25,5 @@ export interface Post {
   likes: number;
   comments: number;
   created_at: string;
+  liked?: boolean; // Whether the current user liked this post
 }

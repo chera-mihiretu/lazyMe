@@ -34,11 +34,13 @@ const UserSuggestionsList: React.FC<UserSuggestionsListProps> = ({ page = 1 }) =
       .then(async (res) => {
         if (!res.ok) throw new Error("Failed to fetch user suggestions");
         const data = await res.json();
+        console.log(data);
         setUsers(data.suggestions || []);
         setHasMore(data.hasMore || false);
         setLoading(false);
       })
       .catch((e) => {
+        console.log(e)
         setUsers([]);
         setHasMore(false);
         setLoading(false);
@@ -55,11 +57,30 @@ const UserSuggestionsList: React.FC<UserSuggestionsListProps> = ({ page = 1 }) =
       className="user-suggestions-responsive"
       style={{ minWidth: 240, maxWidth: 520, marginLeft: 24 }}
     >
-      <h3 style={{ fontWeight: 600, fontSize: 18, marginBottom: 16 }}>Suggestions</h3>
+      {/* Only show title if there are users */}
+      {users.length > 0 && (
+        <h3 style={{ fontWeight: 600, fontSize: 18, marginBottom: 16 }}>Suggestions</h3>
+      )}
       {loading ? (
         <div style={{ textAlign: "center", margin: "2rem 0" }}>Loading...</div>
       ) : users.length === 0 ? (
-        <div style={{ textAlign: "center", color: "#888", margin: "2rem 0" }}>No suggestions found.</div>
+        <div style={{
+          textAlign: "center",
+          color: "#4320d1",
+          margin: "2.5rem 0 2rem 0",
+          background: "#f7f7fb",
+          borderRadius: 14,
+          padding: "2.5rem 1.5rem 2rem 1.5rem",
+          boxShadow: "0 2px 12px #e0e0e0",
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}>
+          <img src="/icons/empty_state.png" alt="No suggestions" style={{ width: 80, height: 80, marginBottom: 18, opacity: 0.8 }} />
+          <div style={{ fontWeight: 600, fontSize: 18, marginBottom: 6 }}>No Connection Requests</div>
+          <div style={{ color: '#888', fontSize: 15, marginBottom: 0 }}>You're all caught up! Check back later for new suggestions.</div>
+        </div>
       ) : (
         <>
           {users.map((user) => <UserCard key={user.id} {...user} />)}

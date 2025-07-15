@@ -102,7 +102,23 @@ const ConnectionsPage: React.FC = () => {
         ) : error ? (
           <div style={{ color: COLORS.error, fontSize: "1.05rem", marginBottom: 12 }}>{error}</div>
         ) : requests.length === 0 ? (
-          <div style={{ color: COLORS.muted, fontSize: "1.05rem" }}>No connection requests.</div>
+          <div style={{
+            textAlign: "center",
+            color: COLORS.primary,
+            margin: "2.5rem 0 2rem 0",
+            background: "#f7f7fb",
+            borderRadius: 14,
+            padding: "2.5rem 1.5rem 2rem 1.5rem",
+            boxShadow: "0 2px 12px #e0e0e0",
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}>
+            <img src="/icons/empty_state.png" alt="No connection requests" style={{ width: 80, height: 80, marginBottom: 18, opacity: 0.8 }} />
+            <div style={{ fontWeight: 600, fontSize: 18, marginBottom: 6 }}>No Connection Requests</div>
+            <div style={{ color: '#888', fontSize: 15, marginBottom: 0 }}>You're all caught up! Check back later for new requests.</div>
+          </div>
         ) : (
           <ul style={{ listStyle: "none", padding: 0 }}>
             {requests.map((user) => (

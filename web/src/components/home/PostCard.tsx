@@ -8,15 +8,13 @@ const PostCard: React.FC<{ post: Post }> = ({ post }) => {
   return (
     <div
       style={{
-        background: "#f7f8fa",
-        borderRadius: 18,
+        background: "#fff",
+        borderRadius: 16,
         boxShadow: "0 2px 16px #4320d10a",
         padding: 32,
         position: "relative",
         marginBottom: 32,
         fontFamily: "Poppins, sans-serif",
-        border: "1.5px solid #e3e6ef",
-        transition: "box-shadow 0.2s, border 0.2s",
       }}
     >
       {/* Header: Avatar, Name, Academic Year, Time */}
@@ -137,7 +135,14 @@ const PostCard: React.FC<{ post: Post }> = ({ post }) => {
           <img src="/icons/like.png" alt="like" width={30} height={30} />
           <span style={{ fontSize: 20, color: "#4320d1", fontWeight: 600 }}>{post.likes}</span>
         </span>
-        <span style={{ display: "flex", alignItems: "center", gap: 10, cursor: "pointer" }}>
+        <span
+          style={{ display: "flex", alignItems: "center", gap: 10, cursor: "pointer" }}
+          onClick={() => {
+            if (typeof window !== 'undefined') {
+              window.location.href = `/home/posts/${post.id}`;
+            }
+          }}
+        >
           <img src="/icons/comment.png" alt="comment" width={30} height={30} />
           <span style={{ fontSize: 20, color: "#4320d1", fontWeight: 600 }}>{post.comments}</span>
         </span>

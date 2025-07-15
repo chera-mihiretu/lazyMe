@@ -6,58 +6,120 @@ export interface JobPost {
   id: string;
   department_ids: string[];
   title: string;
-  like: number;
   description: string;
+  like: number;
   link: string;
   type: string;
   user: User;
   created_at: string;
+  liked: boolean;
 }
 
-
 const JobCard: React.FC<{ job: JobPost }> = ({ job }) => {
+  console.log(job)
   const avatar = job.user?.profile_image_url || '/icons/avatar.png';
   const [likes, setLikes] = React.useState(job.like || 0);
-  const [liked, setLiked] = React.useState(false);
-
-  // Helper: preview if image, else fallback to iframe preview or fallback message
+  const [liked, setLiked] = React.useState(job.liked || false);
   const [iframeError, setIframeError] = React.useState(false);
+  const [error, setError] = React.useState<string | null>(null);
+
   React.useEffect(() => { setIframeError(false); }, [job.link]);
+
+  // Microlink.io Link Preview
+  const [microlink, setMicrolink] = React.useState<any>(null);
+  const [microlinkLoading, setMicrolinkLoading] = React.useState(false);
+  const [microlinkError, setMicrolinkError] = React.useState<string | null>(null);
+
+  React.useEffect(() => {
+    if (!job.link) return;
+    setMicrolink(null);
+    setMicrolinkError(null);
+    setMicrolinkLoading(true);
+    fetch(`https://api.microlink.io/?url=${encodeURIComponent(job.link)}`)
+      .then(res => res.json())
+      .then(data => {
+        if (data.status === 'success') {
+          setMicrolink(data.data);
+        } else {
+          setMicrolinkError('Preview not available.');
+        }
+      })
+      .catch(() => setMicrolinkError('Preview not available.'))
+      .finally(() => setMicrolinkLoading(false));
+  }, [job.link]);
+
   const renderLinkPreview = () => {
+    if (!job.link) {
+      return (
+        <div style={{ color: COLORS.error, background: "#fffbe9", borderRadius: 8, padding: 12, marginBottom: 10 }}>
+          No link provided for this job post.
+        </div>
+      );
+    }
     if (job.link.match(/\.(jpeg|jpg|gif|png|webp|svg)$/i)) {
       return (
         <img src={job.link} alt="Job Attachment" style={{ width: '100%', maxHeight: 260, objectFit: 'contain', borderRadius: 8, border: '1px solid #ececec', marginBottom: 10 }} />
       );
     }
-    if (iframeError) {
-      // Fallback: cannot display preview
-      const url = new URL(job.link);
+    if (microlinkLoading) {
       return (
-        <div style={{ width: '100%', minHeight: 60, marginBottom: 10, borderRadius: 8, border: '1px solid #ececec', background: '#fffbe9', color: '#b45309', display: 'flex', alignItems: 'center', gap: 12, padding: '12px 18px', fontSize: 15 }}>
-          <img src={`https://www.google.com/s2/favicons?domain=${url.hostname}`} alt="favicon" style={{ width: 20, height: 20, marginRight: 8 }} />
-          <span style={{ fontWeight: 600 }}>{url.hostname}</span>
-          <span style={{ color: '#b45309', fontWeight: 500, marginLeft: 8 }}>Cannot display preview for this website.</span>
+        <div style={{ color: COLORS.primary, background: "#f7f7fb", borderRadius: 8, padding: 12, marginBottom: 10 }}>
+          Loading preview...
         </div>
       );
     }
-    return (
-      <div style={{ width: '100%', minHeight: 180, marginBottom: 10, borderRadius: 8, overflow: 'hidden', border: '1px solid #ececec', background: '#f7f7fb' }}>
-        <iframe
-          src={job.link}
-          title="Job Link Preview"
-          style={{ width: '100%', height: 180, border: 'none', borderRadius: 8 }}
-          sandbox="allow-scripts allow-same-origin allow-popups"
-          onError={() => setIframeError(true)}
-        />
-      </div>
-    );
+    if (microlinkError) {
+      return (
+        <div style={{ color: COLORS.error, background: "#fffbe9", borderRadius: 8, padding: 12, marginBottom: 10 }}>
+          {microlinkError}
+        </div>
+      );
+    }
+    if (microlink) {
+      return (
+        <a href={job.link} target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 16, background: '#f7f7fb', border: '1px solid #ececec', borderRadius: 8, padding: 16, marginBottom: 10 }}>
+            {microlink.image && (
+              <img src={microlink.image.url} alt="preview" style={{ width: 60, height: 60, objectFit: 'cover', borderRadius: 8, border: '1px solid #ececec' }} />
+            )}
+            <div style={{ flex: 1 }}>
+              <div style={{ fontWeight: 600, fontSize: 16, color: COLORS.primary, marginBottom: 4 }}>{microlink.title || microlink.url}</div>
+              <div style={{ color: COLORS.muted, fontSize: 14, marginBottom: 2 }}>{microlink.description}</div>
+              <div style={{ color: COLORS.muted, fontSize: 13, display: 'flex', alignItems: 'center', gap: 6 }}>
+                <img src={`https://www.google.com/s2/favicons?domain=${microlink.url ? new URL(microlink.url).hostname : ''}`} alt="favicon" style={{ width: 16, height: 16 }} />
+                {microlink.url ? new URL(microlink.url).hostname : ''}
+              </div>
+            </div>
+          </div>
+        </a>
+      );
+    }
+    return null;
   };
 
-  const handleLike = () => {
-    if (!liked) {
-      setLikes(likes + 1);
-      setLiked(true);
-      // TODO: Optionally send like to backend
+  const handleLike = async () => {
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
+    const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+    const url = liked ? `${baseUrl}/jobs/dislike` : `${baseUrl}/jobs/like`;
+    const body = JSON.stringify({ post_id: job.id });
+    try {
+      if (liked) {
+        setLikes(likes - 1);
+        setLiked(false);
+      } else {
+        setLikes(likes + 1);
+        setLiked(true);
+      }
+      await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: token ? `Bearer ${token}` : '',
+        },
+        body,
+      });
+    } catch (e) {
+      setError('Failed to update like. Please try again.');
     }
   };
 
@@ -87,56 +149,65 @@ const JobCard: React.FC<{ job: JobPost }> = ({ job }) => {
       <h3 style={{ fontFamily: FONT_FAMILY.poppins, fontWeight: 700, fontSize: 22, color: COLORS.primary, margin: 0 }}>{job.title}</h3>
       {/* Description */}
       <div style={{ color: COLORS.foreground, fontSize: 16, marginBottom: 8 }}>{job.description}</div>
+      {/* Error Message */}
+      {error && (
+        <div style={{ color: COLORS.error, background: "#fffbe9", borderRadius: 8, padding: 10, marginBottom: 10 }}>
+          {error}
+        </div>
+      )}
       {/* Link Preview */}
       {renderLinkPreview()}
-      {/* Apply Button */}
-      <a
-        href={job.link}
-        target="_blank"
-        rel="noopener noreferrer"
-        style={{
-          display: 'inline-block',
-          background: '#2563eb',
-          color: '#fff',
-          fontFamily: FONT_FAMILY.poppins,
-          fontWeight: 600,
-          fontSize: '1.08rem',
-          borderRadius: 8,
-          padding: '0.7rem 2.1rem',
-          border: 'none',
-          margin: '0 0 10px 0',
-          boxShadow: '0 2px 8px rgba(67,24,209,0.07)',
-          cursor: 'pointer',
-          textDecoration: 'none',
-          transition: 'background 0.2s',
-        }}
-      >
-        Apply
-      </a>
-      {/* Like Button */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', marginTop: 8 }}>
-        <button
-          onClick={handleLike}
-          disabled={liked}
+      {/* Apply Button with Icon */}
+      <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 8 }}>
+        <a
+          href={job.link}
+          target="_blank"
+          rel="noopener noreferrer"
           style={{
-            background: liked ? '#e0e7ff' : COLORS.primary,
-            color: liked ? COLORS.primary : '#fff',
-            fontWeight: 700,
-            fontFamily: FONT_FAMILY.poppins,
-            border: 'none',
-            borderRadius: 8,
-            padding: '6px 18px',
-            fontSize: 16,
-            cursor: liked ? 'not-allowed' : 'pointer',
-            boxShadow: liked ? '0 1px 4px #6366f133' : '0 2px 8px rgba(67,24,209,0.07)',
-            transition: 'background 0.2s, color 0.2s',
-            display: 'flex',
+            display: 'inline-flex',
             alignItems: 'center',
-            gap: 7,
+            gap: 10,
+            background: '#2563eb',
+            color: '#ffffff', // Changed color to white
+            fontFamily: FONT_FAMILY.poppins,
+            fontWeight: 600,
+            fontSize: '1.08rem',
+            borderRadius: 8,
+            padding: '0.7rem 2.1rem',
+            border: 'none',
+            boxShadow: '0 2px 8px rgba(67,24,209,0.07)',
+            cursor: 'pointer',
+            textDecoration: 'none',
+            transition: 'background 0.2s',
           }}
         >
-          <span style={{ fontSize: 18, marginRight: 3 }}>❤</span> {likes}
-        </button>
+          <img
+            src="/icons/open_link.svg"
+            alt="open link"
+            width={24}
+            height={24}
+            style={{
+              marginRight: 6,
+              filter: 'invert(100%)', // Makes the SVG white
+            }}
+          />
+          Apply
+        </a>
+      </div>
+      {/* Like Button (left side) */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-start', marginTop: 8 }}>
+        <span
+          style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer' }}
+          onClick={handleLike}
+        >
+          <img
+            src={liked ? "/icons/liked.png" : "/icons/like.png"}
+            alt="like"
+            width={30}
+            height={30}
+          />
+          <span style={{ fontSize: 20, color: "#4320d1", fontWeight: 600 }}>{likes}</span>
+        </span>
       </div>
     </div>
   );

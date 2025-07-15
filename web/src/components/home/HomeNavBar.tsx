@@ -14,7 +14,7 @@ const navLinks = [
   { label: 'Opportunities', href: '/home/opportunities', icon: '/home/creative.png' },
   { label: 'Materials', href: '/home/materials', icon: '/home/stack-of-books.png' },
   { label: 'Exams', href: '/home/exams', icon: '/home/exam.png' },
-  {}
+  { label: 'Connectiton', href: '/home/connections', icon: '/home/connection.png' },
 ];
 
 const baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
@@ -57,10 +57,10 @@ const HomeNavBar: React.FC = () => {
       </div>
       {/* Nav Links */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 28 }}>
-        {navLinks.map(link => {
+        {navLinks.map((link, idx) => {
           const isActive = pathname === link.href || (link.href === '/home/posts' && pathname === '/home');
           return (
-            <Link key={link.label} href={link.href} style={{
+            <Link key={link.href || idx} href={link.href} style={{
               color: isActive ? COLORS.primary : COLORS.foreground,
               background: isActive ? COLORS.primary + '07' : 'transparent',
               fontFamily: FONT_FAMILY.poppins,
@@ -86,7 +86,7 @@ const HomeNavBar: React.FC = () => {
       <div style={{ display: 'flex', alignItems: 'center', gap: 18 }}>
         <SearchBar />
         <NotificationBell />
-        <UserAvatar user={user} />
+        <UserAvatar />
       </div>
     </nav>
   );
