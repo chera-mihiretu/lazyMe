@@ -2,7 +2,6 @@ package usecases
 
 import (
 	"context"
-	"errors"
 
 	"github.com/chera-mihiretu/IKnow/domain/models"
 	"github.com/chera-mihiretu/IKnow/repository"
@@ -14,6 +13,8 @@ type CommentUsecase interface {
 	AddComment(ctx context.Context, comment models.Comments) (models.Comments, error)
 	DeleteComment(ctx context.Context, commentID, userID primitive.ObjectID) error
 	EditComment(ctx context.Context, commentID, userID primitive.ObjectID, content string) (models.Comments, error)
+	AddReply(ctx context.Context, reply models.Comments) (models.Comments, error)
+	GetReply(ctx context.Context, commentID primitive.ObjectID, page int) ([]models.Comments, error)
 }
 
 type commentUsecase struct {
@@ -33,16 +34,17 @@ func (u *commentUsecase) AddComment(ctx context.Context, comment models.Comments
 }
 
 func (u *commentUsecase) DeleteComment(ctx context.Context, commentID, userID primitive.ObjectID) error {
-	hasReplies, err := u.repo.HasReplies(ctx, commentID)
-	if err != nil {
-		return err
-	}
-	if hasReplies {
-		return errors.New("cannot delete comment with replies")
-	}
 	return u.repo.DeleteComment(ctx, commentID, userID)
 }
 
 func (u *commentUsecase) EditComment(ctx context.Context, commentID, userID primitive.ObjectID, content string) (models.Comments, error) {
 	return u.repo.EditComment(ctx, commentID, userID, content)
+}
+
+func (u *commentUsecase) AddReply(ctx context.Context, reply models.Comments) (models.Comments, error) {
+	return u.repo.AddReply(ctx, reply)
+}
+
+func (u *commentUsecase) GetReply(ctx context.Context, commentID primitive.ObjectID, page int) ([]models.Comments, error) {
+	return u.repo.GetReply(ctx, commentID, page)
 }

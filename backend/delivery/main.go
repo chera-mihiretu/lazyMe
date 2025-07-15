@@ -65,7 +65,7 @@ func main() {
 	// comment dependencies
 	commentRepository := repository.NewCommentRepository(myDatabase)
 	commentUsecase := usecases.NewCommentUsecase(commentRepository)
-	commentController := controller.NewCommentController(commentUsecase)
+	commentController := controller.NewCommentController(commentUsecase, userUseCase)
 
 	// post dependencies
 	postRepository := repository.NewPostRepository(

@@ -77,10 +77,13 @@ func SetupRoutes(
 		postsInfo.POST("/like", postLikeController.AddLike)
 		postsInfo.POST("/dislike", postLikeController.RemoveLike)
 		// comments
-		postsInfo.GET("/comments/:post_id/:page", commentController.GetComments)
-		postsInfo.POST("/comments", middleware.AuthUserMiddleware(RoleStudent), commentController.AddComment)
-		postsInfo.DELETE("/comments/:comment_id", middleware.AuthUserMiddleware(RoleStudent), commentController.DeleteComment)
-		postsInfo.PUT("/comments/:comment_id", middleware.AuthUserMiddleware(RoleStudent), commentController.EditComment)
+		comments := postsInfo.Group("/comments")
+		comments.GET("/", commentController.GetComments)
+		comments.GET("/reply", commentController.GetReplies)
+		comments.POST("/reply", middleware.AuthUserMiddleware(RoleStudent), commentController.AddReply)
+		comments.POST("/", middleware.AuthUserMiddleware(RoleStudent), commentController.AddComment)
+		comments.DELETE("/:comment_id", middleware.AuthUserMiddleware(RoleStudent), commentController.DeleteComment)
+		comments.PUT("/:comment_id", middleware.AuthUserMiddleware(RoleStudent), commentController.EditComment)
 	}
 
 	connection := r.Group("/api/connections")

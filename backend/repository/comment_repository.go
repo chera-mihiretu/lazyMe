@@ -14,19 +14,22 @@ import (
 
 type CommentRepository interface {
 	GetComments(ctx context.Context, postID primitive.ObjectID, page int) ([]models.Comments, error)
+	GetReply(ctx context.Context, commentID primitive.ObjectID, page int) ([]models.Comments, error)
 	AddComment(ctx context.Context, comment models.Comments) (models.Comments, error)
 	DeleteComment(ctx context.Context, commentID, userID primitive.ObjectID) error
 	EditComment(ctx context.Context, commentID, userID primitive.ObjectID, content string) (models.Comments, error)
-	HasReplies(ctx context.Context, commentID primitive.ObjectID) (bool, error)
+	AddReply(ctx context.Context, reply models.Comments) (models.Comments, error)
 }
 
 type commentRepository struct {
 	comments *mongo.Collection
+	posts    *mongo.Collection
 }
 
 func NewCommentRepository(db *mongo.Database) CommentRepository {
 	return &commentRepository{
 		comments: db.Collection("comments"),
+		posts:    db.Collection("posts"),
 	}
 }
 
@@ -56,9 +59,14 @@ func (r *commentRepository) GetComments(ctx context.Context, postID primitive.Ob
 }
 
 func (r *commentRepository) AddComment(ctx context.Context, comment models.Comments) (models.Comments, error) {
-
+	id := primitive.NewObjectID()
+	comment.ID = id
 	comment.CreatedAt = time.Now()
 	_, err := r.comments.InsertOne(ctx, comment)
+	if err != nil {
+		return models.Comments{}, err
+	}
+	_, err = r.posts.UpdateOne(ctx, bson.M{"_id": comment.PostID}, bson.M{"$inc": bson.M{"comments": 1}})
 	if err != nil {
 		return models.Comments{}, err
 	}
@@ -66,11 +74,18 @@ func (r *commentRepository) AddComment(ctx context.Context, comment models.Comme
 }
 
 func (r *commentRepository) DeleteComment(ctx context.Context, commentID, userID primitive.ObjectID) error {
-	if yes, err := r.HasReplies(ctx, commentID); !yes || err != nil {
-		return errors.New("cannot delete comment with replies")
-	}
+	var comment models.Comments
 
 	filter := bson.M{"_id": commentID, "user_id": userID}
+	err := r.comments.FindOne(ctx, filter).Decode(&comment)
+	if comment.ReplyCount > 0 {
+		return errors.New("cannot delete comment with replies")
+	}
+	if err != nil {
+		if err == mongo.ErrNoDocuments {
+			return errors.New("comment not found or you do not have permission to delete it")
+		}
+	}
 	res, err := r.comments.DeleteOne(ctx, filter)
 	if err != nil {
 		return err
@@ -78,6 +93,12 @@ func (r *commentRepository) DeleteComment(ctx context.Context, commentID, userID
 	if res.DeletedCount == 0 {
 		return mongo.ErrNoDocuments
 	}
+	_, err = r.posts.UpdateOne(ctx, bson.M{"_id": comment.PostID}, bson.M{"$inc": bson.M{"comments": -1}})
+
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 
@@ -93,11 +114,54 @@ func (r *commentRepository) EditComment(ctx context.Context, commentID, userID p
 	return updated, nil
 }
 
-func (r *commentRepository) HasReplies(ctx context.Context, commentID primitive.ObjectID) (bool, error) {
+func (r *commentRepository) GetReply(ctx context.Context, commentID primitive.ObjectID, page int) ([]models.Comments, error) {
+	pageSize := Pagesize
 	filter := bson.M{"parent_comment_id": commentID}
-	count, err := r.comments.CountDocuments(ctx, filter)
+
+	findOption := options.Find().SetSkip(int64((page - 1) * pageSize)).SetLimit(Pagesize)
+	cursor, err := r.comments.Find(ctx, filter, findOption)
 	if err != nil {
-		return false, err
+		return nil, err
 	}
-	return count > 0, nil
+	defer cursor.Close(ctx)
+
+	var replies []models.Comments
+	for cursor.Next(ctx) {
+		var reply models.Comments
+		if err := cursor.Decode(&reply); err != nil {
+			return nil, err
+		}
+		replies = append(replies, reply)
+	}
+	if err := cursor.Err(); err != nil {
+		return nil, err
+	}
+	return replies, nil
+}
+
+func (r *commentRepository) AddReply(ctx context.Context, reply models.Comments) (models.Comments, error) {
+	reply.CreatedAt = time.Now()
+	reply.ReplyCount = 0 // Replies do not have replies
+	reply.ID = primitive.NewObjectID()
+
+	var comment models.Comments
+	filter := bson.M{"_id": reply.ParentCommentID}
+	err := r.comments.FindOne(ctx, filter).Decode(&comment)
+	if err != nil {
+		if err == mongo.ErrNoDocuments {
+			return models.Comments{}, errors.New("parent comment not found")
+		}
+		return models.Comments{}, err
+	}
+
+	_, err = r.comments.InsertOne(ctx, reply)
+	if err != nil {
+		return models.Comments{}, err
+	}
+	// Update the parent comment to indicate it has replies
+	_, err = r.comments.UpdateOne(ctx, bson.M{"_id": reply.ParentCommentID}, bson.M{"$inc": bson.M{"reply_count": 1}})
+	if err != nil {
+		return models.Comments{}, err
+	}
+	return reply, nil
 }
