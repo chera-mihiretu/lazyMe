@@ -1,5 +1,21 @@
 "use client";
 import React, { useEffect, useState } from "react";
+
+interface UserType {
+  id: string;
+  name: string;
+  profile_image_url?: string;
+  acedemic_year?: string;
+}
+
+interface CommentType {
+  id: string;
+  user?: UserType;
+  content: string;
+  created_at: string;
+  likes?: number;
+  reply_count?: number;
+}
 import { useParams } from "next/navigation";
 import PostCard from "@/components/home/PostCard";
 import { COLORS, FONT_FAMILY } from "@/utils/color";
@@ -9,7 +25,7 @@ const baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
 const PostDetailPage = () => {
   const { post_id } = useParams();
   const [post, setPost] = useState(null);
-  const [comments, setComments] = useState([]);
+  const [comments, setComments] = useState<CommentType[]>([]);
   const [commentText, setCommentText] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -62,7 +78,7 @@ const PostDetailPage = () => {
   }, [post_id]);
 
   // Submit new comment
-  const handleCommentSubmit = async (e) => {
+  const handleCommentSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!commentText.trim()) return;
     try {
@@ -83,9 +99,9 @@ const PostDetailPage = () => {
   };
 
   // Render a single comment and its replies
-  const Comment = ({ comment, depth = 0 }) => {
+  const Comment = ({ comment, depth = 0 }: { comment: CommentType; depth?: number }) => {
     const [showReplies, setShowReplies] = useState(false);
-    const [replies, setReplies] = useState([]);
+    const [replies, setReplies] = useState<CommentType[]>([]);
     const [replyText, setReplyText] = useState("");
     const [replyLoading, setReplyLoading] = useState(false);
     const [repliesLoading, setRepliesLoading] = useState(false);
@@ -113,7 +129,7 @@ const PostDetailPage = () => {
       setRepliesLoading(false);
     };
 
-    const handleReplySubmit = async (e) => {
+    const handleReplySubmit = async (e: React.FormEvent<HTMLFormElement>) => {
       e.preventDefault();
       if (!replyText.trim()) return;
       setReplyLoading(true);
@@ -137,15 +153,15 @@ const PostDetailPage = () => {
           setShowReplyInput(false);
           // Optimistically add the new reply to the UI if returned by backend
           if (data.reply) {
-            setReplies(prev => [data.reply, ...prev]);
-            setReplyCount(prev => prev + 1);
+            setReplies((prev: CommentType[]) => [data.reply, ...prev]);
+            setReplyCount((prev: number) => prev + 1);
             // If this is the first reply, show replies immediately
             if (!showReplies) {
               setShowReplies(true);
             }
           } else {
             fetchReplies(1);
-            setReplyCount(prev => prev + 1);
+            setReplyCount((prev: number) => prev + 1);
             if (!showReplies) {
               setShowReplies(true);
             }
@@ -227,7 +243,7 @@ const PostDetailPage = () => {
                 ) : replies.length === 0 ? (
                   <div style={{ color: COLORS.muted, fontSize: 14 }}>No replies yet.</div>
                 ) : (
-                  replies.map(reply => <Comment key={reply.id} comment={reply} depth={depth + 1} />)
+                  replies.map((reply: CommentType) => <Comment key={reply.id} comment={reply} depth={depth + 1} />)
                 )}
                 {repliesHasMore && (
                   <button onClick={() => fetchReplies(repliesPage + 1)} style={{ color: COLORS.primary, background: 'none', border: 'none', cursor: 'pointer', fontSize: 14, fontWeight: 500, marginTop: 6 }}>Load more replies</button>
@@ -267,7 +283,7 @@ const PostDetailPage = () => {
             ) : comments.length === 0 ? (
               <div style={{ color: COLORS.muted, fontSize: 15 }}>No comments yet.</div>
             ) : (
-              comments.map(comment => <Comment key={comment.id} comment={comment} />)
+              comments.map((comment: CommentType) => <Comment key={comment.id} comment={comment} />)
             )}
             {hasMore && !commentLoading && (
               <button onClick={() => fetchComments(page + 1)} style={{ color: COLORS.primary, background: 'none', border: 'none', cursor: 'pointer', fontSize: 15, fontWeight: 500, marginTop: 10 }}>Load more comments</button>
