@@ -84,7 +84,9 @@ const HomeNavBar: React.FC = () => {
       </div>
       {/* Search, Notification, and Avatar */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 18 }}>
-        <SearchBar />
+        <SearchBar value={''} onChange={function (e: React.ChangeEvent<HTMLInputElement>): void {
+          throw new Error('Function not implemented.');
+        } } />
         <NotificationBell />
         <UserAvatar />
       </div>

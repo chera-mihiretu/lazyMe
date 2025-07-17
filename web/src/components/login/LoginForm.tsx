@@ -41,7 +41,19 @@ const LoginForm: React.FC = () => {
         if (response.status === 200 && data.token) {
           if (typeof window !== 'undefined') {
             localStorage.setItem('token', data.token);
-            window.location.href = '/home';
+            // Extract role from JWT
+            try {
+              const payload = data.token.split('.')[1];
+              const decoded = JSON.parse(atob(payload));
+              const role = decoded.role;
+              if (role === 'admin') {
+                window.location.href = '/admin';
+              } else {
+                window.location.href = '/home/posts';
+              }
+            } catch {
+              window.location.href = '/home/posts';
+            }
           }
         } else {
           setError(data.error || 'An unknown error occurred.');

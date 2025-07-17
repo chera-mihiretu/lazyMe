@@ -18,3 +18,24 @@ export function removeToken() {
 export function isLoggedIn() {
   return !!getToken();
 }
+
+export function getUserRole(): string | null {
+  const token = getToken();
+  if (!token) return null;
+  try {
+    const payload = token.split('.')[1];
+    const decoded = JSON.parse(atob(payload));
+    return decoded.role || null;
+  } catch {
+    return null;
+  }
+}
+
+export function redirectByRole() {
+  const role = getUserRole();
+  if (role === 'admin') {
+    window.location.href = '/admin';
+  } else {
+    window.location.href = '/home/posts';
+  }
+}
