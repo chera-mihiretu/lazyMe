@@ -1,6 +1,5 @@
-sentence-transformers
-KeyBERT
-spaCy
-FastAPI
+fastapi
 uvicorn
+spacy
+scikit-learn
 nltk

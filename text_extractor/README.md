@@ -28,7 +28,7 @@ Follow these steps to set up and run the project locally.
 
 ```bash
 git clone https://github.com/ayanasamuel8/Iknow.git
-cd Iknow/Ml/text-extractor
+cd Iknow/text-extractor
 ```
 
 ### 2. Create and Activate a Virtual Environment
@@ -55,6 +55,8 @@ Install the required Python packages using the `requirements.txt` file.
 
 ```bash
 pip install -r requirements.txt
+
+python -m spacy download en_core_web_sm
 ```
 
 ### 4. Download NLP Models
