@@ -106,3 +106,17 @@ func (c *SchoolController) DeleteSchool(ctx *gin.Context) {
 	}
 	ctx.JSON(http.StatusOK, gin.H{"message": "School deleted"})
 }
+
+func (c *SchoolController) GetAllSchools(ctx *gin.Context) {
+	page := ctx.Query("page")
+	pageInt, err := strconv.Atoi(page)
+	if err != nil || pageInt < 1 {
+		pageInt = 1
+	}
+	schools, err := c.usecase.GetAllSchools(ctx, 1) // Default to page 1 for all schools
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	ctx.JSON(http.StatusOK, gin.H{"schools": schools})
+}

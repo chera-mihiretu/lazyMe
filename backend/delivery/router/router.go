@@ -124,6 +124,7 @@ func SetupRoutes(
 	school := r.Group("/api/schools")
 	{
 		school.GET("/", schoolController.GetSchools)
+		school.GET("/all", schoolController.GetAllSchools)
 		school.GET("/:id", schoolController.GetSchoolByID)
 		school.POST("/", middleware.AuthUserMiddleware(RoleAdmin), schoolController.CreateSchool)
 		school.PUT("/:id", middleware.AuthUserMiddleware(RoleAdmin), schoolController.UpdateSchool)
@@ -157,6 +158,7 @@ func SetupRoutes(
 
 		user.GET("/me", middleware.AuthUserMiddleware(RoleAll), userController.Me)
 		user.POST("/complete-account", middleware.AuthUserMiddleware(RoleAll), userController.CompleteUser)
+		user.GET("/analytics", middleware.AuthUserMiddleware(RoleAdmin), userController.UserAnalytics)
 	}
 	r.GET("api/health", func(c *gin.Context) {
 		c.JSON(200, gin.H{

@@ -4,6 +4,8 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"sort"
+	"time"
 
 	"github.com/chera-mihiretu/IKnow/domain/models"
 	"go.mongodb.org/mongo-driver/bson"
@@ -18,6 +20,7 @@ type UserRepository interface {
 	GetUserByEmail(ctx context.Context, email string) (models.UserView, error)
 	GetListOfUsers(ctx context.Context, ids []primitive.ObjectID) ([]models.UserView, error)
 	CompleteUser(ctx context.Context, user models.User) (models.UserView, error)
+	UserAnalytics(ctx context.Context) (models.UserAnalytics, error)
 }
 
 type userRepository struct {
@@ -115,4 +118,76 @@ func (c *userRepository) GetUserByIdNoneView(ctx context.Context, userID string)
 		return models.User{}, err
 	}
 	return user, nil
+}
+
+func (c *userRepository) UserAnalytics(ctx context.Context) (models.UserAnalytics, error) {
+	var analytics models.UserAnalytics
+	now := time.Now()
+
+	// Count all records in the "users" collection
+	totalCount, err := c.users.CountDocuments(ctx, bson.M{})
+	if err != nil {
+		return models.UserAnalytics{}, err
+	}
+	analytics.TotalUsers = totalCount
+
+	// Calculate the start and end times for the 7-day range
+	startOfRange := now.AddDate(0, 0, -6).Truncate(24 * time.Hour)
+	endOfRange := now.Add(24 * time.Hour)
+
+	// Fetch all users created within the 7-day range
+	cursor, err := c.users.Find(ctx, bson.M{
+		"created_at": bson.M{
+			"$gte": startOfRange,
+			"$lt":  endOfRange,
+		},
+	})
+	if err != nil {
+		return models.UserAnalytics{}, err
+	}
+	defer cursor.Close(ctx)
+
+	analytics.UserEachDay = make([]int64, 7)
+
+	// Sort users by their creation date
+	var users []models.User
+	for cursor.Next(ctx) {
+		var user models.User
+		if err := cursor.Decode(&user); err != nil {
+			return models.UserAnalytics{}, err
+		}
+		users = append(users, user)
+	}
+	if err := cursor.Err(); err != nil {
+		return models.UserAnalytics{}, err
+	}
+
+	sort.Slice(users, func(i, j int) bool {
+		return users[i].CreatedAt.Before(users[j].CreatedAt)
+	})
+
+	// Initialize variables
+	start := 0
+	for i := 0; i < len(users); i++ {
+		// Check if the current user is out of the date span
+		if users[i].CreatedAt.After(users[start].CreatedAt.Add(24 * time.Hour)) {
+			// Count the number of users in the span
+			dayIndex := int(users[start].CreatedAt.Sub(startOfRange).Hours() / 24)
+			if dayIndex >= 0 && dayIndex < 7 {
+				analytics.UserEachDay[dayIndex] = int64(i - start)
+			}
+			// Move the start pointer to the current index
+			start = i
+		}
+	}
+
+	// Handle the remaining users
+	if start < len(users) {
+		dayIndex := int(users[start].CreatedAt.Sub(startOfRange).Hours() / 24)
+		if dayIndex >= 0 && dayIndex < 7 {
+			analytics.UserEachDay[dayIndex] = int64(len(users) - start)
+		}
+	}
+
+	return analytics, nil
 }

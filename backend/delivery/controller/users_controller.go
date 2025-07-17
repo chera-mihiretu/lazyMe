@@ -136,3 +136,12 @@ func (c *UserController) CompleteUser(ctx *gin.Context) {
 		"user":    uploadedUser,
 	})
 }
+
+func (c *UserController) UserAnalytics(ctx *gin.Context) {
+	userAnalytics, err := c.usecase.UserAnalytics(ctx)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	ctx.JSON(http.StatusOK, gin.H{"analytics": userAnalytics})
+}

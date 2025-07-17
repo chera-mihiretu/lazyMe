@@ -15,6 +15,7 @@ type UserUseCase interface {
 	GetUserByEmail(ctx context.Context, email string) (models.UserView, error)
 	GetListOfUsers(ctx context.Context, ids []primitive.ObjectID) ([]models.UserView, error)
 	CompleteUser(ctx context.Context, user models.User) (models.UserView, error)
+	UserAnalytics(ctx context.Context) (models.UserAnalytics, error)
 }
 
 type userUseCase struct {
@@ -44,6 +45,10 @@ func (u *userUseCase) CompleteUser(ctx context.Context, user models.User) (model
 // GetUserByIdNoneView implements UserUseCase.
 func (u *userUseCase) GetUserByIdNoneView(ctx context.Context, userID string) (models.User, error) {
 	return u.userRepository.GetUserByIdNoneView(ctx, userID)
+}
+
+func (u *userUseCase) UserAnalytics(ctx context.Context) (models.UserAnalytics, error) {
+	return u.userRepository.UserAnalytics(ctx)
 }
 
 func NewUserUseCase(repository repository.UserRepository) UserUseCase {

@@ -16,6 +16,7 @@ type SchoolRepository interface {
 	CreateSchool(ctx context.Context, school models.School) (models.School, error)
 	UpdateSchool(ctx context.Context, school models.School) (models.School, error)
 	DeleteSchool(ctx context.Context, id primitive.ObjectID) error
+	GetAllSchools(ctx context.Context, page int) ([]models.School, error)
 }
 
 type schoolRepository struct {
@@ -101,4 +102,30 @@ func (r *schoolRepository) DeleteSchool(ctx context.Context, id primitive.Object
 		return mongo.ErrNoDocuments
 	}
 	return nil
+}
+
+func (r *schoolRepository) GetAllSchools(ctx context.Context, page int) ([]models.School, error) {
+	var schools []models.School
+
+	pageSize := Pagesize
+	skip := (page - 1) * pageSize
+	findOptions := options.Find().SetSkip(int64(skip)).SetLimit(int64(pageSize))
+
+	cursor, err := r.schools.Find(ctx, bson.M{}, findOptions)
+	if err != nil {
+		return nil, err
+	}
+	defer cursor.Close(ctx)
+
+	for cursor.Next(ctx) {
+		var school models.School
+		if err := cursor.Decode(&school); err != nil {
+			return nil, err
+		}
+		schools = append(schools, school)
+	}
+	if err := cursor.Err(); err != nil {
+		return nil, err
+	}
+	return schools, nil
 }

@@ -14,6 +14,7 @@ type SchoolUsecase interface {
 	CreateSchool(ctx context.Context, school models.School) (models.School, error)
 	UpdateSchool(ctx context.Context, school models.School) (models.School, error)
 	DeleteSchool(ctx context.Context, id primitive.ObjectID) error
+	GetAllSchools(ctx context.Context, page int) ([]models.School, error)
 }
 
 type schoolUsecase struct {
@@ -42,4 +43,7 @@ func (u *schoolUsecase) UpdateSchool(ctx context.Context, school models.School) 
 
 func (u *schoolUsecase) DeleteSchool(ctx context.Context, id primitive.ObjectID) error {
 	return u.schoolRepo.DeleteSchool(ctx, id)
+}
+func (u *schoolUsecase) GetAllSchools(ctx context.Context, page int) ([]models.School, error) {
+	return u.schoolRepo.GetAllSchools(ctx, page)
 }
