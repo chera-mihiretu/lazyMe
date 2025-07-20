@@ -2,6 +2,7 @@ package main
 
 import (
 	"log"
+	"os"
 
 	"github.com/chera-mihiretu/IKnow/delivery/controller"
 	"github.com/chera-mihiretu/IKnow/delivery/router"
@@ -25,17 +26,11 @@ func main() {
 	if err != nil {
 		log.Fatal("Failed to connect to MongoDB:", err)
 	}
-	// S3 client setup
-	s3Client, err := storage.TestS3Client()
-	if err != nil {
-		log.Fatal("Failed to connect to S3:", err)
-	}
-	// Ensure the MongoDB client is closed when the application exits
+
 	myDatabase := client.Database("lazyme")
 	// storage dependencies
-
-	blackBlaze := storage.NewBlackblazeStorage(s3Client)
-	storageRepository := repository.NewStorageRepository(blackBlaze)
+	posts_supabase := storage.NewSupabaseStorage(os.Getenv("SUPABASE_BUCKET_NAME"), "posts")
+	storageRepository := repository.NewStorageRepository(posts_supabase)
 	storageUseCase := usecases.NewStorageUseCase(storageRepository)
 
 	// auth dependecies

@@ -14,7 +14,7 @@ type UniversityRepository interface {
 	GetUniversityByID(ctx context.Context, id primitive.ObjectID) (models.University, error)
 	CreateUniversity(ctx context.Context, university models.University) (models.University, error)
 	UpdateUniversity(ctx context.Context, university models.University) (models.University, error)
-	DeleteUniversity(ctx context.Context, id primitive.ObjectID) error
+	DeleteUniversity(ctx context.Context, id, userID primitive.ObjectID) error
 }
 
 type universityRepository struct {
@@ -83,8 +83,8 @@ func (r *universityRepository) UpdateUniversity(ctx context.Context, university 
 	return university, nil
 }
 
-func (r *universityRepository) DeleteUniversity(ctx context.Context, id primitive.ObjectID) error {
-	res, err := r.database.DeleteOne(ctx, bson.M{"_id": id})
+func (r *universityRepository) DeleteUniversity(ctx context.Context, id, userID primitive.ObjectID) error {
+	res, err := r.database.DeleteOne(ctx, bson.M{"_id": id, "created_by": userID})
 	if err != nil {
 		return err
 	}

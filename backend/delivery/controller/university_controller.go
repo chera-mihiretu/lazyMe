@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/chera-mihiretu/IKnow/domain/models"
@@ -42,9 +43,33 @@ func (c *UniversityController) GetUniversityByID(ctx *gin.Context) {
 }
 
 func (c *UniversityController) CreateUniversity(ctx *gin.Context) {
+	userID, exist := ctx.Get("user_id")
+	if !exist {
+		fmt.Println("Error: User ID not found in context")
+		ctx.JSON(400, gin.H{"error": "User ID not found in context"})
+		return
+	}
+	userIDStr, ok := userID.(string)
+	if !ok {
+		fmt.Println("Error: Invalid user ID type:", userID)
+		ctx.JSON(400, gin.H{"error": "Invalid user ID type"})
+		return
+	}
+	userIDPri, err := primitive.ObjectIDFromHex(userIDStr)
+
+	if err != nil {
+		fmt.Println("Error: Invalid user ID format:", userIDStr, "Error:", err)
+		ctx.JSON(400, gin.H{"error": "Invalid user ID format"})
+		return
+	}
 	var universityReq models.University
 	if err := ctx.ShouldBindJSON(&universityReq); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	universityReq.CreatedBy = userIDPri
+	if universityReq.Name == "" {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "University name is required"})
 		return
 	}
 	university, err := c.usecase.CreateUniversity(ctx, universityReq)
@@ -78,13 +103,32 @@ func (c *UniversityController) UpdateUniversity(ctx *gin.Context) {
 }
 
 func (c *UniversityController) DeleteUniversity(ctx *gin.Context) {
+	userID, exist := ctx.Get("user_id")
+	if !exist {
+		fmt.Println("Error: User ID not found in context")
+		ctx.JSON(400, gin.H{"error": "User ID not found in context"})
+		return
+	}
+	userIDStr, ok := userID.(string)
+	if !ok {
+		fmt.Println("Error: Invalid user ID type:", userID)
+		ctx.JSON(400, gin.H{"error": "Invalid user ID type"})
+		return
+	}
+	userIDPri, err := primitive.ObjectIDFromHex(userIDStr)
+	if err != nil {
+		fmt.Println("Error: Invalid user ID format:", userIDStr, "Error:", err)
+		ctx.JSON(400, gin.H{"error": "Invalid user ID format"})
+		return
+	}
+
 	idStr := ctx.Param("id")
 	id, err := primitive.ObjectIDFromHex(idStr)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid university ID"})
 		return
 	}
-	if err := c.usecase.DeleteUniversity(ctx, id); err != nil {
+	if err := c.usecase.DeleteUniversity(ctx, id, userIDPri); err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}

@@ -85,6 +85,16 @@ func (d *DepartmentController) CreateDepartment(ctx *gin.Context) {
 		ctx.JSON(400, gin.H{"error": "Invalid input data"})
 		return
 	}
+
+	if department.Name == "" {
+		ctx.JSON(400, gin.H{"error": "Department name is required"})
+		return
+	}
+	if department.SchoolID == primitive.NilObjectID {
+		ctx.JSON(400, gin.H{"error": "School ID is required"})
+		return
+	}
+
 	department.CreatedBy = userIDPrimitive
 	department.CreatedAt = time.Now()
 	createdDepartment, err := d.DepartmentUsecase.CreateDepartment(ctx, department)
@@ -132,7 +142,7 @@ func (d *DepartmentController) UpdateDepartment(ctx *gin.Context) {
 
 // DeleteDepartment deletes a department by its ID
 func (d *DepartmentController) DeleteDepartment(ctx *gin.Context) {
-	departmentID := ctx.Query("id")
+	departmentID := ctx.Param("id")
 	if departmentID == "" {
 		ctx.JSON(400, gin.H{"error": "Department ID is required"})
 		return
@@ -144,7 +154,23 @@ func (d *DepartmentController) DeleteDepartment(ctx *gin.Context) {
 		return
 	}
 
-	err = d.DepartmentUsecase.DeleteDepartment(ctx, departmentIDPrimitive)
+	userID, exists := ctx.Get("user_id")
+	if !exists {
+		ctx.JSON(401, gin.H{"error": "Unauthorized"})
+		return
+	}
+	userIDString, ok := userID.(string)
+	if !ok {
+		ctx.JSON(400, gin.H{"error": "Invalid user ID type"})
+		return
+	}
+	// Ensure userID is of type primitive.ObjectID
+	userIDPrimitive, err := primitive.ObjectIDFromHex(userIDString)
+	if err != nil {
+		ctx.JSON(400, gin.H{"error": "Invalid user ID" + err.Error()})
+		return
+	}
+	err = d.DepartmentUsecase.DeleteDepartment(ctx, departmentIDPrimitive, userIDPrimitive)
 	if err != nil {
 		ctx.JSON(500, gin.H{"error": "Failed to delete department"})
 		return

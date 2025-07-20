@@ -13,7 +13,7 @@ type UniversityUsecase interface {
 	GetUniversityByID(ctx context.Context, id primitive.ObjectID) (models.University, error)
 	CreateUniversity(ctx context.Context, university models.University) (models.University, error)
 	UpdateUniversity(ctx context.Context, university models.University) (models.University, error)
-	DeleteUniversity(ctx context.Context, id primitive.ObjectID) error
+	DeleteUniversity(ctx context.Context, id primitive.ObjectID, userID primitive.ObjectID) error
 }
 
 type universityUsecase struct {
@@ -39,6 +39,6 @@ func (u *universityUsecase) CreateUniversity(ctx context.Context, university mod
 func (u *universityUsecase) UpdateUniversity(ctx context.Context, university models.University) (models.University, error) {
 	return u.universityRepo.UpdateUniversity(ctx, university)
 }
-func (u *universityUsecase) DeleteUniversity(ctx context.Context, id primitive.ObjectID) error {
-	return u.universityRepo.DeleteUniversity(ctx, id)
+func (u *universityUsecase) DeleteUniversity(ctx context.Context, id, userID primitive.ObjectID) error {
+	return u.universityRepo.DeleteUniversity(ctx, id, userID)
 }

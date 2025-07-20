@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"fmt"
 	"net/http"
 	"strconv"
 
@@ -56,9 +57,38 @@ func (c *SchoolController) GetSchoolByID(ctx *gin.Context) {
 }
 
 func (c *SchoolController) CreateSchool(ctx *gin.Context) {
+	userID, exist := ctx.Get("user_id")
+	if !exist {
+		fmt.Println("Error: User ID not found in context")
+		ctx.JSON(400, gin.H{"error": "User ID not found in context"})
+		return
+	}
+	userIDStr, ok := userID.(string)
+	if !ok {
+		fmt.Println("Error: Invalid user ID type:", userID)
+		ctx.JSON(400, gin.H{"error": "Invalid user ID type"})
+		return
+	}
+	userIDPri, err := primitive.ObjectIDFromHex(userIDStr)
+
+	if err != nil {
+		fmt.Println("Error: Invalid user ID format:", userIDStr, "Error:", err)
+		ctx.JSON(400, gin.H{"error": "Invalid user ID format"})
+		return
+	}
 	var schoolReq models.School
 	if err := ctx.ShouldBindJSON(&schoolReq); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	schoolReq.CreatedBy = userIDPri
+
+	if schoolReq.UniversityID.IsZero() {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "University ID is required"})
+		return
+	}
+	if schoolReq.Name == "" {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "School name is required"})
 		return
 	}
 
@@ -100,7 +130,26 @@ func (c *SchoolController) DeleteSchool(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid school ID"})
 		return
 	}
-	if err := c.usecase.DeleteSchool(ctx, id); err != nil {
+	userID, exist := ctx.Get("user_id")
+	if !exist {
+		fmt.Println("Error: User ID not found in context")
+		ctx.JSON(400, gin.H{"error": "User ID not found in context"})
+		return
+	}
+	userIDStr, ok := userID.(string)
+	if !ok {
+		fmt.Println("Error: Invalid user ID type:", userID)
+		ctx.JSON(400, gin.H{"error": "Invalid user ID type"})
+		return
+	}
+	userIDPri, err := primitive.ObjectIDFromHex(userIDStr)
+
+	if err != nil {
+		fmt.Println("Error: Invalid user ID format:", userIDStr, "Error:", err)
+		ctx.JSON(400, gin.H{"error": "Invalid user ID format"})
+		return
+	}
+	if err := c.usecase.DeleteSchool(ctx, id, userIDPri); err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}

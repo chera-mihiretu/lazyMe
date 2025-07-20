@@ -13,7 +13,7 @@ type DepartmentUseCase interface {
 	GetDepartmentByID(ctx context.Context, id primitive.ObjectID) (models.Departments, error)
 	CreateDepartment(ctx context.Context, department models.Departments) (models.Departments, error)
 	UpdateDepartment(ctx context.Context, department models.Departments) (models.Departments, error)
-	DeleteDepartment(ctx context.Context, id primitive.ObjectID) error
+	DeleteDepartment(ctx context.Context, id, userID primitive.ObjectID) error
 	GetDepartmentsInTree(ctx context.Context, schoolID primitive.ObjectID) ([]models.Departments, error)
 }
 
@@ -47,8 +47,8 @@ func (d *departmentUseCase) UpdateDepartment(ctx context.Context, department mod
 }
 
 // DeleteDepartment implements DepartmentUseCase.
-func (d *departmentUseCase) DeleteDepartment(ctx context.Context, id primitive.ObjectID) error {
-	return d.departmentRepository.DeleteDepartment(ctx, id)
+func (d *departmentUseCase) DeleteDepartment(ctx context.Context, id, userID primitive.ObjectID) error {
+	return d.departmentRepository.DeleteDepartment(ctx, id, userID)
 }
 
 func NewDepartmentUseCase(departmentRepository repository.DepartmentRepository) DepartmentUseCase {

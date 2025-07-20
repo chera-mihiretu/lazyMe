@@ -15,7 +15,7 @@ type SchoolRepository interface {
 	GetSchoolByID(ctx context.Context, id primitive.ObjectID) (models.School, error)
 	CreateSchool(ctx context.Context, school models.School) (models.School, error)
 	UpdateSchool(ctx context.Context, school models.School) (models.School, error)
-	DeleteSchool(ctx context.Context, id primitive.ObjectID) error
+	DeleteSchool(ctx context.Context, id, userID primitive.ObjectID) error
 	GetAllSchools(ctx context.Context, page int) ([]models.School, error)
 }
 
@@ -93,8 +93,8 @@ func (r *schoolRepository) UpdateSchool(ctx context.Context, school models.Schoo
 	return school, nil
 }
 
-func (r *schoolRepository) DeleteSchool(ctx context.Context, id primitive.ObjectID) error {
-	res, err := r.schools.DeleteOne(ctx, bson.M{"_id": id})
+func (r *schoolRepository) DeleteSchool(ctx context.Context, id, userID primitive.ObjectID) error {
+	res, err := r.schools.DeleteOne(ctx, bson.M{"_id": id, "created_by": userID})
 	if err != nil {
 		return err
 	}

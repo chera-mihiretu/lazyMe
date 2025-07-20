@@ -13,7 +13,7 @@ type SchoolUsecase interface {
 	GetSchoolByID(ctx context.Context, id primitive.ObjectID) (models.School, error)
 	CreateSchool(ctx context.Context, school models.School) (models.School, error)
 	UpdateSchool(ctx context.Context, school models.School) (models.School, error)
-	DeleteSchool(ctx context.Context, id primitive.ObjectID) error
+	DeleteSchool(ctx context.Context, id, userID primitive.ObjectID) error
 	GetAllSchools(ctx context.Context, page int) ([]models.School, error)
 }
 
@@ -41,8 +41,8 @@ func (u *schoolUsecase) UpdateSchool(ctx context.Context, school models.School) 
 	return u.schoolRepo.UpdateSchool(ctx, school)
 }
 
-func (u *schoolUsecase) DeleteSchool(ctx context.Context, id primitive.ObjectID) error {
-	return u.schoolRepo.DeleteSchool(ctx, id)
+func (u *schoolUsecase) DeleteSchool(ctx context.Context, id, userID primitive.ObjectID) error {
+	return u.schoolRepo.DeleteSchool(ctx, id, userID)
 }
 func (u *schoolUsecase) GetAllSchools(ctx context.Context, page int) ([]models.School, error) {
 	return u.schoolRepo.GetAllSchools(ctx, page)

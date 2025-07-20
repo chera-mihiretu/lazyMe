@@ -11,15 +11,15 @@ type StorageRepository interface {
 }
 
 type storageRepository struct {
-	BlackblazeStorage storage.BlackblazeStorage
+	supabase storage.SupabaseStorage
 }
 
-func NewStorageRepository(blackblazeStorage storage.BlackblazeStorage) StorageRepository {
+func NewStorageRepository(supabase storage.SupabaseStorage) StorageRepository {
 	return &storageRepository{
-		BlackblazeStorage: blackblazeStorage,
+		supabase: supabase,
 	}
 }
 
 func (s *storageRepository) UploadFile(file []*multipart.FileHeader) ([]string, error) {
-	return s.BlackblazeStorage.UploadFiles(file)
+	return s.supabase.UploadFile(file)
 }

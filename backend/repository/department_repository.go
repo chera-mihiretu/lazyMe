@@ -15,7 +15,7 @@ type DepartmentRepository interface {
 	GetDepartmentByID(ctx context.Context, id primitive.ObjectID) (models.Departments, error)
 	CreateDepartment(ctx context.Context, department models.Departments) (models.Departments, error)
 	UpdateDepartment(ctx context.Context, department models.Departments) (models.Departments, error)
-	DeleteDepartment(ctx context.Context, id primitive.ObjectID) error
+	DeleteDepartment(ctx context.Context, id, userID primitive.ObjectID) error
 	GetDepartmentsInTree(ctx context.Context, schoolID primitive.ObjectID) ([]models.Departments, error)
 }
 
@@ -86,8 +86,8 @@ func (r *departmentRepository) UpdateDepartment(ctx context.Context, department 
 	}
 	return department, nil
 }
-func (r *departmentRepository) DeleteDepartment(ctx context.Context, id primitive.ObjectID) error {
-	res, err := r.departments.DeleteOne(ctx, bson.M{"_id": id})
+func (r *departmentRepository) DeleteDepartment(ctx context.Context, id, userID primitive.ObjectID) error {
+	res, err := r.departments.DeleteOne(ctx, bson.M{"_id": id, "created_by": userID})
 	if err != nil {
 		return err
 	}
