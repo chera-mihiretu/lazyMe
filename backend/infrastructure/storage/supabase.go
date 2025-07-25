@@ -2,9 +2,11 @@ package storage
 
 import (
 	"fmt"
+	"mime"
 	"mime/multipart"
 	"os"
 	"path/filepath"
+	"strings"
 	"time"
 
 	"github.com/nedpals/supabase-go"
@@ -12,6 +14,7 @@ import (
 
 type SupabaseStorage interface {
 	UploadFile(fileHeader []*multipart.FileHeader) ([]string, error)
+	DeleteFile(filePath []string) error
 }
 
 type supabaseStorage struct {
@@ -34,36 +37,68 @@ func NewSupabaseStorage(bucket, folder string) SupabaseStorage {
 }
 
 func (s *supabaseStorage) UploadFile(fileHeader []*multipart.FileHeader) ([]string, error) {
-
 	var uploadedPaths []string
 
 	for _, fh := range fileHeader {
+		// Open the file
 		file, err := fh.Open()
 		if err != nil {
-			return nil, fmt.Errorf("failed to open file: %w", err)
+			return nil, fmt.Errorf("failed to open file %s: %w", fh.Filename, err)
 		}
 		defer file.Close()
 
-		// Generate a unique file path in the bucket (e.g., uploads/filename.jpg)
+		// Generate a unique file path
 		extension := filepath.Ext(fh.Filename)
-		fileName := time.Now().Format("20060102150405") + extension
-		if fileName == "" {
-			return nil, fmt.Errorf("file name cannot be empty")
+		if extension == "" {
+			return nil, fmt.Errorf("file %s has no extension", fh.Filename)
 		}
-		uploadPath := filepath.Join(s.folder, fileName) // Store in 'uploads' folder
+		fileName := fmt.Sprintf("%s%s", time.Now().Format("20060102150405"), extension)
+		uploadPath := filepath.Join(s.folder, fileName)
 
-		// Upload the file to the Supabase bucket
-		responce := s.client.Storage.From(s.bucket).Upload(uploadPath, file, nil)
-
-		if responce.Message != "" {
-			return nil, fmt.Errorf("failed to upload file: %s", responce.Message)
+		// Determine content type
+		contentType := mime.TypeByExtension(extension)
+		if contentType == "" {
+			contentType = "application/octet-stream" // Fallback for unknown types
+		}
+		if extension == ".pdf" {
+			contentType = "application/pdf" // Explicitly set for PDFs
 		}
 
-		// Generate the actual URL for the uploaded file
+		// Set upload options
+		uploadOptions := &supabase.FileUploadOptions{
+			ContentType: contentType,
+		}
+
+		// Upload the file to Supabase
+		resp := s.client.Storage.From(s.bucket).Upload(uploadPath, file, uploadOptions)
+		if resp.Message != "" {
+			return nil, fmt.Errorf("failed to upload file: %s", resp.Message)
+		}
+
+		// Generate the public URL for the uploaded file
 		fileURL := fmt.Sprintf("%s/storage/v1/object/public/%s/%s", os.Getenv("SUPABASE_URL"), s.bucket, uploadPath)
 		uploadedPaths = append(uploadedPaths, fileURL)
 	}
 
-	// Return the file paths in the bucket
 	return uploadedPaths, nil
+}
+
+func (s *supabaseStorage) DeleteFile(filePath []string) error {
+	// Remove prefixes starting from the second "/" from the last
+	files := []string{}
+	for _, path := range filePath {
+		contents := strings.Split(path, "/")
+
+		p := strings.Join(contents[len(contents)-2:], "/")
+
+		files = append(files, p)
+	}
+	// Delete the file from the Supabase bucket
+	responce := s.client.Storage.From(s.bucket).Remove(files)
+
+	if responce.Message != "" {
+		return fmt.Errorf("failed to delete file: %s", responce.Message)
+	}
+
+	return nil
 }

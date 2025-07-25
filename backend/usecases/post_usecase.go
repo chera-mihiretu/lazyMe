@@ -14,6 +14,7 @@ type PostUseCase interface {
 	CreatePost(ctx context.Context, post models.Posts) (models.Posts, error)
 	UpdatePost(ctx context.Context, post models.Posts) (models.Posts, error)
 	DeletePost(ctx context.Context, userID string, postID string) error
+	SearchPosts(ctx context.Context, query string, page int) ([]models.Posts, error)
 }
 
 type postUseCase struct {
@@ -44,4 +45,8 @@ func (p *postUseCase) UpdatePost(ctx context.Context, post models.Posts) (models
 }
 func (p *postUseCase) DeletePost(ctx context.Context, userID string, postID string) error {
 	return p.postRepository.DeletePost(ctx, userID, postID)
+}
+
+func (p *postUseCase) SearchPosts(ctx context.Context, query string, page int) ([]models.Posts, error) {
+	return p.postRepository.SearchPosts(ctx, query, page)
 }

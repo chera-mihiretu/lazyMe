@@ -24,6 +24,7 @@ type PostRepository interface {
 	CreatePost(ctx context.Context, post models.Posts) (models.Posts, error)
 	UpdatePost(ctx context.Context, post models.Posts) (models.Posts, error)
 	DeletePost(ctx context.Context, userID string, postID string) error
+	SearchPosts(ctx context.Context, query string, page int) ([]models.Posts, error)
 }
 
 type postRepository struct {
@@ -71,8 +72,6 @@ func (p *postRepository) GetRecomendedPosts(ctx context.Context, userID string, 
 			connects = append(connects, row.ConnectorID)
 		}
 	}
-
-	fmt.Println("Depp ", userDepartments, "\n", "connects", connects, "\n", "userid", userID)
 
 	// Pagination logic
 	skip := (page - 1) * Pagesize
@@ -150,6 +149,8 @@ func (p *postRepository) GetPostByID(ctx context.Context, id string) (models.Pos
 func (p *postRepository) CreatePost(ctx context.Context, post models.Posts) (models.Posts, error) {
 	id := primitive.NewObjectID()
 	post.ID = id
+	post.CreatedAt = time.Now()
+	post.UpdatedAt = time.Now()
 	_, err := p.postsDB.InsertOne(ctx, post)
 	if err != nil {
 		return models.Posts{}, err
@@ -214,6 +215,46 @@ func (p *postRepository) GetPostsByUserID(ctx context.Context, userID string, pa
 	limit := Pagesize
 
 	findOptions := options.Find().SetSkip(int64(skip)).SetLimit(int64(limit))
+
+	cursor, err := p.postsDB.Find(ctx, filter, findOptions)
+	if err != nil {
+		return nil, err
+	}
+	defer cursor.Close(ctx)
+
+	var posts []models.Posts
+	for cursor.Next(ctx) {
+		var post models.Posts
+		if err := cursor.Decode(&post); err != nil {
+			return nil, err
+		}
+		posts = append(posts, post)
+	}
+
+	if err := cursor.Err(); err != nil {
+		return nil, err
+	}
+
+	return posts, nil
+}
+
+func (p *postRepository) SearchPosts(ctx context.Context, query string, page int) ([]models.Posts, error) {
+	skip := (page - 1) * Pagesize
+	limit := Pagesize
+	fmt.Println("This is query", query)
+	filter := bson.M{
+		"$text": bson.M{
+			"$search": query,
+		},
+	}
+
+	findOptions := options.Find().
+		SetSkip(int64(skip)).
+		SetLimit(int64(limit)).
+		SetSort(bson.D{
+			{Key: "created_at", Value: -1}, // Sort by recency (descending)
+			{Key: "likes", Value: -1},      // Sort by likes (descending)
+		})
 
 	cursor, err := p.postsDB.Find(ctx, filter, findOptions)
 	if err != nil {

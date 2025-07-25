@@ -73,6 +73,7 @@ func SetupRoutes(
 		postsInfo.POST("/", postController.CreatePost)
 		postsInfo.PUT("/:id", postController.UpdatePost)
 		postsInfo.DELETE("/", postController.DeletePost)
+		postsInfo.GET("/search", postController.SearchPosts)
 		// likes
 		postsInfo.POST("/like", postLikeController.AddLike)
 		postsInfo.POST("/dislike", postLikeController.RemoveLike)
@@ -113,7 +114,7 @@ func SetupRoutes(
 	department := r.Group("/api/departments")
 	{
 		department.GET("/", departmentController.GetDepartments)
-		department.GET("/tree", departmentController.GetDepartmentsInTree)
+		department.GET("/tree/:school_id", departmentController.GetDepartmentsInTree)
 		department.GET("/:id", middleware.AuthUserMiddleware(RoleAll), departmentController.GetDepartmentByID)
 		department.POST("/", middleware.AuthUserMiddleware(RoleAdmin), departmentController.CreateDepartment)
 		department.PUT("/:id", middleware.AuthUserMiddleware(RoleAdmin), departmentController.UpdateDepartment)

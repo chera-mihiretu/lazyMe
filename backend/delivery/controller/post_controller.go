@@ -35,6 +35,69 @@ func NewPostController(
 	}
 }
 
+func (p *PostController) SearchPosts(ctx *gin.Context) {
+
+	query := ctx.Query("q")
+	if query == "" {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Query parameter 'q' is required"})
+		return
+	}
+
+	pageStr := ctx.Query("page")
+	if pageStr == "" {
+		pageStr = "1" // Default to page 1 if not provided
+	}
+	page, err := strconv.Atoi(pageStr)
+	if err != nil || page < 1 {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid page number"})
+		return
+	}
+
+	userID, exist := ctx.Get("user_id")
+	if !exist {
+		ctx.JSON(400, gin.H{"error": "User ID not found in context"})
+		return
+	}
+	userIDStr, ok := userID.(string)
+	if !ok {
+		ctx.JSON(400, gin.H{"error": "Invalid user ID type"})
+		return
+	}
+
+	userIDPrimitive, err := primitive.ObjectIDFromHex(userIDStr)
+	if err != nil {
+		ctx.JSON(400, gin.H{"error": "Invalid User ID format"})
+		return
+	}
+
+	posts, err := p.postUseCase.SearchPosts(ctx, query, page)
+	if err != nil {
+		fmt.Println("Error searching posts:", err)
+		ctx.JSON(500, gin.H{"error": "Failed to search posts: " + err.Error()})
+		return
+	}
+
+	filteredPosts, err := p.RemoveMyPost(userIDPrimitive, posts)
+	if err != nil {
+		fmt.Println("Error removing user's posts:", err)
+		ctx.JSON(500, gin.H{"error": "Failed to remove user's posts: " + err.Error()})
+		return
+	}
+
+	postViews, err := p.GetPostWithUsers(ctx, filteredPosts)
+	if err != nil {
+		fmt.Println("Error getting posts with user info:", err)
+		ctx.JSON(500, gin.H{"error": "Failed to get posts (user view): " + err.Error()})
+		return
+	}
+
+	ctx.JSON(200, gin.H{
+		"posts": postViews,
+		"page":  page,
+	})
+
+}
+
 func (p *PostController) GetPosts(ctx *gin.Context) {
 	page := ctx.Query("page")
 	if page == "" {
@@ -221,6 +284,7 @@ func (p *PostController) CreatePost(ctx *gin.Context) {
 	uploadedPost, err := p.postUseCase.CreatePost(ctx, post)
 
 	if err != nil {
+		p.storage.DeleteFile(urls) // Clean up uploaded files if creation fails
 		fmt.Println("Failed to create post:", err)
 		ctx.JSON(http.StatusInternalServerError, gin.H{
 			"error":   "Failed to create post",
@@ -424,6 +488,9 @@ func (p *PostController) GetPostsByUserID(ctx *gin.Context) {
 }
 
 func (p *PostController) GetPostWithUsers(ctx *gin.Context, posts []models.Posts) ([]models.PostView, error) {
+	if len(posts) == 0 {
+		return []models.PostView{}, nil
+	}
 	// Collect user IDs
 	userIDSet := make(map[string]struct{})
 	for _, post := range posts {
@@ -453,7 +520,6 @@ func (p *PostController) GetPostWithUsers(ctx *gin.Context, posts []models.Posts
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to check likes " + err.Error()})
 		return nil, err
 	}
-	fmt.Println("Likes checked successfully, count:", likes)
 	// Pair posts with user info
 	postViews := make([]models.PostView, 0, len(posts))
 	for _, post := range posts {
@@ -496,4 +562,14 @@ func (p *PostController) GetPostAndUserPairList(post []models.Posts) [][]primiti
 
 	return listOfLikes
 
+}
+
+func (p *PostController) RemoveMyPost(userID primitive.ObjectID, post []models.Posts) ([]models.Posts, error) {
+	result := make([]models.Posts, 0)
+	for _, post := range post {
+		if post.UserID != userID {
+			result = append(result, post)
+		}
+	}
+	return result, nil
 }

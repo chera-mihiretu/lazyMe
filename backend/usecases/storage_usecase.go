@@ -8,6 +8,7 @@ import (
 
 type StorageUseCase interface {
 	UploadFile(file []*multipart.FileHeader) ([]string, error)
+	DeleteFile(file []string) error
 }
 
 type storageUseCase struct {
@@ -22,4 +23,8 @@ func NewStorageUseCase(repository repository.StorageRepository) StorageUseCase {
 
 func (s *storageUseCase) UploadFile(file []*multipart.FileHeader) ([]string, error) {
 	return s.storageRepository.UploadFile(file)
+}
+
+func (s *storageUseCase) DeleteFile(file []string) error {
+	return s.storageRepository.DeleteFile(file)
 }

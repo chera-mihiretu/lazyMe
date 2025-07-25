@@ -8,6 +8,7 @@ import (
 
 type StorageRepository interface {
 	UploadFile(file []*multipart.FileHeader) ([]string, error)
+	DeleteFile(file []string) error
 }
 
 type storageRepository struct {
@@ -22,4 +23,8 @@ func NewStorageRepository(supabase storage.SupabaseStorage) StorageRepository {
 
 func (s *storageRepository) UploadFile(file []*multipart.FileHeader) ([]string, error) {
 	return s.supabase.UploadFile(file)
+}
+
+func (s *storageRepository) DeleteFile(file []string) error {
+	return s.supabase.DeleteFile(file)
 }

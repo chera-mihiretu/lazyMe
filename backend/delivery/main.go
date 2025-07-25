@@ -7,7 +7,6 @@ import (
 	"github.com/chera-mihiretu/IKnow/delivery/controller"
 	"github.com/chera-mihiretu/IKnow/delivery/router"
 	"github.com/chera-mihiretu/IKnow/infrastructure/mongodb"
-	"github.com/chera-mihiretu/IKnow/infrastructure/storage"
 	"github.com/chera-mihiretu/IKnow/repository"
 	"github.com/chera-mihiretu/IKnow/usecases"
 	"github.com/joho/godotenv"
@@ -28,10 +27,10 @@ func main() {
 	}
 
 	myDatabase := client.Database("lazyme")
-	// storage dependencies
-	posts_supabase := storage.NewSupabaseStorage(os.Getenv("SUPABASE_BUCKET_NAME"), "posts")
-	storageRepository := repository.NewStorageRepository(posts_supabase)
-	storageUseCase := usecases.NewStorageUseCase(storageRepository)
+	// posts storage dependencies
+	postsStorageUseCase := StorageInstances(os.Getenv("SUPABASE_BUCKET_NAME"), "posts")
+	profileStorageUseCase := StorageInstances(os.Getenv("SUPABASE_BUCKET_NAME"), "profile")
+	materialsStorageUseCase := StorageInstances(os.Getenv("SUPABASE_BUCKET_NAME"), "materials")
 
 	// auth dependecies
 	authRepository := repository.NewAuthRepository(myDatabase)
@@ -40,7 +39,7 @@ func main() {
 	// user dependencies
 	userRepository := repository.NewUserRepository(myDatabase)
 	userUseCase := usecases.NewUserUseCase(userRepository)
-	userController := controller.NewUserController(userUseCase, storageUseCase)
+	userController := controller.NewUserController(userUseCase, profileStorageUseCase)
 	// follow dependencies
 	connectionRepository := repository.NewConnectRepository(myDatabase)
 	connectionUsecase := usecases.NewConnectUsecase(connectionRepository)
@@ -69,11 +68,11 @@ func main() {
 		connectionRepository,
 		*userRepository)
 	postUseCase := usecases.NewPostUseCase(postRepository)
-	PostController := controller.NewPostController(postUseCase, userUseCase, departmentUsecase, storageUseCase, postLikeUsecase)
+	PostController := controller.NewPostController(postUseCase, userUseCase, departmentUsecase, postsStorageUseCase, postLikeUsecase)
 	// material dependencies
 	materialRepository := repository.NewMaterialsRepository(myDatabase)
 	materialUseCase := usecases.NewMaterialUseCase(materialRepository)
-	MaterialController := controller.NewMaterialController(materialUseCase, storageUseCase)
+	MaterialController := controller.NewMaterialController(materialUseCase, materialsStorageUseCase)
 	// school dependencies
 	schoolRepository := repository.NewSchoolRepository(myDatabase)
 	schoolUseCase := usecases.NewSchoolUsecase(schoolRepository)

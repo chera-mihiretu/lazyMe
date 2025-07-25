@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"fmt"
 	"strconv"
 	"time"
 
@@ -94,6 +95,10 @@ func (d *DepartmentController) CreateDepartment(ctx *gin.Context) {
 		ctx.JSON(400, gin.H{"error": "School ID is required"})
 		return
 	}
+	if department.Years == 0 {
+		ctx.JSON(400, gin.H{"error": "Years is required"})
+		return
+	}
 
 	department.CreatedBy = userIDPrimitive
 	department.CreatedAt = time.Now()
@@ -182,20 +187,23 @@ func (d *DepartmentController) DeleteDepartment(ctx *gin.Context) {
 }
 
 func (d *DepartmentController) GetDepartmentsInTree(ctx *gin.Context) {
-	schoolID := ctx.Query("school_id")
+	schoolID := ctx.Param("school_id")
 	if schoolID == "" {
+		fmt.Println("School ID is required")
 		ctx.JSON(400, gin.H{"error": "School ID is required"})
 		return
 	}
 
 	schoolIDPrimitive, err := primitive.ObjectIDFromHex(schoolID)
 	if err != nil {
+		fmt.Println("Invalid School ID format:", err)
 		ctx.JSON(400, gin.H{"error": "Invalid School ID format"})
 		return
 	}
 
 	departments, err := d.DepartmentUsecase.GetDepartmentsInTree(ctx, schoolIDPrimitive)
 	if err != nil {
+		fmt.Println("Failed to get departments in tree:", err)
 		ctx.JSON(500, gin.H{"error": "Failed to get departments in tree"})
 		return
 	}
