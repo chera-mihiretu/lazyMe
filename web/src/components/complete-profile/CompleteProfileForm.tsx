@@ -1,7 +1,6 @@
 'use client';
 import React, { useState } from 'react';
 import { COLORS, FONT_FAMILY } from '../../utils/color';
-import Image from 'next/image';
 
 const departments = [
   { label: 'Engineering' },

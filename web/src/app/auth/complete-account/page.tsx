@@ -42,7 +42,7 @@ const CompleteAccountPage: React.FC = () => {
   useEffect(() => {
     if (!selectedSchool) return;
     const token = localStorage.getItem("token");
-    fetch(`${baseUrl}/departments/tree?school_id=${selectedSchool}`, {
+    fetch(`${baseUrl}/departments/tree/${selectedSchool}`, {
       headers: { Authorization: `Bearer ${token}` },
     })
       .then((res) => res.json())
