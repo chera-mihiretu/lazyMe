@@ -3,10 +3,11 @@ import React from "react";
 import HomeNavBar from "@/components/home/HomeNavBar";
 import PostsList from "@/components/home/PostsList";
 import UserSuggestionsList from "@/components/home/UserSuggestionsList";
+import ProtectedRoute from "@/app/ProtectedRoute";
 
 const PostsPage = () => {
   return (
-    <>
+    <ProtectedRoute role="student">
       <HomeNavBar />
       <div style={{
         display: "flex",
@@ -26,7 +27,7 @@ const PostsPage = () => {
           <UserSuggestionsList />
         </div>
       </div>
-    </>
+    </ProtectedRoute>
   );
 };
 

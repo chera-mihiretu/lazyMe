@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import { COLORS, FONT_FAMILY } from '../../../../utils/color';
 import { useRouter } from 'next/navigation';
+import ProtectedRoute from '@/app/ProtectedRoute';
 
 const baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
 
@@ -66,6 +67,7 @@ const CreateJobPage: React.FC = () => {
   };
 
   return (
+    <ProtectedRoute role='admin'>
     <div style={{ maxWidth: 540, margin: '2.5rem auto', background: '#fff', borderRadius: 16, boxShadow: '0 4px 32px rgba(67,24,209,0.07)', padding: '2.5rem 2.2rem' }}>
       <h2 style={{ fontFamily: FONT_FAMILY.poppins, color: COLORS.primary, fontWeight: 700, fontSize: '1.5rem', marginBottom: 18 }}>Post a Job</h2>
       <form onSubmit={handleSubmit}>
@@ -182,6 +184,7 @@ const CreateJobPage: React.FC = () => {
         </button>
       </form>
     </div>
+    </ProtectedRoute>
   );
 };
 

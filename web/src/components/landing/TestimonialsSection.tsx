@@ -39,89 +39,30 @@ const testimonials = [
 
 const TestimonialCard = ({ testimonial, animate }: { testimonial: typeof testimonials[0], animate: string }) => (
 	<div
-		style={{
-			background: COLORS.cardBg,
-			borderRadius: '1.5rem',
-			boxShadow: '0 2px 16px rgba(67,24,209,0.07)',
-			padding: '3.5rem 3.5rem 2.5rem 3.5rem', // More horizontal padding
-			maxWidth: 800, // Expanded width
-			minHeight: 340,
-			display: 'flex',
-			flexDirection: 'column',
-			alignItems: 'center',
-			margin: '0 auto',
-			position: 'relative',
-			border: `1.5px solid #ececec`,
-			transition: 'transform 0.5s cubic-bezier(.4,0,.2,1), opacity 0.5s cubic-bezier(.4,0,.2,1)',
-			transform: animate === 'in' ? 'translateX(0)' : animate === 'left' ? 'translateX(-80px)' : 'translateX(80px)',
-			opacity: animate === 'in' ? 1 : 0,
-		}}
+		className={`relative flex flex-col items-center mx-auto max-w-[800px] min-h-[340px] rounded-3xl border border-[#ececec] px-14 pt-14 pb-10 bg-white shadow-lg transition-all duration-500 ease-[cubic-bezier(.4,0,.2,1)] ${animate === 'in' ? 'translate-x-0 opacity-100' : animate === 'left' ? '-translate-x-20 opacity-0' : 'translate-x-20 opacity-0'}`}
+		style={{ background: COLORS.cardBg }}
 	>
 		<span
-			style={{
-				fontSize: '2.5rem',
-				color: COLORS.primary,
-				position: 'absolute',
-				top: 24,
-				left: 32,
-				opacity: 0.18,
-			}}
+			className="absolute top-6 left-8 text-[2.5rem] opacity-20"
+			style={{ color: COLORS.primary }}
 		>
 			&ldquo;
 		</span>
-		<p
-			style={{
-				fontSize: '1.25rem',
-				fontStyle: 'italic',
-				color: COLORS.foreground,
-				fontFamily: FONT_FAMILY.poppins,
-				marginBottom: '2rem',
-				marginTop: '1.5rem',
-				textAlign: 'center',
-				lineHeight: 1.7,
-			}}
-		>
+		<p className="text-[1.25rem] italic text-center leading-7 mb-8 mt-6 font-poppins" style={{ color: COLORS.foreground }}>
 			{testimonial.text}
 		</p>
-		<div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-			<div
-				style={{
-					width: 72,
-					height: 72,
-					borderRadius: '50%',
-					overflow: 'hidden',
-					marginBottom: 14,
-					border: `2px solid ${COLORS.primary}22`,
-				}}
-			>
+		<div className="flex flex-col items-center">
+			<div className="w-[72px] h-[72px] rounded-full overflow-hidden mb-3.5 border-2" style={{ borderColor: COLORS.primary + '22' }}>
 				<Image
 					src={testimonial.photo}
 					alt={testimonial.name}
 					width={100}
 					height={100}
-					style={{ objectFit: 'cover' }}
+					className="object-cover"
 				/>
 			</div>
-			<span
-				style={{
-					fontWeight: 700,
-					color: '#171717',
-					fontSize: '1.15rem',
-					fontFamily: FONT_FAMILY.poppins,
-				}}
-			>
-				{testimonial.name}
-			</span>
-			<span
-				style={{
-					color: COLORS.primary,
-					fontSize: '1.02rem',
-					fontFamily: FONT_FAMILY.poppins,
-					opacity: 0.85,
-				}}
-			>
-				{testimonial.affiliation}
-			</span>
+			<span className="font-bold text-[#171717] text-[1.15rem] font-poppins">{testimonial.name}</span>
+			<span className="text-[1.02rem] font-poppins opacity-85" style={{ color: COLORS.primary }}>{testimonial.affiliation}</span>
 		</div>
 	</div>
 );
@@ -141,82 +82,22 @@ const TestimonialsSection: React.FC = () => {
 
 	return (
 		<section
-			style={{
-				width: '100%',
-				maxWidth: '100vw',
-				background: COLORS.sectionBg,
-				padding: '4rem 0',
-				display: 'flex',
-				flexDirection: 'column',
-				alignItems: 'center',
-				boxSizing: 'border-box',
-				position: 'relative',
-				margin: 0,
-				left: 'unset',
-				right: 'unset',
-				marginLeft: 0,
-				marginRight: 0,
-			}}
+			className="w-full max-w-[100vw] flex flex-col items-center box-border py-16 relative m-0"
+			style={{ background: COLORS.sectionBg }}
 		>
-			<h2
-				style={{
-					fontSize: '2.2rem',
-					fontWeight: 700,
-					color: COLORS.primary,
-					fontFamily: FONT_FAMILY.poppins,
-					marginBottom: '0.5rem',
-					textAlign: 'center',
-				}}
-			>
+			<h2 className="text-[2.2rem] font-bold text-center mb-2 font-poppins" style={{ color: COLORS.primary }}>
 				What Our Students Say
 			</h2>
-			<p
-				style={{
-					fontSize: '1.1rem',
-					color: COLORS.foreground,
-					fontFamily: FONT_FAMILY.poppins,
-					marginBottom: '1.5rem',
-					textAlign: 'center',
-					maxWidth: 600,
-				}}
-			>
+			<p className="text-[1.1rem] mb-6 max-w-[600px] text-center font-poppins" style={{ color: COLORS.foreground }}>
 				Real feedback from students who have experienced the power of IKnow firsthand
 			</p>
-			<hr
-				style={{
-					width: 80,
-					border: 'none',
-					borderTop: '2px solid #ececec',
-					margin: '0 0 2.5rem 0',
-				}}
-			/>
-			<div
-				style={{
-					width: '100%',
-					maxWidth: 900, // expand the card container further
-					minHeight: 340,
-					position: 'relative',
-					display: 'flex',
-					alignItems: 'center',
-					justifyContent: 'center',
-				}}
-			>
+			<hr className="w-20 border-t-2 border-[#ececec] mb-10" />
+			<div className="w-full max-w-[900px] min-h-[340px] relative flex items-center justify-center">
 				<button
 					aria-label="Previous testimonial"
 					onClick={() => goTo(current - 1, 'left')}
-					style={{
-						position: 'absolute',
-						left: 0,
-						top: '50%',
-						transform: 'translateY(-50%)',
-						background: 'none',
-						border: 'none',
-						fontSize: '2rem',
-						color: COLORS.primary,
-						cursor: 'pointer',
-						opacity: 0.7,
-						zIndex: 2,
-					}}
+					className="absolute left-0 top-1/2 -translate-y-1/2 bg-none border-none text-[2rem] cursor-pointer opacity-70 z-20"
+					style={{ color: COLORS.primary }}
 				>
 					&#8592;
 				</button>
@@ -224,37 +105,18 @@ const TestimonialsSection: React.FC = () => {
 				<button
 					aria-label="Next testimonial"
 					onClick={() => goTo(current + 1, 'right')}
-					style={{
-						position: 'absolute',
-						right: 0,
-						top: '50%',
-						transform: 'translateY(-50%)',
-						background: 'none',
-						border: 'none',
-						fontSize: '2rem',
-						color: COLORS.primary,
-						cursor: 'pointer',
-						opacity: 0.7,
-						zIndex: 2,
-					}}
+					className="absolute right-0 top-1/2 -translate-y-1/2 bg-none border-none text-[2rem] cursor-pointer opacity-70 z-20"
+					style={{ color: COLORS.primary }}
 				>
 					&#8594;
 				</button>
 			</div>
-			<div style={{ display: 'flex', gap: 8, marginTop: 24 }}>
+			<div className="flex gap-2 mt-6">
 				{testimonials.map((_, idx) => (
 					<span
 						key={idx}
 						onClick={() => goTo(idx, idx > current ? 'right' : 'left')}
-						style={{
-							width: 12,
-							height: 12,
-							borderRadius: '50%',
-							background: idx === current ? COLORS.primary : '#d1d5db',
-							display: 'inline-block',
-							cursor: 'pointer',
-							transition: 'background 0.2s',
-						}}
+						className={`w-3 h-3 rounded-full inline-block cursor-pointer transition-colors duration-200 ${idx === current ? 'bg-primary' : 'bg-gray-300'}`}
 					/>
 				))}
 			</div>

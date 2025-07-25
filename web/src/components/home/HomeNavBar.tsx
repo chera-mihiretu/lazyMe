@@ -35,55 +35,32 @@ const HomeNavBar: React.FC = () => {
   }, []);
 
   return (
-    <nav style={{
-      width: '100%',
-      background: '#fff',
-      boxShadow: '0 2px 12px rgba(67,32,209,0.06)',
-      padding: '0.7rem 2.2vw',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'space-between',
-      position: 'sticky',
-      top: 0,
-      zIndex: 100,
-      minHeight: 64,
-    }}>
+    <nav className="w-full bg-white shadow-md px-[2.2vw] py-3 flex items-center justify-between sticky top-0 z-[100] min-h-[64px]">
       {/* Logo */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-        <Link href="/home" style={{ display: 'flex', alignItems: 'center', textDecoration: 'none' }}>
-          <Image src="/logos/logo-real.png" alt="IKnow Logo" width={50} height={50} style={{ marginRight: 8 }} />
-          <span style={{ color: COLORS.primary, fontWeight: 700, fontFamily: FONT_FAMILY.poppins, fontSize: '1.25rem', letterSpacing: 0.5 }}>IKnow</span>
+      <div className="flex items-center gap-3.5">
+        <Link href="/home" className="flex items-center no-underline">
+          <Image src="/logos/logo-real.png" alt="IKnow Logo" width={50} height={50} className="mr-2" />
+          <span className="text-primary font-bold font-poppins text-xl tracking-wide">IKnow</span>
         </Link>
       </div>
       {/* Nav Links */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 28 }}>
+      <div className="flex items-center gap-7">
         {navLinks.map((link, idx) => {
           const isActive = pathname === link.href || (link.href === '/home/posts' && pathname === '/home');
           return (
-            <Link key={link.href || idx} href={link.href} style={{
-              color: isActive ? COLORS.primary : COLORS.foreground,
-              background: isActive ? COLORS.primary + '07' : 'transparent',
-              fontFamily: FONT_FAMILY.poppins,
-              fontWeight: 600,
-              fontSize: '1.07rem',
-              textDecoration: 'none',
-              padding: '0.35rem 1.1rem',
-              borderRadius: 8,
-              transition: 'background 0.18s, color 0.18s',
-              display: 'flex',
-              alignItems: 'center',
-              gap: 8,
-              borderBottom: isActive ? `3px solid ${COLORS.primary}` : '3px solid transparent',
-              boxShadow: 'none',
-            }}>
-              <Image src={link.icon} alt={link.label + ' icon'} width={22} height={22} style={{ marginRight: 4, filter: isActive ? 'none' : 'none' }} />
+            <Link
+              key={link.href || idx}
+              href={link.href}
+              className={`flex items-center gap-2 font-poppins font-semibold text-[1.07rem] px-4 py-1 rounded-lg no-underline border-b-4 transition-colors ${isActive ? 'text-primary bg-primary/5 border-primary' : 'text-foreground bg-transparent border-transparent'}`}
+            >
+              <Image src={link.icon} alt={link.label + ' icon'} width={22} height={22} className="mr-1" />
               {link.label}
             </Link>
           );
         })}
       </div>
       {/* Search, Notification, and Avatar */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 18 }}>
+      <div className="flex items-center gap-4.5">
         <SearchBar value={''} onChange={function (e: React.ChangeEvent<HTMLInputElement>): void {
           throw new Error('Function not implemented.');
         } } />

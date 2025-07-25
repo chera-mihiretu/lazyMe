@@ -17,64 +17,31 @@ const benefits = [
 ];
 
 const WhyChooseLeft: React.FC = () => (
-  <div
-    style={{
-      flex: 6,
-      minWidth: 320,
-      maxWidth: 600,
-      display: 'flex',
-      flexDirection: 'column',
-      alignItems: 'flex-start',
-      justifyContent: 'center',
-      padding: '0 1rem',
-    }}
-  >
+  <div className="flex-[6] min-w-[320px] max-w-[600px] flex flex-col items-start justify-center px-4">
     <h2
-      style={{
-        fontSize: '2rem',
-        fontWeight: 700,
-        color: COLORS.primary,
-        fontFamily: FONT_FAMILY.poppins,
-        marginBottom: '1rem',
-      }}
+      className="text-2xl font-bold mb-4 font-poppins"
+      style={{ color: COLORS.primary }}
     >
       Why Choose IKnow?
     </h2>
     <p
-      style={{
-        fontSize: '1.1rem',
-        color: COLORS.foreground,
-        fontFamily: FONT_FAMILY.poppins,
-        marginBottom: '2rem',
-      }}
+      className="text-[1.1rem] mb-8 font-poppins"
+      style={{ color: COLORS.foreground }}
     >
       IKnow is more than just a platform—it's your partner in academic and campus success. Discover a smarter, more connected way to thrive at university.
     </p>
-    <ul style={{ listStyle: 'disc', paddingLeft: '1.5rem', margin: 0, width: '100%' }}>
+    <ul className="list-disc pl-6 m-0 w-full">
       {benefits.map((b, i) => (
-        <li key={b.title} style={{ marginBottom: '1.5rem', display: 'list-item', alignItems: 'flex-start' }}>
-          <span style={{ fontWeight: 700, color: '#171717', fontSize: '1.1rem', fontFamily: FONT_FAMILY.poppins }}>{b.title}</span>
-          <br />
-          <span style={{ color: COLORS.foreground, fontSize: '1rem', fontFamily: FONT_FAMILY.poppins, marginTop: 4 }}>{b.description}</span>
+        <li key={b.title} className="mb-6 list-item flex flex-col items-start">
+          <span className="font-bold text-[1.1rem] font-poppins text-[#171717]">{b.title}</span>
+          <span className="text-[1rem] font-poppins mt-1" style={{ color: COLORS.foreground }}>{b.description}</span>
         </li>
       ))}
     </ul>
     <a
       href="#about"
-      style={{
-        marginTop: '2rem',
-        color: '#fff',
-        background: COLORS.primary,
-        borderRadius: '8px',
-        padding: '0.75rem 2rem',
-        fontWeight: 600,
-        fontSize: '1rem',
-        textDecoration: 'none',
-        fontFamily: FONT_FAMILY.poppins,
-        boxShadow: '0 2px 8px rgba(67,24,209,0.08)',
-        transition: 'background 0.2s',
-        display: 'inline-block',
-      }}
+      className="mt-8 text-white rounded-lg px-8 py-3 font-semibold text-base no-underline font-poppins shadow-md transition-colors inline-block"
+      style={{ background: COLORS.primary }}
       onMouseOver={e => (e.currentTarget.style.background = '#3413a6')}
       onMouseOut={e => (e.currentTarget.style.background = COLORS.primary)}
     >

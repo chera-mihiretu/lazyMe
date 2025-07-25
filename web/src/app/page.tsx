@@ -5,7 +5,6 @@ import WhatWeOffer from "@/components/landing/WhatWeOffer";
 import WhyChooseIKnow from "@/components/landing/WhyChooseIKnow";
 import TestimonialsSection from "@/components/landing/TestimonialsSection";
 import AboutSection from "@/components/landing/AboutSection";
-import Image from "next/image";
 import RedirectIfLoggedIn from "./RedirectIfLoggedIn";
 
 export default function Home() {
@@ -19,6 +18,6 @@ export default function Home() {
         <TestimonialsSection/>
         <AboutSection/>
       </div>
-    </RedirectIfLoggedIn>
+   </RedirectIfLoggedIn>
   );
 }

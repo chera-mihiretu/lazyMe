@@ -132,40 +132,47 @@ const TreeNode: React.FC<TreeNodeProps> = ({ node, level, onExpand, expanded, lo
       {/* Material buttons */}
       {isMaterial && !loading && (
         <div style={{ display: "flex", gap: 10, marginLeft: 18 }}>
-          <button
-            style={{
-              background: "linear-gradient(90deg, #6366f1 60%, #7c3aed 100%)",
-              color: "#fff",
-              border: "none",
-              borderRadius: 8,
-              padding: "6px 18px",
-              fontWeight: 600,
-              fontSize: 15,
-              cursor: "pointer",
-              boxShadow: "0 1px 4px #6366f133",
-              transition: "background 0.2s, box-shadow 0.2s",
-            }}
-            onClick={() => alert(`Download ${node.name}`)}
-          >
-            ⬇️ Download
-          </button>
-          <button
-            style={{
-              background: "linear-gradient(90deg, #fbbf24 60%, #f59e42 100%)",
-              color: "#fff",
-              border: "none",
-              borderRadius: 8,
-              padding: "6px 18px",
-              fontWeight: 600,
-              fontSize: 15,
-              cursor: "pointer",
-              boxShadow: "0 1px 4px #fbbf2433",
-              transition: "background 0.2s, box-shadow 0.2s",
-            }}
-            onClick={() => alert(`View ${node.name}`)}
-          >
-            👁️ View
-          </button>
+            <a
+              href={node.url}
+              download
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 6,
+                background: "#f3f4f6",
+                color: "#1e40af",
+                border: "none",
+                borderRadius: 8,
+                padding: "6px 18px",
+                fontWeight: 600,
+                fontSize: 15,
+                cursor: "pointer",
+                textDecoration: "none",
+              }}
+            >
+              <img src="/icons/download.png" alt="Download" width={20} height={20} /> Download
+            </a>
+            <a
+              href={node.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 6,
+                background: "#fff7ed",
+                color: "#92400e",
+                border: "none",
+                borderRadius: 8,
+                padding: "6px 18px",
+                fontWeight: 600,
+                fontSize: 15,
+                cursor: "pointer",
+                textDecoration: "none",
+              }}
+            >
+              <img src="/icons/read.png" alt="Read" width={20} height={20} /> Read
+            </a>
         </div>
       )}
     </div>

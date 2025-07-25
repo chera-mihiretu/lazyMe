@@ -5,6 +5,7 @@ import { COLORS, FONT_FAMILY } from "../../../utils/color";
 import { User } from "../../../types/Post";
 import HomeNavBar from "../../../components/home/HomeNavBar";
 import UserSuggestionsList from "@/components/home/UserSuggestionsList";
+import ProtectedRoute from "@/app/ProtectedRoute";
 
 const baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
 
@@ -92,6 +93,7 @@ const ConnectionsPage: React.FC = () => {
 
   return (
     <>
+      <ProtectedRoute role="student">
       <HomeNavBar />
       <div style={{ maxWidth: 600, margin: "0 auto", padding: "2rem 1rem" }}>
         <h2 style={{ fontFamily: FONT_FAMILY.poppins, fontWeight: 700, fontSize: 26, marginBottom: 18, color: COLORS.primary }}>
@@ -160,6 +162,7 @@ const ConnectionsPage: React.FC = () => {
       {/* Suggestions Section */}
       <UserSuggestionsList/>
     </div>
+    </ProtectedRoute>
     </>
   );
 };

@@ -4,71 +4,43 @@ import { formatTimeAgo } from "@/app/helpers/time_formatter";
 
 const PostCard: React.FC<{ post: Post }> = ({ post }) => {
   const [openImg, setOpenImg] = useState<string | null>(null);
+  const [likes, setLikes] = useState(post.likes || 0);
+  const [liked, setLiked] = useState(post.liked || false);
+  const [likeLoading, setLikeLoading] = useState(false);
 
   return (
     <div
-      style={{
-        background: "#fff",
-        borderRadius: 16,
-        boxShadow: "0 2px 16px #4320d10a",
-        padding: 32,
-        position: "relative",
-        marginBottom: 32,
-        fontFamily: "Poppins, sans-serif",
-      }}
+      className="bg-white rounded-2xl shadow-[0_2px_16px_#4320d10a] p-8 relative mb-8 font-poppins"
     >
       {/* Header: Avatar, Name, Academic Year, Time */}
-      <div style={{ display: "flex", alignItems: "center", marginBottom: 18 }}>
+      <div className="flex items-center mb-4">
         <img
           src={post.user?.profile_image_url || "/icons/avatar.png"}
           alt={post.user?.name || "User"}
           width={48}
           height={48}
-          style={{
-            borderRadius: "50%",
-            objectFit: "cover",
-            marginRight: 14,
-            background: "#ececff",
-            border: "2px solid #ececff",
-          }}
+          className="rounded-full object-cover mr-3 bg-[#ececff] border-2 border-[#ececff]"
         />
-        <div style={{ display: "flex", flexDirection: "column" }}>
-          <span style={{ fontWeight: 600, fontSize: 17, color: "#222" }}>
+        <div className="flex flex-col">
+          <span className="font-semibold text-[17px] text-[#222]">
             {post.user?.name || "Unknown"}
           </span>
-          <span style={{ fontSize: 14, color: "#888" }}>
+          <span className="text-[14px] text-[#888]">
             {post.user?.acedemic_year ? `Year ${post.user.acedemic_year}` : ""}
           </span>
         </div>
-        <span style={{ color: "#aaa", fontSize: 14, marginLeft: "auto" }}>
+        <span className="text-[#aaa] text-[14px] ml-auto">
           {formatTimeAgo(post.created_at)}
         </span>
       </div>
       {/* Title */}
-      <div
-        style={{
-          color: "#222",
-          marginBottom: 10,
-          lineHeight: 1.2,
-        }}
-      >
+      <div className="text-[#222] mb-2 leading-tight">
         {post.content}
       </div>
       {/* Attachments */}
       {post.post_attachments && post.post_attachments.length > 0 && (
         <div
-          style={{
-            display: "flex",
-            gap: 16,
-            flexWrap: "wrap",
-            margin: "18px 0",
-            justifyContent:
-              post.post_attachments.length === 1
-                ? "flex-start"
-                : post.post_attachments.length === 2
-                ? "space-between"
-                : "center",
-          }}
+          className={`flex flex-wrap gap-4 my-4 ${post.post_attachments.length === 1 ? 'justify-start' : post.post_attachments.length === 2 ? 'justify-between' : 'justify-center'}`}
         >
           {post.post_attachments.map((url, idx) => (
             <img
@@ -76,8 +48,8 @@ const PostCard: React.FC<{ post: Post }> = ({ post }) => {
               src={url}
               alt="attachment"
               onClick={() => setOpenImg(url)}
+              className={`cursor-pointer rounded-xl object-cover bg-[#f0f0f0] flex-1 transition-shadow shadow-[0_2px_8px_#4320d120]`}
               style={{
-                cursor: "pointer",
                 width:
                   post.post_attachments.length === 1
                     ? "100%"
@@ -87,12 +59,6 @@ const PostCard: React.FC<{ post: Post }> = ({ post }) => {
                 maxWidth: 400,
                 minWidth: 120,
                 maxHeight: 320,
-                borderRadius: 12,
-                objectFit: "cover",
-                background: "#f0f0f0",
-                flex: "1 1 0",
-                transition: "box-shadow 0.2s",
-                boxShadow: "0 2px 8px #4320d120",
               }}
             />
           ))}
@@ -102,41 +68,64 @@ const PostCard: React.FC<{ post: Post }> = ({ post }) => {
       {openImg && (
         <div
           onClick={() => setOpenImg(null)}
-          style={{
-            position: "fixed",
-            zIndex: 1000,
-            left: 0,
-            top: 0,
-            width: "100vw",
-            height: "100vh",
-            background: "rgba(30,30,40,0.85)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            cursor: "zoom-out",
-          }}
+          className="fixed z-[1000] left-0 top-0 w-screen h-screen bg-[rgba(30,30,40,0.85)] flex items-center justify-center cursor-zoom-out"
         >
           <img
             src={openImg}
             alt="full"
-            style={{
-              maxWidth: "90vw",
-              maxHeight: "90vh",
-              borderRadius: 16,
-              boxShadow: "0 8px 32px #0008",
-              background: "#fff",
-            }}
+            className="max-w-[90vw] max-h-[90vh] rounded-2xl shadow-[0_8px_32px_#0008] bg-white"
           />
         </div>
       )}
+      <hr/>
       {/* Like & Comment */}
-      <div style={{ display: "flex", alignItems: "center", gap: 40, marginTop: 14 }}>
-        <span style={{ display: "flex", alignItems: "center", gap: 10, cursor: "pointer" }}>
-          <img src="/icons/like.png" alt="like" width={30} height={30} />
-          <span style={{ fontSize: 20, color: "#4320d1", fontWeight: 600 }}>{post.likes}</span>
-        </span>
+      <div className="flex items-center gap-10 mt-4">
+        <button
+          className={`flex items-center gap-2 cursor-pointer focus:outline-none ${likeLoading ? 'opacity-60' : ''}`}
+          disabled={likeLoading}
+          onClick={async () => {
+            if (likeLoading) return;
+            setLikeLoading(true);
+            const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
+            try {
+              if (!liked) {
+                // Like
+                const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/posts/like`, {
+                  method: "POST",
+                  headers: {
+                    "Content-Type": "application/json",
+                    Authorization: token ? `Bearer ${token}` : "",
+                  },
+                  body: JSON.stringify({ post_id: post.id }),
+                });
+                if (res.ok) {
+                  setLikes(likes + 1);
+                  setLiked(true);
+                }
+              } else {
+                // Dislike
+                const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/posts/dislike`, {
+                  method: "POST",
+                  headers: {
+                    "Content-Type": "application/json",
+                    Authorization: token ? `Bearer ${token}` : "",
+                  },
+                  body: JSON.stringify({ post_id: post.id }),
+                });
+                if (res.ok) {
+                  setLikes(likes > 0 ? likes - 1 : 0);
+                  setLiked(false);
+                }
+              }
+            } catch {}
+            setLikeLoading(false);
+          }}
+        >
+          <img src={liked ? "/icons/liked.png" : "/icons/like.png"} alt="like" width={30} height={30} />
+          <span className="text-[20px] text-[#4320d1] font-semibold">{likes}</span>
+        </button>
         <span
-          style={{ display: "flex", alignItems: "center", gap: 10, cursor: "pointer" }}
+          className="flex items-center gap-2 cursor-pointer"
           onClick={() => {
             if (typeof window !== 'undefined') {
               window.location.href = `/home/posts/${post.id}`;
@@ -144,7 +133,7 @@ const PostCard: React.FC<{ post: Post }> = ({ post }) => {
           }}
         >
           <img src="/icons/comment.png" alt="comment" width={30} height={30} />
-          <span style={{ fontSize: 20, color: "#4320d1", fontWeight: 600 }}>{post.comments}</span>
+          <span className="text-[20px] text-[#4320d1] font-semibold">{post.comments}</span>
         </span>
       </div>
     </div>

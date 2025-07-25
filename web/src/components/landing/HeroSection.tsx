@@ -4,31 +4,11 @@ import HeroRight from './HeroRight';
 import { COLORS } from '../../utils/color';
 
 const HeroSection: React.FC = () => (
-  <section style={{
-    width: '100%', // Use 100% to fit the viewport, not 100vw
-    minHeight: '100vh',
-    height: '100vh',
-    display: 'flex',
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    background: '#f8f9fb',
-    padding: 0,
-    boxSizing: 'border-box',
-    position: 'relative',
-    overflow: 'hidden',
-    maxWidth: '100vw', // Prevents overflow
-  }}>
-    <div style={{
-      position: 'relative',
-      zIndex: 1,
-      display: 'flex',
-      flex: 1,
-      height: '100%',
-      alignItems: 'center',
-      justifyContent: 'center',
-      gap: '5rem', // Add more space between left and right hero sections
-    }}>
+  <section
+    className="w-full min-h-screen h-screen flex flex-row items-center justify-center p-0 box-border relative overflow-hidden max-w-[100vw]"
+    style={{ background: COLORS.sectionBg }}
+  >
+    <div className="relative z-[1] flex flex-1 h-full items-center justify-center gap-[5rem]">
       <HeroLeft />
       <HeroRight />
     </div>

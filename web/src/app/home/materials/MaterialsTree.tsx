@@ -49,7 +49,8 @@ const MaterialsTree: React.FC = () => {
           nodes = allSchools.map((s: any) => ({ id: s.id, name: s.name, type: "school", description: s.description }));
         } else if (node.type === "school") {
           // Use the school id for departments
-          const res = await fetch(`${baseUrl}/departments/tree?school_id=${node.id}`, { headers });
+          
+          const res = await fetch(`${baseUrl}/departments/tree/${node.id}`, { headers });
           const data = await res.json();
           if (Array.isArray(data.departments)) {
             nodes = data.departments.map((d: any) => ({ id: d.id, name: d.name, type: "department", years: d.years, description: d.description }));
@@ -71,8 +72,15 @@ const MaterialsTree: React.FC = () => {
           const yearNum = parseInt((node.year || '').replace(/[^0-9]/g, ''));
           const res = await fetch(`${baseUrl}/materials/tree?department_id=${node.departmentId}&year=${yearNum}&semester=${node.semester}`, { headers });
           const data = await res.json();
+          console.log(data)
           if (Array.isArray(data.materials)) {
-            nodes = data.materials.map((m: any) => ({ id: m.id, name: m.name, type: "material", isLeaf: true, url: m.url }));
+            nodes = data.materials.map((m: any) => ({
+              id: m.id,
+              name: m.title,
+              type: "material",
+              isLeaf: true,
+              url: m.file,
+            }));
           }
         }
       } catch (e) {

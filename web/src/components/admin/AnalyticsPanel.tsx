@@ -54,19 +54,19 @@ const AnalyticsPanel: React.FC = () => {
   }, []);
 
   return (
-    <div style={{ background: "#fff", borderRadius: 16, boxShadow: "0 2px 16px #4320d10a", padding: 32, marginBottom: 32 }}>
-      <h2 style={{ fontSize: 22, fontWeight: 700, marginBottom: 18, color: "#4320d1" }}>Analytics (Last 7 Days)</h2>
-      <div style={{ fontSize: 16, fontWeight: 500, color: "#4320d1", marginBottom: 10 }}>
+    <div className="bg-white rounded-2xl shadow-[0_2px_16px_#4320d10a] p-8 mb-8">
+      <h2 className="text-[22px] font-bold mb-4 text-[#4320d1]">Analytics (Last 7 Days)</h2>
+      <div className="text-[16px] font-medium text-[#4320d1] mb-2.5">
         Total Users: {totalUsers}
       </div>
       {loading ? (
-        <div style={{ color: "#888", fontSize: 16 }}>Loading analytics...</div>
+        <div className="text-[#888] text-[16px]">Loading analytics...</div>
       ) : error ? (
-        <div style={{ color: "#e53e3e", fontSize: 16 }}>{error}</div>
+        <div className="text-[#e53e3e] text-[16px]">{error}</div>
       ) : (
-        <div style={{ display: "flex", gap: 40, flexWrap: "wrap" }}>
-          <div style={{ flex: 1, minWidth: 320 }}>
-            <h3 style={{ fontSize: 18, fontWeight: 600, marginBottom: 8 }}>New Users</h3>
+        <div className="flex gap-10 flex-wrap">
+          <div className="flex-1 min-w-[320px]">
+            <h3 className="text-[18px] font-semibold mb-2">New Users</h3>
             <Line
               data={{
                 labels,
@@ -93,8 +93,8 @@ const AnalyticsPanel: React.FC = () => {
               }}
             />
           </div>
-          <div style={{ flex: 1, minWidth: 320 }}>
-            <h3 style={{ fontSize: 18, fontWeight: 600, marginBottom: 8 }}>Reports</h3>
+          <div className="flex-1 min-w-[320px]">
+            <h3 className="text-[18px] font-semibold mb-2">Reports</h3>
             <Line
               data={{
                 labels,

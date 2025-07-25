@@ -6,7 +6,7 @@ import HomeNavBar from '@/components/home/HomeNavBar';
 
 function MaterialsPage() {
   return (
-    <ProtectedRoute>
+    <ProtectedRoute role="student">
       <div style={{ minHeight: '100vh', background: '#f7f7fb' }}>
         <HomeNavBar />
         <div style={{ maxWidth: 1100, margin: '2.5rem auto 0 auto', padding: '0 1.5rem' }}>
@@ -44,5 +44,5 @@ function MaterialsPage() {
 }
 
 // --- MaterialsTree Implementation ---
-import MaterialsTree from "./MaterialsTree";
+const MaterialsTree = dynamic(() => import("./MaterialsTree"), { ssr: false });
 export default MaterialsPage;

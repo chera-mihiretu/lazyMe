@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from "react";
 import type { Department } from "@/types/Department";
 import { useRouter } from "next/navigation";
+import ProtectedRoute from "@/app/ProtectedRoute";
 
 const baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
 
@@ -82,6 +83,7 @@ const CreatePostPage: React.FC = () => {
   };
 
   return (
+    <ProtectedRoute role='student'>
     <div style={{ maxWidth: 800, margin: "3rem auto", background: "#fff", borderRadius: 16, boxShadow: "0 2px 16px #4320d10a", padding: 40 }}>
       <h2 style={{ fontWeight: 700, fontSize: 24, marginBottom: 24 }}>Create Post</h2>
       <form onSubmit={handleSubmit}>
@@ -281,6 +283,7 @@ const CreatePostPage: React.FC = () => {
         </button>
       </form>
     </div>
+    </ProtectedRoute>
   );
 };
 

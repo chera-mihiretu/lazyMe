@@ -60,13 +60,13 @@ const AddSchoolDialog: React.FC<Props> = ({ open, onClose }) => {
   };
 
   return (
-    <div style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', background: 'rgba(30,30,40,0.25)', zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-      <div style={{ background: '#fff', borderRadius: 12, padding: 32, minWidth: 320, boxShadow: '0 2px 8px #4320d120' }}>
-        <h2 style={{ fontWeight: 700, fontSize: 22, color: '#4320d1', marginBottom: 18 }}>Add School</h2>
+    <div className="fixed top-0 left-0 w-screen h-screen bg-black/20 flex items-center justify-center z-[1000]">
+      <div className="bg-white rounded-2xl shadow-[0_2px_16px_#4320d120] px-8 py-6 min-w-[320px] w-full max-w-md flex flex-col gap-4">
+        <h2 className="font-bold text-[22px] text-[#4320d1] mb-4">Add School</h2>
         <select
           value={selectedUniversity}
           onChange={e => setSelectedUniversity(e.target.value)}
-          style={{ width: '100%', padding: '10px 12px', borderRadius: 8, border: '1px solid #eee', marginBottom: 18, fontSize: 16 }}
+          className="w-full px-3 py-2 rounded-lg border border-[#eee] mb-4 text-[16px]"
         >
           <option value="">Select University</option>
           {universities.map(u => (
@@ -78,42 +78,26 @@ const AddSchoolDialog: React.FC<Props> = ({ open, onClose }) => {
           value={schoolName}
           onChange={e => setSchoolName(e.target.value)}
           placeholder="School Name"
-          style={{ width: '100%', padding: '10px 12px', borderRadius: 8, border: '1px solid #eee', marginBottom: 18, fontSize: 16 }}
+          className="w-full px-3 py-2 rounded-lg border border-[#eee] mb-4 text-[16px]"
         />
         <input
           type="text"
           value={description}
           onChange={e => setDescription(e.target.value)}
           placeholder="Description (optional)"
-          style={{ width: '100%', padding: '10px 12px', borderRadius: 8, border: '1px solid #eee', marginBottom: 18, fontSize: 16 }}
+          className="w-full px-3 py-2 rounded-lg border border-[#eee] mb-4 text-[16px]"
         />
-        {error && <div style={{ color: '#e53e3e', fontWeight: 500, marginBottom: 8 }}>{error}</div>}
-        <div style={{ display: 'flex', gap: 12, justifyContent: 'flex-end', flexDirection: 'column' }}>
-          <button onClick={onClose} style={{
-                      background: "#eee",
-                      color: "#4320d1",
-                      border: "none",
-                      borderRadius: 8,
-                      padding: "8px 0",
-                      fontWeight: 600,
-                      cursor: loading ? "not-allowed" : "pointer",
-                      width: "100%",
-                      fontSize: 18,
-                  }} disabled={loading}>Cancel</button>
-
+        {error && <div className="text-[#e53e3e] font-medium mb-2">{error}</div>}
+        <div className="flex flex-col gap-3 w-full mt-2">
+          <button
+            onClick={onClose}
+            className="bg-[#eee] text-[#4320d1] border-none rounded-lg py-2 font-semibold w-full text-[18px] disabled:cursor-not-allowed"
+            style={{ cursor: loading ? 'not-allowed' : 'pointer' }}
+            disabled={loading}
+          >Cancel</button>
           <button
             onClick={handleSubmit}
-            style={{
-              background: loading ? "#aaa" : "#4320d1",
-              color: "#fff",
-              border: "none",
-              borderRadius: 8,
-              padding: "8px 0",
-              fontWeight: 600,
-              cursor: loading ? "not-allowed" : "pointer",
-              width: "100%",
-              fontSize: 18,
-            }}
+            className={`border-none rounded-lg py-2 font-semibold w-full text-[18px] text-white ${loading ? 'bg-[#aaa] cursor-not-allowed' : 'bg-[#4320d1] cursor-pointer'}`}
             disabled={!selectedUniversity || !schoolName.trim() || loading}
           >
             {loading ? "Adding..." : "Add"}

@@ -53,123 +53,34 @@ const WhatWeOffer: React.FC = () => {
 	return (
 		<section
 			id="what-we-offer"
-			style={{
-				width: '100%',
-				background: COLORS.sectionBg,
-				padding: '4rem 0',
-				display: 'flex',
-				flexDirection: 'column',
-				alignItems: 'center',
-				boxSizing: 'border-box',
-			}}
+			className="w-full flex flex-col items-center box-border py-16"
+			style={{ background: COLORS.sectionBg }}
 		>
-			<h2
-				style={{
-					fontSize: '2.2rem',
-					fontWeight: 700,
-					color: COLORS.primary,
-					fontFamily: FONT_FAMILY.poppins,
-					marginBottom: '1rem',
-					textAlign: 'center',
-				}}
-			>
+			<h2 className="text-[2.2rem] font-bold text-center mb-4 font-poppins" style={{ color: COLORS.primary }}>
 				What We Offer
 			</h2>
-			<p
-				style={{
-					fontSize: '1.15rem',
-					color: COLORS.foreground,
-					fontFamily: FONT_FAMILY.poppins,
-					marginBottom: '2.5rem',
-					maxWidth: 600,
-					textAlign: 'center',
-				}}
-			>
-				Comprehensive tools and resources designed to enhance your university
-				experience and accelerate your academic success.
+			<p className="text-[1.15rem] mb-10 max-w-[600px] text-center font-poppins" style={{ color: COLORS.foreground }}>
+				Comprehensive tools and resources designed to enhance your university experience and accelerate your academic success.
 			</p>
-			<div
-				style={{
-					display: 'grid',
-					gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))',
-					gap: '2rem',
-					width: '90%',
-					maxWidth: 1000,
-				}}
-			>
+			<div className="grid w-[90%] max-w-[1000px] gap-8 grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-4">
 				{features.map((feature, idx) => (
 					<div
 						key={feature.title}
-						style={{
-							background: COLORS.cardBg,
-							borderRadius: '1.25rem',
-							boxShadow: 'none',
-							padding: '2rem 1.5rem',
-							display: 'flex',
-							flexDirection: 'column',
-							alignItems: 'center',
-							textAlign: 'center',
-							borderTop: 'none', // Remove divider/shadow
-							cursor: 'pointer',
-							transition:
-								'transform 0.2s, box-shadow 0.2s, background 0.2s',
-						}}
-						onMouseOver={e => {
-							e.currentTarget.style.transform =
-								'translateY(-8px) scale(1.04)';
-							e.currentTarget.style.boxShadow =
-								'0 4px 24px rgba(67,24,209,0.10)';
-							e.currentTarget.style.background = '#fff';
-						}}
-						onMouseOut={e => {
-							e.currentTarget.style.transform = 'none';
-							e.currentTarget.style.boxShadow = 'none';
-							e.currentTarget.style.background = COLORS.cardBg;
-						}}
+						className="bg-white rounded-xl shadow-none p-8 flex flex-col items-center text-center cursor-pointer transition-transform hover:-translate-y-2 hover:scale-[1.04] hover:shadow-lg hover:bg-white"
 					>
-						<div
-							style={{
-								width: 56,
-								height: 56,
-								marginBottom: '1rem',
-								borderRadius: '50%',
-								overflow: 'hidden',
-								background: '#f0f0f7',
-								display: 'flex',
-								alignItems: 'center',
-								justifyContent: 'center',
-							}}
-						>
+						<div className="w-14 h-14 mb-4 rounded-full overflow-hidden bg-[#f0f0f7] flex items-center justify-center">
 							<Image
-								src={`/what_we_offer/${feature.icon.replace(
-									/\s+/g,
-									'_'
-								).toLowerCase()}.png`}
+								src={`/what_we_offer/${feature.icon.replace(/\s+/g, '_').toLowerCase()}.png`}
 								alt={feature.title}
 								width={40}
 								height={40}
 								style={{ objectFit: 'contain' }}
 							/>
 						</div>
-						<h3
-							style={{
-								fontSize: '1.25rem',
-								fontWeight: 600,
-								color: '#171717',
-								marginBottom: '0.5rem',
-								fontFamily: FONT_FAMILY.poppins,
-							}}
-						>
+						<h3 className="text-[1.25rem] font-semibold text-[#171717] mb-2 font-poppins">
 							{feature.title}
 						</h3>
-						<p
-							style={{
-								fontSize: '1rem',
-								color: COLORS.foreground,
-								fontFamily: FONT_FAMILY.poppins,
-								opacity: 0.85,
-							}}
-						>
+						<p className="text-[1rem] opacity-85 font-poppins" style={{ color: COLORS.foreground }}>
 							{feature.description}
 						</p>
 					</div>

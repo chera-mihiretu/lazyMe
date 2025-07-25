@@ -3,7 +3,7 @@ import React, { useState } from "react";
 const baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
 
 const DepartmentsSection: React.FC = () => {
-  const [departments, setDepartments] = useState<{ id: string; name: string }[]>([]);
+  const [departments, setDepartments] = useState<{ id: string; name: string; description?: string; year?: number }[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [showDeleteDialog, setShowDeleteDialog] = useState<string | null>(null);
@@ -56,24 +56,48 @@ const DepartmentsSection: React.FC = () => {
   }, []);
 
   return (
-    <section style={{ background: '#fff', borderRadius: 14, boxShadow: '0 2px 8px #4320d120', padding: '24px 24px 18px 24px', display: 'flex', flexDirection: 'column', minHeight: 180 }}>
-      <h3 style={{ fontWeight: 700, fontSize: 20, color: '#4320d1', marginBottom: 12 }}>Departments</h3>
+    <section className="bg-white rounded-[14px] shadow-[0_2px_8px_#4320d120] px-6 pt-6 pb-4 flex flex-col min-h-[180px]">
+      <h3 className="font-bold text-[20px] text-[#4320d1] mb-3">Departments</h3>
       {loading ? (
-        <div style={{ color: '#888', fontWeight: 500, padding: '12px 0' }}>Loading...</div>
+        <div className="text-[#888] font-medium py-3">Loading...</div>
       ) : error ? (
-        <div style={{ color: '#e53e3e', fontWeight: 500, padding: '12px 0' }}>{error}</div>
+        <div className="text-[#e53e3e] font-medium py-3">{error}</div>
       ) : (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 8, margin: 0, padding: 0, flex: 1 }}>
+        <div className="flex flex-col gap-2 flex-1">
           {departments.slice(0, 4).map(d => (
-            <div key={d.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: '#f7f7fa', borderRadius: 8, padding: '8px 12px', marginBottom: 2 }}>
-              <span style={{ color: '#333', fontWeight: 500 }}>{d.name}</span>
-              <div style={{ display: 'flex', gap: 8 }}>
-                <button style={{ background: '#eee', color: '#4320d1', border: 'none', borderRadius: 6, padding: '4px 10px', fontWeight: 500, cursor: 'pointer', fontSize: 14 }}>Edit</button>
-                <button
-                  style={{ background: '#f44336', color: '#fff', border: 'none', borderRadius: 6, padding: '4px 10px', fontWeight: 500, cursor: 'pointer', fontSize: 14 }}
-                  onClick={() => { setShowDeleteDialog(d.id); setDeleteInput(""); setDeleteError(""); }}
-                >Delete</button>
+            <div key={d.id} className="flex flex-col bg-[#f7f7fa] rounded-lg px-3 py-2 mb-0.5">
+              <div className="flex items-center justify-between">
+                <span className="text-[#333] font-medium">{d.name}</span>
+                <div className="flex gap-2">
+                  <button className="bg-[#eee] text-[#4320d1] border-none rounded-md px-2.5 py-1 font-medium cursor-pointer text-[14px]">Edit</button>
+                  <button
+                    className="bg-[#f44336] text-white border-none rounded-md px-2.5 py-1 font-medium cursor-pointer text-[14px]"
+                    onClick={() => { setShowDeleteDialog(d.id); setDeleteInput(""); setDeleteError(""); }}
+                  >Delete</button>
+                </div>
               </div>
+              {d.description && (
+                <div className="text-[#aaa] text-[13px] mt-0.5 flex items-center gap-1">
+                  <span className="inline-block w-4 h-4">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <circle cx="8" cy="8" r="8" fill="#aaa" />
+                      <text x="8" y="11" textAnchor="middle" fontSize="10" fill="#fff">i</text>
+                    </svg>
+                  </span>
+                  {d.description}
+                </div>
+              )}
+              {d.year !== undefined && (
+                <div className="text-[#aaa] text-[13px] mt-0.5 flex items-center gap-1">
+                  <span className="inline-block w-4 h-4">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <circle cx="8" cy="8" r="8" fill="#aaa" />
+                      <text x="8" y="11" textAnchor="middle" fontSize="10" fill="#fff">Y</text>
+                    </svg>
+                  </span>
+                  {d.year}
+                </div>
+              )}
             </div>
           ))}
         </div>
