@@ -22,6 +22,7 @@ const baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
 const HomeNavBar: React.FC = () => {
   const pathname = usePathname();
   const [user, setUser] = useState<any>(null);
+  const [showAvatarMenu, setShowAvatarMenu] = useState(false);
 
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -33,6 +34,24 @@ const HomeNavBar: React.FC = () => {
       .then(data => setUser(data))
       .catch(() => setUser(null));
   }, []);
+  // Avatar menu handlers
+  const handleProfile = () => {
+    if (user && user.id && typeof window !== 'undefined') {
+      window.location.href = `/profile`;
+    }
+    setShowAvatarMenu(false);
+  };
+  const handleProfileUpdate = () => {
+    if (user && user.id && typeof window !== 'undefined') {
+      window.location.href = `/profile/edit`;
+    }
+    setShowAvatarMenu(false);
+  };
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    window.location.href = '/auth/login';
+    setShowAvatarMenu(false);
+  };
 
   return (
     <nav className="w-full bg-white shadow-md px-[2.2vw] py-3 flex items-center justify-between sticky top-0 z-[100] min-h-[64px]">
@@ -60,12 +79,27 @@ const HomeNavBar: React.FC = () => {
         })}
       </div>
       {/* Search, Notification, and Avatar */}
-      <div className="flex items-center gap-4.5">
+      <div className="flex items-center gap-4.5 relative">
         <SearchBar value={''} onChange={function (e: React.ChangeEvent<HTMLInputElement>): void {
           throw new Error('Function not implemented.');
         } } />
         <NotificationBell />
-        <UserAvatar />
+        {/* Avatar with dropdown menu */}
+        <div className="relative">
+          <button
+            className="focus:outline-none"
+            onClick={() => setShowAvatarMenu((v) => !v)}
+          >
+            <UserAvatar />
+          </button>
+          {showAvatarMenu && (
+            <div className="absolute right-0 mt-2 w-44 bg-white border border-gray-200 rounded-lg shadow-lg z-20">
+              <button className="w-full text-left px-4 py-2 hover:bg-gray-100" onClick={handleProfile}>Profile</button>
+              <button className="w-full text-left px-4 py-2 hover:bg-gray-100" onClick={handleProfileUpdate}>Profile Update</button>
+              <button className="w-full text-left px-4 py-2 hover:bg-gray-100 text-red-600" onClick={handleLogout}>Logout</button>
+            </div>
+          )}
+        </div>
       </div>
     </nav>
   );

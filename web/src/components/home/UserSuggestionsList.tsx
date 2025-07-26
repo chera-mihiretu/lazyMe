@@ -34,13 +34,11 @@ const UserSuggestionsList: React.FC<UserSuggestionsListProps> = ({ page = 1 }) =
       .then(async (res) => {
         if (!res.ok) throw new Error("Failed to fetch user suggestions");
         const data = await res.json();
-        console.log(data);
         setUsers(data.suggestions || []);
         setHasMore(data.hasMore || false);
         setLoading(false);
       })
       .catch((e) => {
-        console.log(e)
         setUsers([]);
         setHasMore(false);
         setLoading(false);

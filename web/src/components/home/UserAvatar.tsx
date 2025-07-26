@@ -29,7 +29,7 @@ const UserAvatar: React.FC = () => {
       })
       .catch((err) => {
         setUser(null);
-        setError("Could not load user info");
+        setError("Could not load user info: " + err.message);
         setLoading(false);
       });
   }, [router]);

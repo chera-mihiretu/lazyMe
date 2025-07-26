@@ -67,50 +67,42 @@ const CreateJobPage: React.FC = () => {
   };
 
   return (
-    <ProtectedRoute role='admin'>
-    <div style={{ maxWidth: 540, margin: '2.5rem auto', background: '#fff', borderRadius: 16, boxShadow: '0 4px 32px rgba(67,24,209,0.07)', padding: '2.5rem 2.2rem' }}>
-      <h2 style={{ fontFamily: FONT_FAMILY.poppins, color: COLORS.primary, fontWeight: 700, fontSize: '1.5rem', marginBottom: 18 }}>Post a Job</h2>
+    <ProtectedRoute role='student'>
+    <div className="max-w-[540px] mx-auto mt-10 bg-white rounded-2xl shadow-[0_4px_32px_rgba(67,24,209,0.07)] p-[2.5rem] px-[2.2rem]">
+      <h2 className="font-poppins text-primary font-bold text-[1.5rem] mb-5">Post a Job</h2>
       <form onSubmit={handleSubmit}>
-        <div style={{ marginBottom: 16 }}>
-          <label style={{ fontWeight: 600, color: COLORS.foreground, fontFamily: FONT_FAMILY.poppins, marginBottom: 4, display: 'block' }}>Title</label>
+        <div className="mb-4">
+          <label className="font-semibold text-foreground font-poppins mb-1 block">Title</label>
           <input
             type="text"
             value={title}
             onChange={e => setTitle(e.target.value)}
-            style={{ width: '100%', padding: '0.85rem 1rem', border: `1.5px solid ${COLORS.inputBorder}`, borderRadius: 8, fontFamily: FONT_FAMILY.poppins, fontSize: '1rem', outline: 'none', marginBottom: 8, background: COLORS.inputBg, color: '#171717', boxShadow: '0 2px 8px #e0e0e0', transition: 'border 0.2s, box-shadow 0.2s' }}
+            className="w-full py-3 px-4 border border-inputBorder rounded-lg font-poppins text-base outline-none mb-2 bg-inputBg text-[#171717] shadow-[0_2px_8px_#e0e0e0] transition-all"
           />
         </div>
-        <div style={{ marginBottom: 16 }}>
-          <label style={{ fontWeight: 600, color: COLORS.foreground, fontFamily: FONT_FAMILY.poppins, marginBottom: 4, display: 'block' }}>Description</label>
+        <div className="mb-4">
+          <label className="font-semibold text-foreground font-poppins mb-1 block">Description</label>
           <textarea
             value={description}
             onChange={e => setDescription(e.target.value)}
             rows={4}
-            style={{ width: '100%', padding: '0.85rem 1rem', border: `1.5px solid ${COLORS.inputBorder}`, borderRadius: 8, fontFamily: FONT_FAMILY.poppins, fontSize: '1rem', outline: 'none', marginBottom: 8, background: COLORS.inputBg, color: '#171717', boxShadow: '0 2px 8px #e0e0e0', transition: 'border 0.2s, box-shadow 0.2s', resize: 'vertical' }}
+            className="w-full py-3 px-4 border border-inputBorder rounded-lg font-poppins text-base outline-none mb-2 bg-inputBg text-[#171717] shadow-[0_2px_8px_#e0e0e0] transition-all resize-vertical"
           />
         </div>
-        <div style={{ marginBottom: 16 }}>
-          <label style={{ fontWeight: 600, color: COLORS.foreground, fontFamily: FONT_FAMILY.poppins, marginBottom: 4, display: 'block' }}>Link</label>
+        <div className="mb-4">
+          <label className="font-semibold text-foreground font-poppins mb-1 block">Link</label>
           <input
             type="url"
             value={link}
             onChange={e => setLink(e.target.value)}
             placeholder="https://example.com/job"
-            style={{ width: '100%', padding: '0.85rem 1rem', border: `1.5px solid ${COLORS.inputBorder}`, borderRadius: 8, fontFamily: FONT_FAMILY.poppins, fontSize: '1rem', outline: 'none', marginBottom: 8, background: COLORS.inputBg, color: '#171717', boxShadow: '0 2px 8px #e0e0e0', transition: 'border 0.2s, box-shadow 0.2s' }}
+            className="w-full py-3 px-4 border border-inputBorder rounded-lg font-poppins text-base outline-none mb-2 bg-inputBg text-[#171717] shadow-[0_2px_8px_#e0e0e0] transition-all"
           />
         </div>
         {/* Department Multi-Select */}
-        <div style={{ marginBottom: 18 }}>
-          <label style={{ fontWeight: 600, fontSize: 16 }}>Your Department Concern With</label>
-          <div style={{
-            borderRadius: 10,
-            border: selectedDepartments.length === 0 ? '2px solid #d32f2f' : '2px solid #6366f1',
-            background: 'linear-gradient(90deg, #f7f7fb 60%, #e0e7ff 100%)',
-            boxShadow: selectedDepartments.length === 0 ? '0 2px 8px #d32f2f22' : '0 2px 8px #6366f122',
-            padding: 8,
-            marginTop: 6,
-            transition: 'border 0.2s, box-shadow 0.2s',
-          }}>
+        <div className="mb-5">
+          <label className="font-semibold text-[16px]">Your Post Concern With</label>
+          <div className={`rounded-xl p-2 mt-1 transition-all ${selectedDepartments.length === 0 ? 'border-2 border-[#d32f2f] shadow-[0_2px_8px_#d32f2f22]' : 'border-2 border-[#6366f1] shadow-[0_2px_8px_#6366f122]'} bg-gradient-to-r from-[#f7f7fb] to-[#e0e7ff]`}>
             <select
               multiple
               value={selectedDepartments}
@@ -118,55 +110,24 @@ const CreateJobPage: React.FC = () => {
                 const options = Array.from(e.target.selectedOptions).map(opt => opt.value);
                 setSelectedDepartments(options);
               }}
-              style={{
-                width: "100%",
-                border: 'none',
-                outline: 'none',
-                background: 'transparent',
-                fontSize: 15,
-                minHeight: 80,
-                color: '#222',
-                fontWeight: 500,
-                fontFamily: 'inherit',
-                cursor: 'pointer',
-                padding: 0,
-                boxShadow: 'none',
-                appearance: 'none',
-                WebkitAppearance: 'none',
-                MozAppearance: 'none',
-              }}
+              className="w-full border-none outline-none bg-transparent text-[15px] min-h-[80px] text-[#222] font-medium font-inherit cursor-pointer p-0 shadow-none appearance-none"
               required
             >
               {departments.map((dep) => (
-                <option key={dep.id} value={dep.id} title={dep.description} style={{
-                  background: selectedDepartments.includes(dep.id) ? 'linear-gradient(90deg, #6366f1 60%, #7c3aed 100%)' : '#fff',
-                  color: selectedDepartments.includes(dep.id) ? '#fff' : '#222',
-                  borderRadius: 6,
-                  margin: 2,
-                  padding: 6,
-                  fontWeight: selectedDepartments.includes(dep.id) ? 700 : 500,
-                  fontSize: 15,
-                  transition: 'background 0.2s, color 0.2s',
-                }}>{dep.name}</option>
+                <option key={dep.id} value={dep.id} title={dep.description}
+                  className={`rounded-lg m-1 p-2 text-[15px] transition-all ${selectedDepartments.includes(dep.id) ? 'bg-gradient-to-r from-[#6366f1] to-[#7c3aed] text-white font-bold' : 'bg-white text-[#222] font-medium'}`}
+                >{dep.name}</option>
               ))}
             </select>
           </div>
           {/* Show selected departments as chips */}
           {selectedDepartments.length > 0 && (
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginTop: 10 }}>
+            <div className="flex flex-wrap gap-2 mt-2">
               {selectedDepartments.map(depId => {
                 const dep = departments.find(d => d.id === depId);
                 if (!dep) return null;
                 return (
-                  <span key={dep.id} style={{
-                    background: 'linear-gradient(90deg, #6366f1 60%, #7c3aed 100%)',
-                    color: '#fff',
-                    borderRadius: 8,
-                    padding: '4px 14px',
-                    fontWeight: 600,
-                    fontSize: 14,
-                    boxShadow: '0 1px 4px #6366f133',
-                  }}>
+                  <span key={dep.id} className="bg-gradient-to-r from-[#6366f1] to-[#7c3aed] text-white rounded-lg px-4 py-1 font-semibold text-[14px] shadow-[0_1px_4px_#6366f133]">
                     {dep.name}
                   </span>
                 );
@@ -174,7 +135,7 @@ const CreateJobPage: React.FC = () => {
             </div>
           )}
         </div>
-        {error && <div style={{ color: COLORS.error, fontSize: '0.98rem', marginBottom: 10 }}>{error}</div>}
+        {error && <div className="text-error text-[0.98rem] mb-2">{error}</div>}
         <button
           type="submit"
           disabled={loading}
