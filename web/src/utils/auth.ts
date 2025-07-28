@@ -31,6 +31,18 @@ export function getUserRole(): string | null {
   }
 }
 
+export function getUserID(): string | null {
+  const token = getToken();
+  if (!token) return null;
+  try {
+    const payload = token.split('.')[1];
+    const decoded = JSON.parse(atob(payload));
+    return decoded.id || null;
+  } catch {
+    return null;
+  }
+}
+
 export function redirectByRole() {
   const role = getUserRole();
   if (role === 'admin') {

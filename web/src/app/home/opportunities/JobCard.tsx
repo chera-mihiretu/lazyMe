@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useState } from 'react';
+import { formatTimeAgo } from '@/app/helpers/time_formatter';
 import { COLORS, FONT_FAMILY } from '../../../utils/color';
 import type { User } from '../../../types/Post';
 
@@ -18,10 +19,75 @@ export interface JobPost {
 const JobCard: React.FC<{ job: JobPost }> = ({ job }) => {
   console.log(job)
   const avatar = job.user?.profile_image_url || '/icons/avatar.png';
-  const [likes, setLikes] = React.useState(job.like || 0);
-  const [liked, setLiked] = React.useState(job.liked || false);
-  const [iframeError, setIframeError] = React.useState(false);
-  const [error, setError] = React.useState<string | null>(null);
+  const [likes, setLikes] = useState(job.like || 0);
+  const [liked, setLiked] = useState(job.liked || false);
+  const [iframeError, setIframeError] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  // Menu logic (copied from PostCard)
+  const [showMenu, setShowMenu] = useState(false);
+  const menuButtonRef = React.useRef<HTMLButtonElement>(null);
+  const menuRef = React.useRef<HTMLDivElement>(null);
+
+  React.useEffect(() => {
+    if (!showMenu) return;
+    function handleClickOutside(event: MouseEvent) {
+      if (
+        menuRef.current &&
+        !menuRef.current.contains(event.target as Node) &&
+        menuButtonRef.current &&
+        !menuButtonRef.current.contains(event.target as Node)
+      ) {
+        setShowMenu(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [showMenu]);
+  const [showReportDialog, setShowReportDialog] = useState(false);
+  const [reportReason, setReportReason] = useState("");
+  const [reportLoading, setReportLoading] = useState(false);
+  // You may need to adjust this logic to match your auth/user system
+  const getUserID = () => (typeof window !== 'undefined' ? localStorage.getItem('user_id') : null);
+  const isCurrentUser = getUserID() === job.user?.id;
+
+  const handleEdit = () => {
+    alert('Edit job ' + job.id);
+    setShowMenu(false);
+  };
+  const handleDelete = () => {
+    alert('Delete job ' + job.id);
+    setShowMenu(false);
+  };
+  const handleReport = () => {
+    setShowMenu(false);
+    setShowReportDialog(true);
+  };
+  const submitReport = async () => {
+    if (!reportReason.trim()) return;
+    setReportLoading(true);
+    try {
+      const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
+      await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/reports/joba`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: token ? `Bearer ${token}` : "",
+        },
+        body: JSON.stringify({
+          reported_post_id: job.id,
+          reason: reportReason,
+        }),
+      });
+      setShowReportDialog(false);
+      setReportReason("");
+    } catch {
+      // handle error
+    }
+    setReportLoading(false);
+  };
 
   React.useEffect(() => { setIframeError(false); }, [job.link]);
 
@@ -133,8 +199,9 @@ const JobCard: React.FC<{ job: JobPost }> = ({ job }) => {
       display: 'flex',
       flexDirection: 'column',
       gap: 10,
+      position: 'relative',
     }}>
-      {/* Header: Avatar, Name, Date */}
+      {/* Header: Avatar, Name, Date, Menu */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
           <img src={avatar} alt={job.user?.name || 'User'} style={{ width: 38, height: 38, borderRadius: '50%', objectFit: 'cover', border: '2px solid #ececec', marginRight: 8 }} />
@@ -143,7 +210,69 @@ const JobCard: React.FC<{ job: JobPost }> = ({ job }) => {
             <div style={{ color: COLORS.muted, fontSize: 13 }}>{job.user?.department || ''} {job.user?.school ? `- ${job.user.school}` : ''}</div>
           </div>
         </div>
-        <span style={{ color: COLORS.muted, fontSize: 14 }}>{new Date(job.created_at).toLocaleDateString()}</span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <span style={{ color: COLORS.muted, fontSize: 14 }}>{formatTimeAgo(job.created_at)}</span>
+          <button
+            ref={menuButtonRef}
+            style={{ padding: 8, borderRadius: '50%', background: 'transparent', border: 'none', cursor: 'pointer' }}
+            onClick={e => {
+              e.stopPropagation();
+              setShowMenu(v => !v);
+            }}
+          >
+            <img src="/icons/menu.png" alt="menu" width={22} height={22} />
+          </button>
+          {showMenu && (
+            <div
+              ref={menuRef}
+              style={{ position: 'absolute', right: 0, marginTop: 32, width: 160, background: '#fff', border: '1px solid #e5e7eb', borderRadius: 10, boxShadow: '0 2px 12px #e0e0e0', zIndex: 10 }}
+            >
+              {isCurrentUser ? (
+                <>
+                  <button style={{ width: '100%', textAlign: 'left', padding: '8px 16px', background: 'none', border: 'none', cursor: 'pointer' }} onClick={handleEdit}>Edit</button>
+                  <button style={{ width: '100%', textAlign: 'left', padding: '8px 16px', background: 'none', border: 'none', color: '#e53e3e', cursor: 'pointer' }} onClick={handleDelete}>Delete</button>
+                </>
+              ) : (
+                <>
+                  <button style={{ width: '100%', textAlign: 'left', padding: '8px 16px', background: 'none', border: 'none', cursor: 'pointer' }} onClick={handleReport}>Report</button>
+                </>
+              )}
+            </div>
+          )}
+          {/* Report Dialog */}
+          {showReportDialog && (
+            <div style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', background: 'rgba(0,0,0,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1100 }}>
+              <div style={{ background: '#fff', borderRadius: 16, boxShadow: '0 2px 16px #4320d10a', padding: 24, width: '100%', maxWidth: 400 }}>
+                <h3 style={{ fontWeight: 700, fontSize: 20, marginBottom: 12, color: '#4320d1' }}>Report Job</h3>
+                <label style={{ display: 'block', marginBottom: 8, fontWeight: 500 }}>Reason for report</label>
+                <textarea
+                  style={{ width: '100%', border: '1px solid #e5e7eb', borderRadius: 8, padding: 8, marginBottom: 12, resize: 'vertical' }}
+                  rows={3}
+                  value={reportReason}
+                  onChange={e => setReportReason(e.target.value)}
+                  placeholder="Describe the reason..."
+                  disabled={reportLoading}
+                />
+                <div style={{ display: 'flex', gap: 12, marginTop: 8 }}>
+                  <button
+                    style={{ border: 'none', borderRadius: 8, padding: '8px 0', fontWeight: 600, width: '100%', fontSize: 18, color: '#fff', background: reportLoading || !reportReason.trim() ? '#aaa' : '#4320d1', cursor: reportLoading || !reportReason.trim() ? 'not-allowed' : 'pointer' }}
+                    disabled={reportLoading || !reportReason.trim()}
+                    onClick={submitReport}
+                  >
+                    {reportLoading ? 'Reporting...' : 'Report'}
+                  </button>
+                  <button
+                    style={{ background: '#eee', color: '#4320d1', border: 'none', borderRadius: 8, padding: '8px 0', fontWeight: 600, width: '100%', fontSize: 18, cursor: reportLoading ? 'not-allowed' : 'pointer' }}
+                    onClick={() => { setShowReportDialog(false); setReportReason(''); }}
+                    disabled={reportLoading}
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
       </div>
       {/* Title */}
       <h3 style={{ fontFamily: FONT_FAMILY.poppins, fontWeight: 700, fontSize: 22, color: COLORS.primary, margin: 0 }}>{job.title}</h3>

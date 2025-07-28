@@ -4,7 +4,6 @@ import dynamic from 'next/dynamic';
 const ProtectedRoute = dynamic(() => import('../../ProtectedRoute'), { ssr: false });
 import HomeNavBar from '@/components/home/HomeNavBar';
 import { useRouter } from 'next/navigation';
-import SearchBar from '@/components/home/SearchBar';
 
 
 import { useEffect, useState } from 'react';

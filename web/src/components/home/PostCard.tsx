@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import type { Post } from "@/types/Post";
 import { formatTimeAgo } from "@/app/helpers/time_formatter";
+import { getUserID } from "@/utils/auth"; // Assuming you have a utility to get the current user ID
 
 const PostCard: React.FC<{ post: Post }> = ({ post }) => {
   const [openImg, setOpenImg] = useState<string | null>(null);
@@ -8,12 +9,76 @@ const PostCard: React.FC<{ post: Post }> = ({ post }) => {
   const [liked, setLiked] = useState(post.liked || false);
   const [likeLoading, setLikeLoading] = useState(false);
 
+  // Menu logic
+  const [showMenu, setShowMenu] = useState(false);
+  const menuButtonRef = React.useRef<HTMLButtonElement>(null);
+  const menuRef = React.useRef<HTMLDivElement>(null);
+
+  React.useEffect(() => {
+    if (!showMenu) return;
+    function handleClickOutside(event: MouseEvent) {
+      if (
+        menuRef.current &&
+        !menuRef.current.contains(event.target as Node) &&
+        menuButtonRef.current &&
+        !menuButtonRef.current.contains(event.target as Node)
+      ) {
+        setShowMenu(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [showMenu]);
+  const isCurrentUser = getUserID() === post.user?.id;
+
+  // Menu handlers (extensible)
+  const handleEdit = () => {
+    alert('Edit job ' + post.id);
+    setShowMenu(false);
+  };
+  const handleDelete = () => {
+    alert('Delete job ' + post.id);
+    setShowMenu(false);
+  };
+  const [showReportDialog, setShowReportDialog] = useState(false);
+  const [reportReason, setReportReason] = useState("");
+  const [reportLoading, setReportLoading] = useState(false);
+
+  const handleReport = () => {
+    setShowMenu(false);
+    setShowReportDialog(true);
+  };
+
+  const submitReport = async () => {
+    if (!reportReason.trim()) return;
+    setReportLoading(true);
+    try {
+      const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
+      await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/reports/post`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: token ? `Bearer ${token}` : "",
+        },
+        body: JSON.stringify({
+          reported_post_id: post.id,
+          reason: reportReason,
+        }),
+      });
+      setShowReportDialog(false);
+      setReportReason("");
+    } catch {
+      // handle error
+    }
+    setReportLoading(false);
+  };
+
   return (
-    <div
-      className="bg-white rounded-2xl shadow-[0_2px_16px_#4320d10a] p-8 relative mb-8 font-poppins"
-    >
-      {/* Header: Avatar, Name, Academic Year, Time */}
-      <div className="flex items-center mb-4">
+    <div className="bg-white rounded-2xl shadow-[0_2px_16px_#4320d10a] p-8 relative mb-8 font-poppins">
+      {/* Header: Avatar, Name, Academic Year, Time, Menu */}
+      <div className="flex items-center mb-4 relative">
         <img
           src={post.user?.profile_image_url || "/icons/avatar.png"}
           alt={post.user?.name || "User"}
@@ -32,6 +97,70 @@ const PostCard: React.FC<{ post: Post }> = ({ post }) => {
         <span className="text-[#aaa] text-[14px] ml-auto">
           {formatTimeAgo(post.created_at)}
         </span>
+        {/* Menu Icon */}
+        <div className="relative ml-2">
+          <button
+            ref={menuButtonRef}
+            className="p-2 rounded-full hover:bg-gray-100 focus:outline-none"
+            onClick={e => {
+              e.stopPropagation();
+              setShowMenu((v) => !v);
+            }}
+          >
+            <img src="/icons/menu.png" alt="menu" width={22} height={22} />
+          </button>
+          {showMenu && (
+            <div
+              ref={menuRef}
+              className="absolute right-0 mt-2 w-40 bg-white border border-gray-200 rounded-lg shadow-lg z-10"
+            >
+              {isCurrentUser ? (
+                <>
+                  <button className="w-full text-left px-4 py-2 hover:bg-gray-100" onClick={handleEdit}>Edit</button>
+                  <button className="w-full text-left px-4 py-2 hover:bg-gray-100 text-red-600" onClick={handleDelete}>Delete</button>
+                </>
+              ) : (
+                <>
+                  <button className="w-full text-left px-4 py-2 hover:bg-gray-100" onClick={handleReport}>Report</button>
+                </>
+              )}
+              {/* Room for more options here */}
+            </div>
+          )}
+          {/* Report Dialog */}
+          {showReportDialog && (
+            <div className="fixed top-0 left-0 w-screen h-screen bg-black/20 flex items-center justify-center z-[1100]">
+              <div className="bg-white rounded-xl shadow-lg p-6 w-full max-w-md mx-auto">
+                <h3 className="font-bold text-lg mb-3 text-[#4320d1]">Report Post</h3>
+                <label className="block mb-2 font-medium">Reason for report</label>
+                <textarea
+                  className="w-full border border-gray-300 rounded-lg p-2 mb-3 resize-vertical"
+                  rows={3}
+                  value={reportReason}
+                  onChange={e => setReportReason(e.target.value)}
+                  placeholder="Describe the reason..."
+                  disabled={reportLoading}
+                />
+                <div className="flex gap-3 mt-2">
+                  <button
+                    className={`border-none rounded-lg py-2 font-semibold w-full text-[18px] text-white px-4 block ${reportLoading || !reportReason.trim() ? 'bg-[#aaa] cursor-not-allowed' : 'bg-[#4320d1] cursor-pointer'}`}
+                    disabled={reportLoading || !reportReason.trim()}
+                    onClick={submitReport}
+                  >
+                    {reportLoading ? "Reporting..." : "Report"}
+                  </button>
+                  <button
+                    className="bg-[#eee] text-[#4320d1] border-none rounded-lg py-2 font-semibold px-4 w-full block"
+                    onClick={() => { setShowReportDialog(false); setReportReason(""); }}
+                    disabled={reportLoading}
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
       </div>
       {/* Title */}
       <div className="text-[#222] mb-2 leading-tight">
