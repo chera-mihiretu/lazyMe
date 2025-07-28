@@ -137,6 +137,7 @@ func (c *JobController) GetRecommendedJobs(ctx *gin.Context) {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
+
 	pageStr := ctx.Query("page")
 	if pageStr == "" {
 		pageStr = "1"
@@ -145,6 +146,18 @@ func (c *JobController) GetRecommendedJobs(ctx *gin.Context) {
 	if err != nil || pageInt < 1 {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid page number"})
 		return
+	}
+	fmt.Println(user)
+	if user.DepartmentID == nil && user.SchoolID == nil {
+
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Please Complete your profile with Department and School"})
+		return
+	}
+	if user.DepartmentID == nil {
+		user.DepartmentID = &primitive.NilObjectID
+	}
+	if user.SchoolID == nil {
+		user.SchoolID = &primitive.NilObjectID
 	}
 
 	jobs, err := c.usecase.GetRecommendedJobs(ctx, *user.DepartmentID, *user.SchoolID, pageInt)

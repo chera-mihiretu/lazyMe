@@ -81,6 +81,10 @@ func main() {
 	universityRepository := repository.NewUniversityRepository(myDatabase)
 	universityUseCase := usecases.NewUniversityUsecase(universityRepository)
 	universityController := controller.NewUniversityController(universityUseCase)
+	// report dependencies
+	reportRepository := repository.NewReportRepository(myDatabase)
+	reportUseCase := usecases.NewReportUseCase(reportRepository)
+	reportController := controller.NewReportController(reportUseCase, userUseCase, postUseCase)
 	// job dependencies
 	jobRepository := repository.NewJobRepository(myDatabase, departmentRepository)
 	jobUsecase := usecases.NewJobUsecase(jobRepository)
@@ -98,6 +102,7 @@ func main() {
 		postLikeController,
 		jobLikeController,
 		commentController,
+		reportController,
 	)
 
 	if err := router.Run(":8080"); err != nil {

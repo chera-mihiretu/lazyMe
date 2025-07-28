@@ -5,6 +5,7 @@ import (
 
 	"github.com/chera-mihiretu/IKnow/domain/models"
 	"github.com/chera-mihiretu/IKnow/repository"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type PostUseCase interface {
@@ -15,6 +16,7 @@ type PostUseCase interface {
 	UpdatePost(ctx context.Context, post models.Posts) (models.Posts, error)
 	DeletePost(ctx context.Context, userID string, postID string) error
 	SearchPosts(ctx context.Context, query string, page int) ([]models.Posts, error)
+	GetPostsWithListOfId(ctx context.Context, postIDs []primitive.ObjectID) ([]models.Posts, error)
 }
 
 type postUseCase struct {
@@ -25,6 +27,10 @@ func NewPostUseCase(repository repository.PostRepository) PostUseCase {
 	return &postUseCase{
 		postRepository: repository,
 	}
+}
+
+func (p *postUseCase) GetPostsWithListOfId(ctx context.Context, postIDs []primitive.ObjectID) ([]models.Posts, error) {
+	return p.postRepository.GetPostsWithListOfId(ctx, postIDs)
 }
 
 func (p *postUseCase) GetPostsByUserID(ctx context.Context, userID string, page int) ([]models.Posts, error) {

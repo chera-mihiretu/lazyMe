@@ -21,3 +21,14 @@ type Report struct {
 	ReviewedAt     *time.Time          `bson:"reviewed_at,omitempty" json:"reviewed_at,omitempty"`
 	CreatedAt      time.Time           `bson:"created_at" json:"created_at"`
 }
+
+type ReportView struct {
+	ID           primitive.ObjectID `bson:"_id,omitempty" json:"id"`
+	ReportedBy   UserView           `bson:"reported_by" json:"reported_by"`
+	ReportedPost PostView           `bson:"reported_post" json:"reported_post"`
+	Reason       string             `bson:"reason" json:"reason"`
+	Reviewed     bool               `bson:"reviewed" json:"reviewed"`
+	ReviewedBy   *UserView          `bson:"reviewed_by,omitempty" json:"reviewed_by,omitempty"`
+	ReviewedAt   *time.Time         `bson:"reviewed_at,omitempty" json:"reviewed_at,omitempty"`
+	CreatedAt    time.Time          `bson:"created_at" json:"created_at"`
+}

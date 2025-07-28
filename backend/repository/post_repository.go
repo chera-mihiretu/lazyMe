@@ -25,6 +25,7 @@ type PostRepository interface {
 	UpdatePost(ctx context.Context, post models.Posts) (models.Posts, error)
 	DeletePost(ctx context.Context, userID string, postID string) error
 	SearchPosts(ctx context.Context, query string, page int) ([]models.Posts, error)
+	GetPostsWithListOfId(ctx context.Context, postIDs []primitive.ObjectID) ([]models.Posts, error)
 }
 
 type postRepository struct {
@@ -42,6 +43,33 @@ func NewPostRepository(db *mongo.Database,
 		connectRepository: connect,
 		userRepository:    &userRepo,
 	}
+}
+
+func (p *postRepository) GetPostsWithListOfId(ctx context.Context, postIDs []primitive.ObjectID) ([]models.Posts, error) {
+	var posts []models.Posts
+	cursor, err := p.postsDB.Find(ctx, bson.M{
+		"_id": bson.M{"$in": postIDs},
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	defer cursor.Close(ctx)
+
+	for cursor.Next(ctx) {
+		var post models.Posts
+		if err := cursor.Decode(&post); err != nil {
+			return nil, err
+		}
+		posts = append(posts, post)
+	}
+
+	if err := cursor.Err(); err != nil {
+		return nil, err
+	}
+
+	return posts, nil
 }
 
 func (p *postRepository) GetRecomendedPosts(ctx context.Context, userID string, page int) ([]models.Posts, error) {
