@@ -1,6 +1,7 @@
 "use client";
 import React, { useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 
 import Navbar from "@/components/admin/Navbar";
 import AddDepartmentDialog from "@/components/admin/AddDepartmentDialog";
@@ -32,14 +33,14 @@ const AdminDashboard: React.FC = () => {
           {/* See Reports */}
           <Link href="/admin/reports" className="no-underline">
             <div className="bg-white rounded-[14px] shadow-[0_2px_8px_#4320d120] px-8 py-6 flex items-center min-w-[220px] cursor-pointer transition-shadow duration-200 gap-[18px]">
-              <img src="/icons/report.png" alt="See Reports" width={38} height={38} />
+              <Image src="/icons/report.png" alt="See Reports" width={36} height={36} className="w-9 h-9" />
               <span className="font-semibold text-[18px] text-[#4320d1]">See Reports</span>
             </div>
           </Link>
           {/* Unverified Posts */}
           <Link href="/admin/unverified-posts" className="no-underline">
             <div className="bg-white rounded-[14px] shadow-[0_2px_8px_#4320d120] px-8 py-6 flex items-center min-w-[220px] cursor-pointer transition-shadow duration-200 gap-[18px]">
-              <img src="/icons/verify-posts.png" alt="Unverified Posts" width={38} height={38} />
+              <Image src="/icons/verify-posts.png" alt="Unverified Posts" width={36} height={36} className="w-9 h-9" />
               <span className="font-semibold text-[18px] text-[#4320d1]">Unverified Posts</span>
             </div>
           </Link>
@@ -49,7 +50,7 @@ const AdminDashboard: React.FC = () => {
               className="bg-white rounded-[14px] shadow-[0_2px_8px_#4320d120] px-8 py-6 flex items-center min-w-[220px] cursor-pointer transition-shadow duration-200 gap-[18px]"
               onClick={() => setShowUniversityDialog(true)}
             >
-              <img src="/icons/school.png" alt="Add University" width={38} height={38} />
+              <Image src="/icons/school.png" alt="Add University" width={36} height={36} className="w-9 h-9" />
               <span className="font-semibold text-[18px] text-[#4320d1]">Add University</span>
             </div>
             <AddUniversityDialog
@@ -63,7 +64,7 @@ const AdminDashboard: React.FC = () => {
               className="bg-white rounded-[14px] shadow-[0_2px_8px_#4320d120] px-8 py-6 flex items-center min-w-[220px] cursor-pointer transition-shadow duration-200 gap-[18px]"
               onClick={() => setShowSchoolDialog(true)}
             >
-              <img src="/icons/school.png" alt="Add School" width={38} height={38} />
+              <Image src="/icons/school.png" alt="Add School" width={36} height={36} className="w-9 h-9" />
               <span className="font-semibold text-[18px] text-[#4320d1]">Add School</span>
             </div>
             <AddSchoolDialog
@@ -77,7 +78,7 @@ const AdminDashboard: React.FC = () => {
               className="bg-white rounded-[14px] shadow-[0_2px_8px_#4320d120] px-8 py-6 flex items-center min-w-[220px] cursor-pointer transition-shadow duration-200 gap-[18px]"
               onClick={() => setShowDepartmentDialog(true)}
             >
-              <img src="/icons/school.png" alt="Add Department" width={38} height={38} />
+              <Image src="/icons/school.png" alt="Add Department" width={36} height={36} className="w-9 h-9" />
               <span className="font-semibold text-[18px] text-[#4320d1]">Add Department</span>
             </div>
             <AddDepartmentDialog
@@ -91,7 +92,7 @@ const AdminDashboard: React.FC = () => {
               className="bg-white rounded-[14px] shadow-[0_2px_8px_#4320d120] px-8 py-6 flex items-center min-w-[220px] cursor-pointer transition-shadow duration-200 gap-[18px]"
               onClick={() => setShowMaterialDialog(true)}
             >
-              <img src="/icons/material.png" alt="Add Material" width={38} height={38} />
+              <Image src="/icons/material.png" alt="Add Material" width={36} height={36} className="w-9 h-9" />
               <span className="font-semibold text-[18px] text-[#4320d1]">Add Material</span>
             </div>
             <AddMaterialDialog

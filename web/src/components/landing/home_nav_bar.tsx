@@ -8,9 +8,6 @@ function HomeNavBar() {
   return (
     <nav style={{
       width: '100%',
-      background: COLORS.background,
-      fontFamily: FONT_FAMILY.poppins,
-      boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
       padding: '0 2rem',
       display: 'flex',
       alignItems: 'center',

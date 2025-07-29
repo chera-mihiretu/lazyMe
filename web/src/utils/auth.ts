@@ -42,6 +42,17 @@ export function getUserID(): string | null {
     return null;
   }
 }
+export function getUserExpiryTime(): number {
+  const token = getToken();
+  if (!token) return 0;
+  try {
+    const payload = token.split('.')[1];
+    const decoded = JSON.parse(atob(payload));
+    return decoded.exp ? decoded.exp * 1000 : 0; // Convert to milliseconds
+  } catch {
+    return 0;
+  }
+}
 
 export function redirectByRole() {
   const role = getUserRole();

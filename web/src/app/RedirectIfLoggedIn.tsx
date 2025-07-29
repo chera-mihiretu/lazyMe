@@ -20,6 +20,6 @@ export default function RedirectIfLoggedIn({ children, role = 'none' }: { childr
         }
       }
     }
-  }, [router]);
+  }, [router, role]);
   return <>{children}</>;
 }

@@ -62,7 +62,7 @@ const WhatWeOffer: React.FC = () => {
 			<p className="text-[1.15rem] mb-10 max-w-[600px] text-center font-poppins" style={{ color: COLORS.foreground }}>
 				Comprehensive tools and resources designed to enhance your university experience and accelerate your academic success.
 			</p>
-			<div className="grid w-[90%] max-w-[1000px] gap-8 grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-4">
+	  		<div className="grid w-[95%] max-w-[1400px] gap-8 grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-4">
 				{features.map((feature, idx) => (
 					<div
 						key={feature.title}

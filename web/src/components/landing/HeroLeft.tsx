@@ -18,7 +18,7 @@ const HeroLeft: React.FC = () => (
     <h1 style={{
       fontSize: '2.5rem',
       fontWeight: 700,
-      color: COLORS.primary,
+      color: COLORS.white,
       fontFamily: FONT_FAMILY.poppins,
       marginBottom: '1rem',
       lineHeight: 1.15,
@@ -27,7 +27,7 @@ const HeroLeft: React.FC = () => (
     </h1>
     <p style={{
       fontSize: '1.15rem',
-      color: COLORS.foreground,
+      color: COLORS.white,
       marginBottom: '1.5rem',
       fontWeight: 400,
       lineHeight: 1.6,

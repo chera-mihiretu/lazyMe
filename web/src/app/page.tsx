@@ -6,15 +6,16 @@ import WhyChooseIKnow from "@/components/landing/WhyChooseIKnow";
 import TestimonialsSection from "@/components/landing/TestimonialsSection";
 import AboutSection from "@/components/landing/AboutSection";
 import RedirectIfLoggedIn from "./RedirectIfLoggedIn";
+import UpcomingFeaturesSection from "@/components/landing/UpcomingFeaturesSection";
 
 export default function Home() {
   return (
     <RedirectIfLoggedIn>
       <div>
-        <HomeNavBar/>
         <HeroSection/>
         <WhatWeOffer/>
         <WhyChooseIKnow/>
+        <UpcomingFeaturesSection/>
         <TestimonialsSection/>
         <AboutSection/>
       </div>

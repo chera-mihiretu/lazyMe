@@ -7,32 +7,13 @@ import WhyChooseRight from './WhyChooseRight';
 import { COLORS } from '../../utils/color';
 
 const WhyChooseIKnow: React.FC = () => (
-	<section
-		style={{
-			width: '100%',
-			background: COLORS.sectionBg,
-			padding: '4rem 0',
-			display: 'flex',
-			flexDirection: 'row',
-			alignItems: 'center',
-			justifyContent: 'center',
-			boxSizing: 'border-box',
-			gap: '3rem',
-		}}
-	>
+   <section
+	 className="w-full flex flex-col md:flex-row items-center justify-center gap-12 py-16 box-border"
+	 style={{ background: COLORS.sectionBg }}
+   >
 		<WhyChooseLeft />
 		<WhyChooseRight />
-		<style jsx>{`
-			@media (max-width: 900px) {
-				section {
-					flex-direction: column !important;
-				}
-				section > div {
-					max-width: 100% !important;
-					width: 100% !important;
-				}
-			}
-		`}</style>
+		
 	</section>
 );
 

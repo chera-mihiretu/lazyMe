@@ -12,6 +12,7 @@ export const COLORS = {
   inputBorder: '#E0E0E0',
   inputBg: '#FAFAFA',
   muted: '#7B7B93',
+  white: '#FFFFFF',
 };
 
 export const FONT_FAMILY = {

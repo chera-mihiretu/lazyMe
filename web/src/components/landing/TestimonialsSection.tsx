@@ -6,35 +6,11 @@ import { COLORS, FONT_FAMILY } from '../../utils/color';
 
 const testimonials = [
 	{
-		text: 'IKnow helped me connect with peers and find resources I never knew existed. My academic life is so much easier now!',
-		name: 'Alex Johnson',
-		affiliation: 'Computer Science, ASTU',
+		text: 'lazyme helped me connect with peers and find resources I never knew existed. My academic life is so much easier now!',
+		name: 'Chera Mihiretu',
+		affiliation: 'Software Engineer, ASTU',
 		photo: '/my.png',
-	},
-	{
-		text: 'The platform is intuitive and the opportunities section helped me land my first internship!',
-		name: 'Sara Lee',
-		affiliation: 'Business Administration, ASTU',
-		photo: '/my.png',
-	},
-	{
-		text: 'I love the campus announcements and networking features. IKnow is a must-have for every student.',
-		name: 'Mohammed Ali',
-		affiliation: 'Engineering, ASTU',
-		photo: '/my.png',
-	},
-	{
-		text: 'IKnow made it easy to find study groups and stay on top of campus events. Highly recommended!',
-		name: 'Lina Tesfaye',
-		affiliation: 'Medicine, ASTU',
-		photo: '/my.png',
-	},
-	{
-		text: 'The resources and peer networking features are a game changer for my studies.',
-		name: 'Samuel Getachew',
-		affiliation: 'Law, ASTU',
-		photo: '/my.png',
-	},
+	},	
 ];
 
 const TestimonialCard = ({ testimonial, animate }: { testimonial: typeof testimonials[0], animate: string }) => (

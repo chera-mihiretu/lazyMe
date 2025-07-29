@@ -1,6 +1,8 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import { useRouter } from 'next/navigation';
+import dynamic from "next/dynamic";
+const ProtectedRoute = dynamic(() => import('../../ProtectedRoute'), { ssr: false });
 const baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
 
 const CompleteAccountPage: React.FC = () => {
@@ -101,42 +103,22 @@ const CompleteAccountPage: React.FC = () => {
   };
 
   return (
-    <div style={{ maxWidth: 480, margin: "3rem auto", background: "#fff", borderRadius: 16, boxShadow: "0 2px 16px #4320d10a", padding: 32 }}>
-      <h2 style={{ fontWeight: 700, fontSize: 24, marginBottom: 24 }}>Complete Your Profile</h2>
+    <ProtectedRoute role="student">
+    <div className="max-w-[480px] my-12 mx-auto bg-white rounded-xl shadow-[0_2px_16px_#4320d10a] p-8">
+      <h2 className="font-bold text-2xl mb-6">Complete Your Profile</h2>
       <form onSubmit={handleSubmit}>
         {/* Profile Image */}
-        <div style={{ marginBottom: 22, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-          <label style={{ fontWeight: 600, fontSize: 16, marginBottom: 8 }}>Profile Image <span style={{ color: '#888', fontWeight: 400 }}>(optional)</span></label>
+        <div className="mb-6 flex flex-col items-center">
+          <label className="font-semibold text-base mb-2">Profile Image <span className="text-gray-500 font-normal">(optional)</span></label>
           <div style={{ position: 'relative', width: 130, height: 130, marginBottom: 8 }}>
             <input
               id="profile-image-input"
               type="file"
               accept="image/*"
               onChange={handleProfileImageChange}
-              style={{
-                position: 'absolute',
-                width: '100%',
-                height: '100%',
-                opacity: 0,
-                cursor: 'pointer',
-                zIndex: 2,
-                left: 0,
-                top: 0,
-              }}
+              className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
             />
-            <div style={{
-              width: 130,
-              height: 130,
-              borderRadius: '50%',
-              overflow: 'hidden',
-              border: '2.5px solid #6366f1',
-              boxShadow: '0 2px 12px #6366f133',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              background: '#f7f7fb',
-              position: 'relative',
-            }}>
+            <div className="relative w-[130px] h-[130px] rounded-full overflow-hidden border-[2.5px] border-[#6366f1] shadow-[0_2px_12px_#6366f133] flex items-center justify-center bg-[#f7f7fb] mb-2">
               {profilePreview ? (
                 <img src={profilePreview} alt="Profile Preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
               ) : (
@@ -144,13 +126,13 @@ const CompleteAccountPage: React.FC = () => {
               )}
             </div>
           </div>
-          <div style={{ color: '#6366f1', fontWeight: 500, fontSize: 15, cursor: 'pointer', marginTop: 2 }} onClick={() => document.getElementById('profile-image-input')?.click()}>
+          <div className="text-[#6366f1] font-medium text-[15px] cursor-pointer mt-1" onClick={() => document.getElementById('profile-image-input')?.click()}>
             Pick image
           </div>
         </div>
         {/* University Selection */}
-        <div style={{ marginBottom: 18 }}>
-          <label style={{ fontWeight: 600, fontSize: 16 }}>University</label>
+        <div className="mb-5">
+          <label className="font-semibold text-base">University</label>
           <select
             value={selectedUniversity}
             onChange={e => {
@@ -158,7 +140,7 @@ const CompleteAccountPage: React.FC = () => {
               setSelectedSchool("");
               setSelectedDepartment("");
             }}
-            style={{ width: '100%', borderRadius: 8, border: '1.5px solid #e3e6ef', padding: 10, fontSize: 15, marginTop: 6 }}
+            className="w-full rounded-lg border-[1.5px] border-[#e3e6ef] px-3 py-2 text-base mt-2"
             required
           >
             <option value="">Select university</option>
@@ -168,15 +150,15 @@ const CompleteAccountPage: React.FC = () => {
           </select>
         </div>
         {/* School Selection */}
-        <div style={{ marginBottom: 18 }}>
-          <label style={{ fontWeight: 600, fontSize: 16 }}>School</label>
+        <div className="mb-5">
+          <label className="font-semibold text-base">School</label>
           <select
             value={selectedSchool}
             onChange={e => {
               setSelectedSchool(e.target.value);
               setSelectedDepartment("");
             }}
-            style={{ width: '100%', borderRadius: 8, border: '1.5px solid #e3e6ef', padding: 10, fontSize: 15, marginTop: 6 }}
+            className="w-full rounded-lg border-[1.5px] border-[#e3e6ef] px-3 py-2 text-base mt-2"
             required
             disabled={!selectedUniversity}
           >
@@ -187,12 +169,12 @@ const CompleteAccountPage: React.FC = () => {
           </select>
         </div>
         {/* Department Selection (Optional) */}
-        <div style={{ marginBottom: 18 }}>
-          <label style={{ fontWeight: 600, fontSize: 16 }}>Department <span style={{ color: '#888', fontWeight: 400 }}>(optional)</span></label>
+        <div className="mb-5">
+          <label className="font-semibold text-base">Department <span className="text-gray-500 font-normal">(optional)</span></label>
           <select
             value={selectedDepartment}
             onChange={e => setSelectedDepartment(e.target.value)}
-            style={{ width: '100%', borderRadius: 8, border: '1.5px solid #e3e6ef', padding: 10, fontSize: 15, marginTop: 6 }}
+            className="w-full rounded-lg border-[1.5px] border-[#e3e6ef] px-3 py-2 text-base mt-2"
             disabled={!selectedSchool}
           >
             <option value="">Select department</option>
@@ -201,28 +183,17 @@ const CompleteAccountPage: React.FC = () => {
             ))}
           </select>
         </div>
-        {error && <div style={{ color: "#d32f2f", marginBottom: 12 }}>{error}</div>}
+        {error && <div className="text-[#d32f2f] mb-3">{error}</div>}
         <button
           type="submit"
           disabled={loading}
-          style={{
-            width: "100%",
-            padding: "12px 0",
-            borderRadius: 8,
-            border: "none",
-            background: loading ? "#b3b3b3" : "#2563eb",
-            color: "#fff",
-            fontWeight: 700,
-            fontSize: 17,
-            cursor: loading ? "not-allowed" : "pointer",
-            marginTop: 10,
-            transition: "background 0.2s",
-          }}
+          className={`w-full py-3 rounded-lg font-bold text-base mt-2 text-white transition-colors ${loading ? 'bg-gray-400 cursor-not-allowed' : 'bg-[#2563eb] hover:bg-blue-600'}`}
         >
           {loading ? "Completing..." : "Complete Profile"}
         </button>
       </form>
     </div>
+    </ProtectedRoute>
   );
 };
 

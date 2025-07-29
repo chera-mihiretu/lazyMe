@@ -1,7 +1,7 @@
 "use client";
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { isLoggedIn, getUserRole } from "@/utils/auth";
+import { isLoggedIn, getUserRole, getUserExpiryTime } from "@/utils/auth";
 
 export default function ProtectedRoute({ children, role }: { children: React.ReactNode, role : string }) {
   const router = useRouter();
@@ -12,7 +12,8 @@ export default function ProtectedRoute({ children, role }: { children: React.Rea
         router.replace("/auth/login");
       } else {
         const thisRole = getUserRole();
-        if (!thisRole) {
+        const thisTime = getUserExpiryTime();
+        if (!thisRole || (new Date().getTime() > thisTime)) {
           router.replace("/auth/login");
           return;
         }
