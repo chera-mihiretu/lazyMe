@@ -2,15 +2,19 @@
 import React, { useState, useEffect } from "react";
 import { useRouter } from 'next/navigation';
 import dynamic from "next/dynamic";
+import Image from "next/image";
+import { School } from "@/types/schools";
+import { Department } from "@/types/department";
+import { University } from "@/types/university";
 const ProtectedRoute = dynamic(() => import('../../ProtectedRoute'), { ssr: false });
 const baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
 
 const CompleteAccountPage: React.FC = () => {
   const [profileImage, setProfileImage] = useState<File | null>(null);
   const [profilePreview, setProfilePreview] = useState<string | null>(null);
-  const [universities, setUniversities] = useState<any[]>([]);
-  const [schools, setSchools] = useState<any[]>([]);
-  const [departments, setDepartments] = useState<any[]>([]);
+  const [universities, setUniversities] = useState<University[]>([]);
+  const [schools, setSchools] = useState<School[]>([]);
+  const [departments, setDepartments] = useState<Department[]>([]);
   const [selectedUniversity, setSelectedUniversity] = useState("");
   const [selectedSchool, setSelectedSchool] = useState("");
   const [selectedDepartment, setSelectedDepartment] = useState("");
@@ -96,9 +100,9 @@ const CompleteAccountPage: React.FC = () => {
       setLoading(false);
       router.push("/home/posts"); // Redirect to home after successful completion
       // Optionally redirect here
-    } catch (err: any) {
+    } catch (err) {
       setLoading(false);
-      setError(err.message || "Failed to complete profile");
+      setError("Failed to complete profile" + err);
     }
   };
 
@@ -120,9 +124,9 @@ const CompleteAccountPage: React.FC = () => {
             />
             <div className="relative w-[130px] h-[130px] rounded-full overflow-hidden border-[2.5px] border-[#6366f1] shadow-[0_2px_12px_#6366f133] flex items-center justify-center bg-[#f7f7fb] mb-2">
               {profilePreview ? (
-                <img src={profilePreview} alt="Profile Preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                <Image src={profilePreview} alt="Profile Preview" width={130} height={130} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
               ) : (
-                <img src="/icons/avatar.png" alt="Avatar Placeholder" style={{ width: 70, height: 70, opacity: 0.7 }} />
+                <Image src="/icons/avatar.png" alt="Avatar Placeholder" width={70} height={70} style={{ opacity: 0.7 }} />
               )}
             </div>
           </div>

@@ -2,12 +2,12 @@
 import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { COLORS, FONT_FAMILY } from '../../utils/color';
 import Image from 'next/image';
 import SearchBar from './SearchBar';
 import UserAvatar from './UserAvatar';
 import { useEffect, useState } from 'react';
 import NotificationBell from './NotificationBell';
+import { User } from '@/types/post';
 
 const navLinks = [
   { label: 'Posts', href: '/home/posts', icon: '/home/announcement.png' },
@@ -21,7 +21,7 @@ const baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
 
 const HomeNavBar: React.FC = () => {
   const pathname = usePathname();
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<User | null>(null);
   const [showAvatarMenu, setShowAvatarMenu] = useState(false);
 
   useEffect(() => {
@@ -81,7 +81,7 @@ const HomeNavBar: React.FC = () => {
       {/* Search, Notification, and Avatar */}
       <div className="flex items-center gap-4.5 relative">
         <SearchBar value={''} onChange={function (e: React.ChangeEvent<HTMLInputElement>): void {
-          throw new Error('Function not implemented.');
+          throw new Error('Function not implemented.' + e);
         } } />
         <NotificationBell />
         {/* Avatar with dropdown menu */}

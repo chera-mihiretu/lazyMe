@@ -1,6 +1,5 @@
 "use client";
-import React, { useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import React from 'react';
 import dynamic from 'next/dynamic';
 const ProtectedRoute = dynamic(() => import('../ProtectedRoute'), { ssr: false });
 

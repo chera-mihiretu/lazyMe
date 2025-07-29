@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import Image from 'next/image';
-import { COLORS, FONT_FAMILY } from '../../utils/color';
+import { COLORS } from '../../utils/color';
 
 const testimonials = [
 	{

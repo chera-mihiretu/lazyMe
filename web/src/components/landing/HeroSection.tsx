@@ -1,8 +1,6 @@
 import React from 'react';
 import HeroLeft from './HeroLeft';
 import HeroRight from './HeroRight';
-import { COLORS } from '../../utils/color';
-import HomeNavBar from './home_nav_bar';
 
 const HeroSection: React.FC = () => (
   <div className="inset-0 bg-cover bg-center"

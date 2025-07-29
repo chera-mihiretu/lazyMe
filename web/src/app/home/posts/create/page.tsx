@@ -1,9 +1,9 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import type { Department } from "@/types/Department";
+import type { Department } from "@/types/department";
 import { useRouter } from "next/navigation";
 import ProtectedRoute from "@/app/ProtectedRoute";
-
+import Image from "next/image";
 const baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
 
 const CreatePostPage: React.FC = () => {
@@ -76,9 +76,9 @@ const CreatePostPage: React.FC = () => {
       }
       setLoading(false);
       router.push("/home/posts");
-    } catch (err: any) {
+    } catch (err) {
       setLoading(false);
-      setError(err.message || "Failed to create post");
+      setError("Failed to create post" + err);
     }
   };
 
@@ -221,10 +221,12 @@ const CreatePostPage: React.FC = () => {
                 const url = URL.createObjectURL(img);
                 return (
                   <div key={idx} style={{ position: 'relative', borderRadius: 14, overflow: 'hidden', boxShadow: '0 2px 12px #4320d122', border: '2px solid #6366f1', background: '#f7f7fb', width: 220, height: 220, display: 'flex', alignItems: 'center', justifyContent: 'center', flex: '0 0 auto' }}>
-                    <img
+                    <Image
                       src={url}
                       alt={`Selected ${idx + 1}`}
-                      style={{ width: 220, height: 220, objectFit: 'cover', display: 'block' }}
+                      width={220}
+                      height={220}
+                      style={{ objectFit: 'cover', display: 'block' }}
                     />
                     <button
                       type="button"

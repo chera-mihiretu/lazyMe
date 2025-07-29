@@ -29,8 +29,8 @@ const AddUniversityDialog: React.FC<AddUniversityDialogProps> = ({ open, onClose
       setUniversityName("");
       setCountry("");
       onClose();
-    } catch (err: any) {
-      setError(err.message || "Error adding university");
+    } catch (err) {
+      setError("Error adding university" + err);
     } finally {
       setLoading(false);
     }

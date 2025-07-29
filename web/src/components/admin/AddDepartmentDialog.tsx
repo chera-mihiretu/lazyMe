@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from "react";
+import { University } from "../signup/useUniversities";
+import { School } from "../signup/useSchools";
 
 interface AddDepartmentDialogProps {
   open: boolean;
@@ -18,7 +20,6 @@ const AddDepartmentDialog: React.FC<AddDepartmentDialogProps> = ({ open, onClose
   const [schools, setSchools] = useState<{ id: string; name: string }[]>([]);
   const [loadingUniversities, setLoadingUniversities] = useState(false);
   const [loadingSchools, setLoadingSchools] = useState(false);
-  const [error, setError] = useState("");
 
   useEffect(() => {
     if (!open) return;
@@ -27,14 +28,12 @@ const AddDepartmentDialog: React.FC<AddDepartmentDialogProps> = ({ open, onClose
       .then(res => res.json())
       .then(data => {
         if (data && Array.isArray(data.universities)) {
-          setUniversities(data.universities.map((u: any) => ({ id: u.id, name: u.name })));
+          setUniversities(data.universities.map((u: University) => ({ id: u.id, name: u.name })));
         } else {
-          setError("Failed to load universities");
         }
         setLoadingUniversities(false);
       })
       .catch(() => {
-        setError("Failed to load universities");
         setLoadingUniversities(false);
       });
   }, [open]);
@@ -49,14 +48,12 @@ const AddDepartmentDialog: React.FC<AddDepartmentDialogProps> = ({ open, onClose
       .then(res => res.json())
       .then(data => {
         if (data && Array.isArray(data.schools)) {
-          setSchools(data.schools.map((s: any) => ({ id: s.id, name: s.name })));
+          setSchools(data.schools.map((s: School) => ({ id: s.id, name: s.name })));
         } else {
-          setError("Failed to load schools");
         }
         setLoadingSchools(false);
       })
       .catch(() => {
-        setError("Failed to load schools");
         setLoadingSchools(false);
       });
   }, [selectedUniversity]);
@@ -89,8 +86,8 @@ const AddDepartmentDialog: React.FC<AddDepartmentDialogProps> = ({ open, onClose
       setDescription("");
       setYear("");
       onClose();
-    } catch (err: any) {
-      setAddError(err.message || "Error adding department");
+    } catch (err) {
+      setAddError("Error adding department" + err);
     } finally {
       setAddLoading(false);
     }

@@ -1,5 +1,5 @@
 import React from "react";
-
+import Image from "next/image";
 interface UserCardProps {
   id: string;
   name: string;
@@ -39,7 +39,7 @@ const UserCard: React.FC<UserCardProps> = React.memo(({
       setSent(true);
       })
       .catch((e) => {
-      // Optionally show error
+      console.log(e)
       })
       .finally(() => {
       setLoading(false);
@@ -65,7 +65,7 @@ const UserCard: React.FC<UserCardProps> = React.memo(({
         transition: "box-shadow 0.2s, border 0.2s",
       }}
     >
-      <img
+      <Image
         src={profile_image_url || "/icons/avatar.png"}
         alt={name + " avatar"}
         style={{
@@ -114,6 +114,8 @@ const UserCard: React.FC<UserCardProps> = React.memo(({
     </div>
   );
 });
+
+UserCard.displayName = "UserCard";
 
 
 // Responsive style: hide on mobile

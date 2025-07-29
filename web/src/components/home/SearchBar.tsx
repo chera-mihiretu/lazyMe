@@ -1,5 +1,4 @@
 import React from 'react';
-import { COLORS, FONT_FAMILY } from '../../utils/color';
 
 
 interface SearchBarProps {

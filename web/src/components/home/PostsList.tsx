@@ -1,7 +1,7 @@
 "use client";
 import React, { useState } from "react";
 import PostCard from "@/components/home/PostCard";
-import type { Post } from "@/types/Post";
+import type { Post } from "@/types/post";
 import PostSearchBar from "@/components/home/PostSearchBar";
 const baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
 
@@ -51,8 +51,8 @@ const PostsList: React.FC<PostsListProps> = ({ initialSearch = "" }) => {
       setPosts(data.posts || []);
       setBackupPosts(data.posts || []);
       setLoading(false);
-    } catch (e: any) {
-      setError(e?.message || "Failed to fetch posts.");
+    } catch (e) {
+      setError("Failed to fetch posts." + e);
       setLoading(false);
       setPosts([]);
     }
@@ -95,8 +95,8 @@ const PostsList: React.FC<PostsListProps> = ({ initialSearch = "" }) => {
       const data = await res.json();
       setPosts(data.posts || []);
       setLoading(false);
-    } catch (e: any) {
-      setError(e?.message || "Failed to fetch posts.");
+    } catch (e) {
+      setError("Failed to fetch posts." + e);
       setLoading(false);
       setPosts([]);
     }
@@ -108,7 +108,7 @@ const PostsList: React.FC<PostsListProps> = ({ initialSearch = "" }) => {
       setPosts(backupPosts);
       setBackupPosts(null);
     }
-  }, [search]);
+  }, [search, backupPosts]);
   return (
     <>
       <PostSearchBar

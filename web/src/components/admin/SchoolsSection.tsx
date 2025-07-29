@@ -24,8 +24,8 @@ const SchoolsSection: React.FC = () => {
       setSchools(prev => prev.filter(s => s.id !== id));
       setShowDeleteDialog(null);
       setDeleteInput("");
-    } catch (err: any) {
-      setDeleteError(err.message || "Error deleting school");
+    } catch (err) {
+      setDeleteError("Error deleting school" + err);
     } finally {
       setDeleteLoading(false);
     }
@@ -96,7 +96,7 @@ const SchoolsSection: React.FC = () => {
         <div className="fixed top-0 left-0 w-screen h-screen bg-black/20 flex items-center justify-center z-[1000]">
           <div className="bg-white rounded-2xl shadow-[0_4px_32px_#4320d120] px-8 py-6 min-w-[320px] w-full max-w-md flex flex-col gap-4">
             <h3 className="font-bold text-[20px] text-[#e53e3e] mb-2">Delete School</h3>
-            <div className="text-[#333] font-medium mb-2">Type <span className="text-[#e53e3e] font-bold">'delete school'</span> to confirm deletion.</div>
+            <div className="text-[#333] font-medium mb-2">Type <span className="text-[#e53e3e] font-bold">&quot;delete school&quot;</span> to confirm deletion.</div>
             <input
               type="text"
               value={deleteInput}

@@ -2,7 +2,7 @@
 
 import React, { useEffect } from 'react';
 import Image from 'next/image';
-import { COLORS, FONT_FAMILY } from '../../utils/color';
+import { COLORS } from '../../utils/color';
 
 const features = [
 	{
@@ -63,7 +63,7 @@ const WhatWeOffer: React.FC = () => {
 				Comprehensive tools and resources designed to enhance your university experience and accelerate your academic success.
 			</p>
 	  		<div className="grid w-[95%] max-w-[1400px] gap-8 grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-4">
-				{features.map((feature, idx) => (
+				{features.map((feature) => (
 					<div
 						key={feature.title}
 						className="bg-white rounded-xl shadow-none p-8 flex flex-col items-center text-center cursor-pointer transition-transform hover:-translate-y-2 hover:scale-[1.04] hover:shadow-lg hover:bg-white"

@@ -1,8 +1,8 @@
 import React, { useState } from "react";
-import type { Post } from "@/types/Post";
+import type { Post } from "@/types/post";
 import { formatTimeAgo } from "@/app/helpers/time_formatter";
 import { getUserID } from "@/utils/auth"; // Assuming you have a utility to get the current user ID
-
+import Image from "next/image";
 const PostCard: React.FC<{ post: Post }> = ({ post }) => {
   const [openImg, setOpenImg] = useState<string | null>(null);
   const [likes, setLikes] = useState(post.likes || 0);
@@ -79,7 +79,7 @@ const PostCard: React.FC<{ post: Post }> = ({ post }) => {
     <div className="bg-white rounded-2xl shadow-[0_2px_16px_#4320d10a] p-8 relative mb-8 font-poppins">
       {/* Header: Avatar, Name, Academic Year, Time, Menu */}
       <div className="flex items-center mb-4 relative">
-        <img
+        <Image
           src={post.user?.profile_image_url || "/icons/avatar.png"}
           alt={post.user?.name || "User"}
           width={48}
@@ -107,7 +107,7 @@ const PostCard: React.FC<{ post: Post }> = ({ post }) => {
               setShowMenu((v) => !v);
             }}
           >
-            <img src="/icons/menu.png" alt="menu" width={22} height={22} />
+            <Image src="/icons/menu.png" alt="menu" width={22} height={22} />
           </button>
           {showMenu && (
             <div
@@ -172,7 +172,7 @@ const PostCard: React.FC<{ post: Post }> = ({ post }) => {
           className={`flex flex-wrap gap-4 my-4 ${post.post_attachments.length === 1 ? 'justify-start' : post.post_attachments.length === 2 ? 'justify-between' : 'justify-center'}`}
         >
           {post.post_attachments.map((url, idx) => (
-            <img
+            <Image
               key={idx}
               src={url}
               alt="attachment"
@@ -199,7 +199,7 @@ const PostCard: React.FC<{ post: Post }> = ({ post }) => {
           onClick={() => setOpenImg(null)}
           className="fixed z-[1000] left-0 top-0 w-screen h-screen bg-[rgba(30,30,40,0.85)] flex items-center justify-center cursor-zoom-out"
         >
-          <img
+          <Image
             src={openImg}
             alt="full"
             className="max-w-[90vw] max-h-[90vh] rounded-2xl shadow-[0_8px_32px_#0008] bg-white"
@@ -250,7 +250,7 @@ const PostCard: React.FC<{ post: Post }> = ({ post }) => {
             setLikeLoading(false);
           }}
         >
-          <img src={liked ? "/icons/liked.png" : "/icons/like.png"} alt="like" width={30} height={30} />
+          <Image src={liked ? "/icons/liked.png" : "/icons/like.png"} alt="like" width={30} height={30} />
           <span className="text-[20px] text-[#4320d1] font-semibold">{likes}</span>
         </button>
         <span
@@ -261,7 +261,7 @@ const PostCard: React.FC<{ post: Post }> = ({ post }) => {
             }
           }}
         >
-          <img src="/icons/comment.png" alt="comment" width={30} height={30} />
+          <Image src="/icons/comment.png" alt="comment" width={30} height={30} />
           <span className="text-[20px] text-[#4320d1] font-semibold">{post.comments}</span>
         </span>
       </div>

@@ -52,8 +52,8 @@ const AddSchoolDialog: React.FC<Props> = ({ open, onClose }) => {
       setSelectedUniversity("");
       setDescription("");
       onClose();
-    } catch (err: any) {
-      setError(err.message || "Error adding school");
+    } catch (err) {
+      setError("Error adding school" + err);
     } finally {
       setLoading(false);
     }

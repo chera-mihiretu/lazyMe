@@ -39,7 +39,7 @@ export function useSchools(universityId: string) {
         }
         if (isMounted) setSchools(allSchools);
       } catch (e) {
-        if (isMounted) setError("Failed to load schools");
+        if (isMounted) setError("Failed to load schools" + e);
       } finally {
         if (isMounted) setLoading(false);
       }

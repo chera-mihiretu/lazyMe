@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { COLORS, FONT_FAMILY } from '../../../../utils/color';
 import { useRouter } from 'next/navigation';
 import ProtectedRoute from '@/app/ProtectedRoute';
+import { Department } from '@/types/department';
 
 const baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
 
@@ -12,7 +13,7 @@ const CreateJobPage: React.FC = () => {
   const [link, setLink] = useState('');
   // const [universities, setUniversities] = useState<any[]>([]);
   // const [schools, setSchools] = useState<any[]>([]);
-  const [departments, setDepartments] = useState<any[]>([]);
+  const [departments, setDepartments] = useState<Department[]>([]);
   const [selectedDepartments, setSelectedDepartments] = useState<string[]>([]);
   // const [departmentSearch, setDepartmentSearch] = useState('');
   const [loading, setLoading] = useState(false);

@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { COLORS } from "@/utils/color";
-
+import Image from "next/image";
 interface UserType {
   id: string;
   name: string;
@@ -106,7 +106,7 @@ const Comment: React.FC<{
   return (
     <div style={{ marginLeft: depth * 32, marginTop: 18, background: depth ? '#fafaff' : 'transparent', borderRadius: 10, padding: depth ? '1rem' : 0 }}>
       <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12 }}>
-        <img src={comment.user?.profile_image_url || '/icons/avatar.png'} alt={comment.user?.name} width={36} height={36} style={{ borderRadius: '50%', objectFit: 'cover', background: '#ececff' }} />
+        <Image src={comment.user?.profile_image_url || '/icons/avatar.png'} alt={comment.user?.name || "Unkown"} width={36} height={36} style={{ borderRadius: '50%', objectFit: 'cover', background: '#ececff' }} />
         <div style={{ flex: 1 }}>
           <div style={{ fontWeight: 600, fontSize: 15 }}>{comment.user?.name}</div>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 4 }}>
@@ -115,7 +115,7 @@ const Comment: React.FC<{
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 18, marginTop: 2 }}>
             <span style={{ display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer' }} onClick={handleLike}>
-              <img src={liked ? '/icons/liked.png' : '/icons/like.png'} alt="like" width={22} height={22} />
+              <Image src={liked ? '/icons/liked.png' : '/icons/like.png'} alt="like" width={22} height={22} />
               <span style={{ color: COLORS.primary, fontSize: 15, fontWeight: 600 }}>{likes}</span>
             </span>
             <span
@@ -131,7 +131,7 @@ const Comment: React.FC<{
                 }
               }}
             >
-              <img src="/icons/comment.png" alt="replies" width={20} height={20} style={{ opacity: 0.7 }} />
+              <Image src="/icons/comment.png" alt="replies" width={20} height={20} style={{ opacity: 0.7 }} />
               {replyCount}
             </span>
             <button

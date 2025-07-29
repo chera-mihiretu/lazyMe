@@ -1,5 +1,5 @@
 import React from 'react';
-import { COLORS, FONT_FAMILY } from '../../utils/color';
+import { COLORS } from '../../utils/color';
 
 const benefits = [
   {
@@ -28,7 +28,7 @@ const WhyChooseLeft: React.FC = () => (
       className="text-[1.1rem] mb-8 font-poppins text-center md:text-left"
       style={{ color: COLORS.foreground }}
     >
-      IKnow is more than just a platform—it's your partner in academic and campus success. Discover a smarter, more connected way to thrive at university.
+      IKnow is more than just a platform—it&apos;s your partner in academic and campus success. Discover a smarter, more connected way to thrive at university.
     </p>
     <ul className="space-y-6 w-full">
       {benefits.map((b) => (

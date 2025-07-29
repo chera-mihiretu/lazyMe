@@ -1,8 +1,10 @@
 "use client";
 import React from 'react';
+import HomeNavBar from '@/components/home/HomeNavBar';
+import MaterialsTree from './MaterialsTree';
 import dynamic from 'next/dynamic';
 const ProtectedRoute = dynamic(() => import('../../ProtectedRoute'), { ssr: false });
-import HomeNavBar from '@/components/home/HomeNavBar';
+
 
 function MaterialsPage() {
   return (
@@ -44,5 +46,5 @@ function MaterialsPage() {
 }
 
 // --- MaterialsTree Implementation ---
-const MaterialsTree = dynamic(() => import("./MaterialsTree"), { ssr: false });
+// const MaterialsTree = dynamic(() => import("./MaterialsTree"), { ssr: false });
 export default MaterialsPage;

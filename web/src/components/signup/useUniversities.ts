@@ -23,10 +23,10 @@ export function useUniversities() {
         setLoading(false);
       })
       .catch((e) => {
-        setError("Failed to load universities");
+        setError("Failed to load universities" + e); 
         setLoading(false);
       });
   }, []);
-
+  
   return { universities, loading, error };
 }

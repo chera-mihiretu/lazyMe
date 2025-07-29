@@ -18,7 +18,7 @@ interface CommentType {
 }
 import { useParams } from "next/navigation";
 import PostCard from "@/components/home/PostCard";
-import { COLORS, FONT_FAMILY } from "@/utils/color";
+import { COLORS } from "@/utils/color";
 import Comment from "@/components/home/Comment";
 import ProtectedRoute from "@/app/ProtectedRoute";
 
@@ -58,7 +58,7 @@ const PostDetailPage = () => {
   }, [post_id]);
 
   // Fetch comments
-  const fetchComments = async (pageNum = 1) => {
+  const fetchComments = React.useCallback(async (pageNum = 1) => {
     setCommentLoading(true);
     try {
       const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
@@ -73,11 +73,11 @@ const PostDetailPage = () => {
       }
     } catch {}
     setCommentLoading(false);
-  };
+  }, [post_id]);
 
   useEffect(() => {
     if (post_id) fetchComments(1);
-  }, [post_id]);
+  }, [post_id, fetchComments]);
 
   // Submit new comment
   const handleCommentSubmit = async (e: React.FormEvent<HTMLFormElement>) => {

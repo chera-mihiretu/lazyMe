@@ -1,6 +1,6 @@
 import React from 'react';
 import { COLORS, FONT_FAMILY } from '../../utils/color';
-
+import Image from 'next/image';
 const HeroRight: React.FC = () => (
   <div style={{
     flex: 1,
@@ -12,9 +12,11 @@ const HeroRight: React.FC = () => (
     maxWidth: 540,
     height: 400,
   }}>
-    <img
+    <Image
       src="/logos/hero-image.png"
       alt="Students on campus"
+      width={540}
+      height={400}
       style={{
         width: '100%',
         height: '100%',

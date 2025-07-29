@@ -18,7 +18,6 @@ const years = [
 ];
 
 const CompleteProfileForm: React.FC = () => {
-  const [step, setStep] = useState(2);
   const [department, setDepartment] = useState('');
   const [otherDept, setOtherDept] = useState('');
   const [year, setYear] = useState('');

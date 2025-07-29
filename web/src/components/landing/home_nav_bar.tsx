@@ -1,6 +1,6 @@
 'use client';
 import React from 'react'
-import { COLORS, FONT_FAMILY } from '../../utils/color'
+import { COLORS } from '../../utils/color'
 import Image from 'next/image'
 import Button from './Button';
 

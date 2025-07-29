@@ -1,6 +1,10 @@
 import React, { useEffect, useState } from "react";
 import TreeNode from "../materials/TreeNode";
 import { MaterialNode } from "../materials/types";
+import { University } from "@/types/university";
+import { School } from "@/types/schools";
+import { Department } from "@/types/department";
+import { Material } from "@/types/material";
 
 const baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
 
@@ -18,7 +22,7 @@ const ExamsTree: React.FC = () => {
       .then((res) => res.json())
       .then((data) => {
         if (Array.isArray(data.universities)) {
-          setTree(data.universities.map((u: any) => ({ id: u.id, name: u.name, type: "university" })));
+          setTree(data.universities.map((u: University) => ({ id: u.id, name: u.name, type: "university" })));
         }
       });
   }, []);
@@ -33,7 +37,7 @@ const ExamsTree: React.FC = () => {
       try {
         if (node.type === "university") {
           let page = 1;
-          let allSchools: any[] = [];
+          let allSchools: School[] = [];
           let hasMore = true;
           while (hasMore) {
             const res = await fetch(`${baseUrl}/schools/?university_id=${node.id}&page=${page}`, { headers });
@@ -46,12 +50,12 @@ const ExamsTree: React.FC = () => {
               hasMore = false;
             }
           }
-          nodes = allSchools.map((s: any) => ({ id: s.id, name: s.name, type: "school", description: s.description }));
+          nodes = allSchools.map((s: School) => ({ id: s.id, name: s.name, type: "school", description: s.description }));
         } else if (node.type === "school") {
-          const res = await fetch(`${baseUrl}/departments/tree?school_id=${node.id}`, { headers });
+          const res = await fetch(`${baseUrl}/departments/tree/${node.id}`, { headers });
           const data = await res.json();
           if (Array.isArray(data.departments)) {
-            nodes = data.departments.map((d: any) => ({ id: d.id, name: d.name, type: "department", years: d.years, description: d.description }));
+            nodes = data.departments.map((d: Department) => ({ id: d.id, name: d.name, type: "department", years: d.years, description: d.description }));
           }
         } else if (node.type === "department") {
           const years = node.years || 4;
@@ -72,11 +76,11 @@ const ExamsTree: React.FC = () => {
           const res = await fetch(`${baseUrl}/exams/tree?department_id=${node.departmentId}&year=${yearNum}&semester=${node.semester}`, { headers });
           const data = await res.json();
           if (Array.isArray(data.exams)) {
-            nodes = data.exams.map((m: any) => ({ id: m.id, name: m.name, type: "material", isLeaf: true, url: m.url }));
+            nodes = data.exams.map((m: Material) => ({ id: m.id, name: m.title, type: "material", isLeaf: true, url: m.file }));
           }
         }
       } catch (e) {
-        // Optionally handle error
+        console.log(e);
       }
       setChildren((prev) => ({ ...prev, [node.id]: nodes }));
       setLoading((prev) => ({ ...prev, [node.id]: false }));

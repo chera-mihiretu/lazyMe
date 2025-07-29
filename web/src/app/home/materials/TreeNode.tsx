@@ -1,4 +1,5 @@
 import React from "react";
+import Image from "next/image";
 import { TreeNodeProps } from "./types";
 
 const iconMap: Record<string, string> = {
@@ -12,166 +13,81 @@ const iconMap: Record<string, string> = {
   compressed: "/icons/compressed.png",
 };
 
-const TreeNode: React.FC<TreeNodeProps> = ({ node, level, onExpand, expanded, loading, childrenNodes }) => {
+const TreeNode: React.FC<TreeNodeProps> = ({ node, level, onExpand, expanded, loading }) => {
   const isExpandable = !node.isLeaf;
   const isMaterial = node.type === "material";
   return (
     <div
-      style={{
-        marginLeft: level * 28,
-        display: "flex",
-        alignItems: "center",
-        fontFamily: "Poppins, sans-serif",
-        fontSize: 16,
-        padding: isMaterial ? "10px 16px" : "6px 8px",
-        borderRadius: isMaterial ? 12 : 8,
-        background: isMaterial
-          ? "linear-gradient(90deg, #f7f7fb 60%, #e0e7ff 100%)"
-          : expanded && isExpandable
-            ? "linear-gradient(90deg, #ede9fe 60%, #e0e7ff 100%)"
-            : level % 2 === 0
-              ? "#fff"
-              : "#f7f7fb",
-        boxShadow: isMaterial
-          ? "0 2px 8px #4320d11a"
-          : expanded && isExpandable
-            ? "0 2px 12px #7c3aed22"
-            : undefined,
-        marginBottom: 6,
-        border: isMaterial
-          ? "1.5px solid #a5b4fc"
-          : expanded && isExpandable
-            ? "1.5px solid #a5b4fc"
-            : undefined,
-        position: "relative",
-        transition: "background 0.2s, box-shadow 0.2s, border 0.2s",
-      }}
+      className={`flex items-center font-[Poppins,sans-serif] text-[16px] mb-[6px] relative transition-all duration-200
+        ${isMaterial ?
+          'px-4 py-2 rounded-[12px] bg-gradient-to-r from-[#f7f7fb] via-[#f7f7fb] to-[#e0e7ff] shadow-[0_2px_8px_#4320d11a] border-[1.5px] border-[#a5b4fc]'
+          : expanded && isExpandable ?
+            'px-2 py-1 rounded-[8px] bg-gradient-to-r from-[#ede9fe] via-[#ede9fe] to-[#e0e7ff] shadow-[0_2px_12px_#7c3aed22] border-[1.5px] border-[#a5b4fc]'
+            : level % 2 === 0 ?
+              'px-2 py-1 rounded-[8px] bg-white'
+              : 'px-2 py-1 rounded-[8px] bg-[#f7f7fb]'}
+      `}
+      style={{ marginLeft: level * 28 }}
     >
       {isExpandable && (
         <button
           onClick={() => onExpand(node)}
-          style={{
-            marginRight: 10,
-            background: "transparent",
-            border: "none",
-            cursor: "pointer",
-            width: 28,
-            height: 28,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            borderRadius: "50%",
-            outline: "none",
-            userSelect: "none",
-            boxShadow: expanded ? "0 1px 4px #7c3aed22" : undefined,
-            transition: "background 0.2s, color 0.2s",
-          }}
+          className={`mr-[10px] bg-transparent border-none cursor-pointer w-[28px] h-[28px] flex items-center justify-center rounded-full outline-none select-none transition-all duration-200 ${expanded ? 'shadow-[0_1px_4px_#7c3aed22]' : ''}`}
           aria-label={expanded ? "Collapse" : "Expand"}
         >
-          <img
+          <Image
             src={expanded ? iconMap.expanded : iconMap.compressed}
             alt={expanded ? "Collapse" : "Expand"}
-            style={{ width: 22, height: 22 }}
+            width={22}
+            height={22}
+            className="w-[22px] h-[22px]"
           />
         </button>
       )}
       {/* Icon for each node type */}
-      <span style={{
-        marginRight: 10,
-        display: "flex",
-        alignItems: "center",
-        minWidth: 24,
-        justifyContent: "center",
-      }}>
-        <img
+      <span className="mr-[10px] flex items-center min-w-[24px] justify-center">
+        <Image
           src={iconMap[node.type]}
           alt={node.type}
-          style={{ width: 22, height: 22 }}
+          width={22}
+          height={22}
+          className="w-[22px] h-[22px]"
         />
       </span>
       <span
-        style={{
-          flex: 1,
-          display: 'flex',
-          flexDirection: 'column',
-          justifyContent: 'center',
-          minWidth: 0,
-        }}
+        className="flex-1 flex flex-col justify-center min-w-0"
       >
         <span
-          style={{
-            fontWeight: node.type === "university" ? 700 : node.type === "school" ? 600 : 500,
-            color: isMaterial ? "#4320d1" : level === 0 ? "#7c3aed" : level === 1 ? "#2563eb" : "#222",
-            letterSpacing: isMaterial ? 0.2 : 0,
-            overflow: "hidden",
-            textOverflow: "ellipsis",
-            whiteSpace: "nowrap",
-            display: 'block',
-          }}
+          className={`block overflow-hidden text-ellipsis whitespace-nowrap ${node.type === "university" ? "font-bold" : node.type === "school" ? "font-semibold" : "font-medium"} ${isMaterial ? "text-[#4320d1] tracking-[0.2px]" : level === 0 ? "text-[#7c3aed]" : level === 1 ? "text-[#2563eb]" : "text-[#222]"}`}
         >
           {node.name}
         </span>
         {(node.type === "school" || node.type === "department") && node.description && (
           <span
-            style={{
-              fontSize: 13,
-              color: '#666',
-              marginTop: 2,
-              fontWeight: 400,
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-              whiteSpace: 'nowrap',
-              display: 'block',
-            }}
+            className="block text-[13px] text-[#666] mt-[2px] font-normal overflow-hidden text-ellipsis whitespace-nowrap"
           >
             {node.description}
           </span>
         )}
       </span>
-      {loading && <span style={{ marginLeft: 8, color: "#888", fontSize: 14 }}>Loading...</span>}
+      {loading && <span className="ml-2 text-[#888] text-[14px]">Loading...</span>}
       {/* Material buttons */}
       {isMaterial && !loading && (
-        <div style={{ display: "flex", gap: 10, marginLeft: 18 }}>
+        <div className="flex gap-[10px] ml-[18px]">
             <a
               href={node.url}
               download
-              style={{
-                display: "inline-flex",
-                alignItems: "center",
-                gap: 6,
-                background: "#f3f4f6",
-                color: "#1e40af",
-                border: "none",
-                borderRadius: 8,
-                padding: "6px 18px",
-                fontWeight: 600,
-                fontSize: 15,
-                cursor: "pointer",
-                textDecoration: "none",
-              }}
+              className="inline-flex items-center gap-[6px] bg-[#f3f4f6] text-[#1e40af] border-none rounded-[8px] px-[18px] py-[6px] font-semibold text-[15px] cursor-pointer no-underline"
             >
-              <img src="/icons/download.png" alt="Download" width={20} height={20} /> Download
+              <Image src="/icons/download.png" alt="Download" width={20} height={20} /> Download
             </a>
             <a
               href={node.url}
               target="_blank"
               rel="noopener noreferrer"
-              style={{
-                display: "inline-flex",
-                alignItems: "center",
-                gap: 6,
-                background: "#fff7ed",
-                color: "#92400e",
-                border: "none",
-                borderRadius: 8,
-                padding: "6px 18px",
-                fontWeight: 600,
-                fontSize: 15,
-                cursor: "pointer",
-                textDecoration: "none",
-              }}
+              className="inline-flex items-center gap-[6px] bg-[#fff7ed] text-[#92400e] border-none rounded-[8px] px-[18px] py-[6px] font-semibold text-[15px] cursor-pointer no-underline"
             >
-              <img src="/icons/read.png" alt="Read" width={20} height={20} /> Read
+              <Image src="/icons/read.png" alt="Read" width={20} height={20} /> Read
             </a>
         </div>
       )}

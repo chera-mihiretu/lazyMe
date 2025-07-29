@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useCallback } from "react";
 import UserCard from "@/components/home/UserCard";
+import Image from "next/image";
 const baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
 
 interface UserSuggestion {
@@ -19,7 +20,6 @@ const UserSuggestionsList: React.FC<UserSuggestionsListProps> = ({ page = 1 }) =
   const [users, setUsers] = useState<UserSuggestion[]>([]);
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(page);
-  const [hasMore, setHasMore] = useState(false);
 
   const fetchSuggestions = useCallback(() => {
     setLoading(true);
@@ -35,12 +35,11 @@ const UserSuggestionsList: React.FC<UserSuggestionsListProps> = ({ page = 1 }) =
         if (!res.ok) throw new Error("Failed to fetch user suggestions");
         const data = await res.json();
         setUsers(data.suggestions || []);
-        setHasMore(data.hasMore || false);
         setLoading(false);
       })
       .catch((e) => {
+        console.log(e)
         setUsers([]);
-        setHasMore(false);
         setLoading(false);
       });
   }, [currentPage]);
@@ -75,9 +74,9 @@ const UserSuggestionsList: React.FC<UserSuggestionsListProps> = ({ page = 1 }) =
           alignItems: 'center',
           justifyContent: 'center',
         }}>
-          <img src="/icons/empty_state.png" alt="No suggestions" style={{ width: 80, height: 80, marginBottom: 18, opacity: 0.8 }} />
+          <Image src="/icons/empty_state.png" alt="No suggestions" style={{ width: 80, height: 80, marginBottom: 18, opacity: 0.8 }} />
           <div style={{ fontWeight: 600, fontSize: 18, marginBottom: 6 }}>No Connection Requests</div>
-          <div style={{ color: '#888', fontSize: 15, marginBottom: 0 }}>You're all caught up! Check back later for new suggestions.</div>
+          <div style={{ color: '#888', fontSize: 15, marginBottom: 0 }}>You&apos;re all caught up! Check back later for new suggestions.</div>
         </div>
       ) : (
         <>
@@ -96,7 +95,7 @@ const UserSuggestionsList: React.FC<UserSuggestionsListProps> = ({ page = 1 }) =
                 transition: "background 0.2s",
                 boxShadow: "0 1px 4px rgba(0,0,0,0.04)",
               }}
-              onClick={() => alert('View more suggestions coming soon!')}
+              onClick={() => setCurrentPage(currentPage + 1) }
             >
               View More
             </button>

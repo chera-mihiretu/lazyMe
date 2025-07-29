@@ -21,7 +21,7 @@ const SignupSuccess: React.FC = () => {
       </p>
       <p style={{ fontSize: '1.01rem', color: '#444', marginBottom: 18 }}>
         We have sent a verification email to your inbox.<br />
-        <b>If you can't find it, please check your spam or junk folder.</b>
+        <b>If you can&apos;t find it, please check your spam or junk folder.</b>
       </p>
       <div style={{ fontSize: '0.98rem', color: '#888' }}>
         After verifying, you can log in and start using your account.

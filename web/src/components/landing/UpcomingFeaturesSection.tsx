@@ -1,5 +1,5 @@
 import React from "react";
-
+import Image from "next/image";
 const features = [
   {
     icon: "/icons/validation.png",
@@ -34,7 +34,7 @@ const UpcomingFeaturesSection: React.FC = () => (
       <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4 mt-8">
         {features.map((feature, idx) => (
           <div key={idx} className="bg-white rounded-xl shadow-md p-6 flex flex-col items-center">
-            <img src={feature.icon} alt={feature.title} className="w-14 h-14 mb-4" />
+            <Image src={feature.icon} alt={feature.title} width={56} height={56} className="w-14 h-14 mb-4" />
             <h3 className="text-xl font-semibold text-[#4320d1] mb-2">{feature.title}</h3>
             <p className="text-gray-700 text-base">{feature.description}</p>
           </div>

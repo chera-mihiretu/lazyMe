@@ -27,8 +27,8 @@ const DepartmentsSection: React.FC = () => {
       setDepartments(prev => prev.filter(dep => dep.id !== id));
       setShowDeleteDialog(null);
       setDeleteInput("");
-    } catch (err: any) {
-      setDeleteError(err.message || "Error deleting department");
+    } catch (err) {
+      setDeleteError("Error deleting department" + err);
     } finally {
       setDeleteLoading(false);
     }
@@ -107,7 +107,7 @@ const DepartmentsSection: React.FC = () => {
         <div style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', background: 'rgba(30,30,40,0.25)', zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
           <div style={{ background: '#fff', borderRadius: 16, boxShadow: '0 4px 32px #4320d120', padding: 32, minWidth: 340, display: 'flex', flexDirection: 'column', gap: 18 }}>
             <h3 style={{ fontWeight: 700, fontSize: 20, color: '#e53e3e', marginBottom: 8 }}>Delete Department</h3>
-            <div style={{ color: '#333', fontWeight: 500, marginBottom: 8 }}>Type <span style={{ color: '#e53e3e', fontWeight: 700 }}>'delete department'</span> to confirm deletion.</div>
+            <div style={{ color: '#333', fontWeight: 500, marginBottom: 8 }}>Type <span style={{ color: '#e53e3e', fontWeight: 700 }}>&quot;delete department&quot;</span> to confirm deletion.</div>
             <input
               type="text"
               value={deleteInput}

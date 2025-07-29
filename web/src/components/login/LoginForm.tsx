@@ -2,8 +2,7 @@
 import React, { useState } from 'react';
 import { COLORS, FONT_FAMILY } from '../../utils/color';
 import Link from 'next/link';
-
-
+import Image from 'next/image';
 const LoginForm: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -213,7 +212,7 @@ const LoginForm: React.FC = () => {
           textDecoration: 'none',
         }}
       >
-        <img src="/icons/google.png" alt="Google" width={22} height={22} style={{ marginRight: 8 }} />
+        <Image src="/icons/google.png" alt="Google" width={22} height={22} style={{ marginRight: 8 }} />
         Continue with Google
       </a>
       <div style={{ textAlign: 'center', marginTop: 10 }}>

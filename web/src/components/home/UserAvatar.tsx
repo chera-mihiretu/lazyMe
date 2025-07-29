@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { COLORS, FONT_FAMILY } from '../../utils/color';
+import { COLORS } from '../../utils/color';
 import Image from 'next/image';
-import type { User as UserType } from '../../types/Post';
+import type { User as UserType } from '../../types/post';
 const baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
 
 const UserAvatar: React.FC = () => {

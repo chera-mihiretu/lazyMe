@@ -1,6 +1,10 @@
 import React, { useEffect, useState } from "react";
 import TreeNode from "./TreeNode";
 import { MaterialNode } from "./types";
+import { University } from "@/types/university";
+import { School } from "@/types/schools";
+import { Department } from "@/types/department";
+import { Material } from "@/types/material";
 
 const baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
 
@@ -18,7 +22,7 @@ const MaterialsTree: React.FC = () => {
       .then((res) => res.json())
       .then((data) => {
         if (Array.isArray(data.universities)) {
-          setTree(data.universities.map((u: any) => ({ id: u.id, name: u.name, type: "university" })));
+          setTree(data.universities.map((u: University) => ({ id: u.id, name: u.name, type: "university" })));
         }
       });
   }, []);
@@ -33,7 +37,7 @@ const MaterialsTree: React.FC = () => {
       try {
         if (node.type === "university") {
           let page = 1;
-          let allSchools: any[] = [];
+          let allSchools: School[] = [];
           let hasMore = true;
           while (hasMore) {
             const res = await fetch(`${baseUrl}/schools/?university_id=${node.id}&page=${page}`, { headers });
@@ -46,14 +50,14 @@ const MaterialsTree: React.FC = () => {
               hasMore = false;
             }
           }
-          nodes = allSchools.map((s: any) => ({ id: s.id, name: s.name, type: "school", description: s.description }));
+          nodes = allSchools.map((s: School) => ({ id: s.id, name: s.name, type: "school", description: s.description }));
         } else if (node.type === "school") {
           // Use the school id for departments
           
           const res = await fetch(`${baseUrl}/departments/tree/${node.id}`, { headers });
           const data = await res.json();
           if (Array.isArray(data.departments)) {
-            nodes = data.departments.map((d: any) => ({ id: d.id, name: d.name, type: "department", years: d.years, description: d.description }));
+            nodes = data.departments.map((d: Department) => ({ id: d.id, name: d.name, type: "department", years: d.years, description: d.description }));
           }
         } else if (node.type === "department") {
           const years = node.years || 4;
@@ -74,7 +78,7 @@ const MaterialsTree: React.FC = () => {
           const data = await res.json();
           console.log(data)
           if (Array.isArray(data.materials)) {
-            nodes = data.materials.map((m: any) => ({
+            nodes = data.materials.map((m: Material) => ({
               id: m.id,
               name: m.title,
               type: "material",
@@ -84,7 +88,7 @@ const MaterialsTree: React.FC = () => {
           }
         }
       } catch (e) {
-        // Optionally handle error
+        console.log(e);
       }
       setChildren((prev) => ({ ...prev, [node.id]: nodes }));
       setLoading((prev) => ({ ...prev, [node.id]: false }));
