@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { COLORS, FONT_FAMILY } from '../../utils/color';
+import { COLORS } from '../../utils/color';
 import Image from 'next/image';
 import type { University } from '@/types/university';
 import type { School } from '@/types/schools';
