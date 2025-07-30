@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { COLORS, FONT_FAMILY } from '../../utils/color';
 import Link from 'next/link';
 import Image from 'next/image';
+const baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
 const LoginForm: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -69,156 +70,79 @@ const LoginForm: React.FC = () => {
   
 
   return (
-    <form onSubmit={handleSubmit} style={{ width: '100%', maxWidth: 380, margin: '0 auto' }}>
-      
-      <div style={{ marginBottom: 18 }}>
+    <form onSubmit={handleSubmit} className="w-full max-w-[380px] mx-auto">
+      <div className="mb-5">
         <input
           type="email"
           placeholder="Enter your university email"
           value={email}
           onChange={e => setEmail(e.target.value)}
-          style={{
-            width: '100%',
-            padding: '0.85rem 1rem',
-            border: `1.5px solid ${error ? COLORS.error : COLORS.inputBorder}`,
-            borderRadius: 8,
-            fontFamily: FONT_FAMILY.poppins,
-            fontSize: '1rem',
-            outline: 'none',
-            marginBottom: 8,
-            background: COLORS.inputBg,
-            color: '#171717', // black text
-            boxShadow: error ? `0 0 0 2px ${COLORS.error}33, 0 2px 8px #e0e0e0` : '0 2px 8px #e0e0e0',
-            transition: 'border 0.2s, box-shadow 0.2s',
-          }}
+          className={`w-full px-4 py-3 rounded-lg font-poppins text-base outline-none mb-2 bg-inputBg text-[#171717] shadow-md transition-all duration-200 border-[1.5px] ${error ? 'border-error shadow-[0_0_0_2px_rgba(211,47,47,0.2),0_2px_8px_#e0e0e0]' : 'border-inputBorder shadow-[0_2px_8px_#e0e0e0]'}`}
           aria-label="University Email"
         />
       </div>
-      <div style={{ marginBottom: 8, position: 'relative' }}>
+      <div className="mb-2 relative">
         <input
           type={showPassword ? 'text' : 'password'}
           placeholder="Enter your password"
           value={password}
           onChange={e => setPassword(e.target.value)}
-          style={{
-            width: '100%',
-            padding: '0.85rem 1rem',
-            border: `1.5px solid ${error ? COLORS.error : COLORS.inputBorder}`,
-            borderRadius: 8,
-            fontFamily: FONT_FAMILY.poppins,
-            fontSize: '1rem',
-            outline: 'none',
-            background: COLORS.inputBg,
-            color: '#171717', // black text
-            boxShadow: error ? `0 0 0 2px ${COLORS.error}33, 0 2px 8px #e0e0e0` : '0 2px 8px #e0e0e0',
-            transition: 'border 0.2s, box-shadow 0.2s',
-          }}
+          className={`w-full px-4 py-3 rounded-lg font-poppins text-base outline-none bg-inputBg text-[#171717] shadow-md transition-all duration-200 border-[1.5px] ${error ? 'border-error shadow-[0_0_0_2px_rgba(211,47,47,0.2),0_2px_8px_#e0e0e0]' : 'border-inputBorder shadow-[0_2px_8px_#e0e0e0]'}`}
           aria-label="Password"
         />
         <button
           type="button"
           onClick={() => setShowPassword(v => !v)}
           aria-label={showPassword ? 'Hide password' : 'Show password'}
-          style={{
-            position: 'absolute',
-            right: 12,
-            top: '50%',
-            transform: 'translateY(-50%)',
-            background: 'none',
-            border: 'none',
-            cursor: 'pointer',
-            padding: 0,
-            color: COLORS.muted,
-            fontSize: '1.1rem',
-            fontFamily: FONT_FAMILY.poppins,
-            opacity: 0.8,
-          }}
+          className="absolute right-3 top-1/2 -translate-y-1/2 bg-transparent border-none cursor-pointer p-0 text-[1.1rem] font-poppins opacity-80"
+          style={{ color: COLORS.muted }}
         >
           {showPassword ? 'Hide' : 'Show'}
         </button>
       </div>
-      {error && <div style={{ color: COLORS.error, fontSize: '0.98rem', marginBottom: 10 }}>{error}</div>}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
-        <label style={{ display: 'flex', alignItems: 'center', fontFamily: FONT_FAMILY.poppins, fontSize: '0.98rem', color: COLORS.foreground }}>
+      {error && <div className="text-error text-[0.98rem] mb-2" style={{ color: COLORS.error }}>{error}</div>}
+      <div className="flex items-center justify-between mb-2.5">
+        <label className="flex items-center font-poppins text-[0.98rem] text-foreground">
           <input
             type="checkbox"
             checked={remember}
             onChange={e => setRemember(e.target.checked)}
-            style={{ marginRight: 7 }}
+            className="mr-2"
           />
           Remember me
         </label>
-        <a href="#" style={{ color: COLORS.primary, fontSize: '0.98rem', textDecoration: 'underline', opacity: 0.85 }}>Forgot Password?</a>
+        <a href="#" className="text-primary text-[0.98rem] underline opacity-85">Forgot Password?</a>
       </div>
       <button
         type="submit"
         disabled={loading}
-        style={{
-          width: '100%',
-          background: loading ? COLORS.muted : COLORS.primary,
-          color: '#fff',
-          fontFamily: FONT_FAMILY.poppins,
-          fontWeight: 600,
-          fontSize: '1.08rem',
-          borderRadius: 8,
-          padding: '0.85rem 0',
-          border: 'none',
-          marginTop: 8,
-          marginBottom: 18,
-          boxShadow: '0 2px 8px rgba(67,24,209,0.07)',
-          cursor: loading ? 'not-allowed' : 'pointer',
-          transition: 'background 0.2s',
-          opacity: loading ? 0.7 : 1,
-        }}
+        className={`w-full text-white font-poppins font-semibold text-[1.08rem] rounded-lg py-3 border-none mt-2 mb-4 shadow-md cursor-pointer transition-colors ${loading ? 'opacity-70 cursor-not-allowed bg-muted' : ''}`}
+        style={{ background: loading ? COLORS.muted : COLORS.primary }}
       >
         {loading ? (
-          <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
-            <span className="spinner" style={{
-              width: 18, height: 18, border: '2.5px solid #fff', borderTop: `2.5px solid ${COLORS.primary}`,
-              borderRadius: '50%', display: 'inline-block', marginRight: 8,
-              animation: 'spin 0.8s linear infinite',
-            }} />
+          <span className="flex items-center justify-center gap-2">
+            <span className="inline-block w-[18px] h-[18px] border-[2.5px] border-white border-t-[2.5px] border-t-[COLORS.primary] rounded-full animate-spin mr-2" style={{ borderTopColor: COLORS.primary }} />
             Signing In...
-            <style>{`@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }`}</style>
           </span>
         ) : 'Sign In'}
       </button>
-      <div style={{ display: 'flex', alignItems: 'center', margin: '18px 0' }}>
-        <div style={{ flex: 1, height: 1, background: COLORS.inputBorder, opacity: 0.5 }} />
-        <span style={{ margin: '0 12px', color: '#171717', fontFamily: FONT_FAMILY.poppins, fontSize: '0.98rem' }}>Or continue with</span>
-        <div style={{ flex: 1, height: 1, background: COLORS.inputBorder, opacity: 0.5 }} />
+      <div className="flex items-center my-4">
+        <div className="flex-1 h-[1px] bg-inputBorder opacity-50" />
+        <span className="mx-3 text-[#171717] font-poppins text-[0.98rem]">Or continue with</span>
+        <div className="flex-1 h-[1px] bg-inputBorder opacity-50" />
       </div>
       <a
-        href="http://localhost:8080/api/auth/google/login"
-        
-        style={{
-          width: '100%',
-          background: '#fff',
-          color: COLORS.foreground,
-          fontFamily: FONT_FAMILY.poppins,
-          fontWeight: 600,
-          fontSize: '1.08rem',
-          borderRadius: 8,
-          padding: '0.85rem 0',
-          border: `1.5px solid ${COLORS.inputBorder}`,
-          marginBottom: 10,
-          boxShadow: '0 1px 4px rgba(0,0,0,0.03)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          gap: 10,
-          cursor: 'pointer',
-          transition: 'border 0.2s',
-          textDecoration: 'none',
-        }}
+        href={baseUrl + "/auth/google/login"}
+        className="w-full bg-white text-foreground font-poppins font-semibold text-[1.08rem] rounded-lg py-3 border-inputBorder border-[1.5px] mb-2 shadow-sm flex items-center justify-center gap-2 cursor-pointer transition-colors no-underline"
+        style={{ color: COLORS.foreground, borderColor: COLORS.inputBorder }}
       >
-        <Image src="/icons/google.png" alt="Google" width={22} height={22} style={{ marginRight: 8 }} />
+        <Image src="/icons/google.png" alt="Google" width={22} height={22} className="mr-2" />
         Continue with Google
       </a>
-      <div style={{ textAlign: 'center', marginTop: 10 }}>
-        <span style={{ color: '#171717', fontFamily: FONT_FAMILY.poppins, fontSize: '0.98rem' }}>
+      <div className="text-center mt-2">
+        <span className="text-[#171717] font-poppins text-[0.98rem]">
           New to iKnow?{' '}
-          <Link href="/auth/signup" prefetch={false} style={{ color: COLORS.primary, textDecoration: 'underline', fontWeight: 500 }}>Sign Up</Link>
+          <Link href="/auth/signup" prefetch={false} className="text-primary underline font-medium">Sign Up</Link>
         </span>
       </div>
     </form>

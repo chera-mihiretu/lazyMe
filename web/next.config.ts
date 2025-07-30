@@ -9,7 +9,7 @@ const nextConfig: NextConfig = {
       }
     ],
   },
-  pageExtensions: ['tsx', 'ts', 'jsx', 'js'], // Specify the file extensions for pages
+  pageExtensions: ['tsx', 'ts', 'jsx', 'js'], 
 };
 
 export default nextConfig;
