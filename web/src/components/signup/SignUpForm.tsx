@@ -292,13 +292,14 @@ const SignUpForm: React.FC = () => {
         <span className="mx-3 text-[#171717] font-poppins text-[0.98rem]">Or sign up with</span>
         <div className="flex-1 h-[1px] bg-inputBorder opacity-50" />
       </div>
-      <button
+      <a
+        href={baseUrl + "/auth/google/login"}
         type="button"
         className="w-full bg-white text-foreground font-poppins font-semibold text-[1.08rem] rounded-lg py-3 border-inputBorder border-[1.5px] mb-2 shadow-sm flex items-center justify-center gap-2 cursor-pointer transition-colors"
       >
         <Image src="/icons/google.png" alt="Google" width={22} height={22} className="mr-2" />
         Continue with Google
-      </button>
+      </a>
       <div className="text-center mt-2">
         <span className="text-[#171717] font-poppins text-[0.98rem]">
           Already have an account?{' '}
