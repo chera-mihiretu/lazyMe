@@ -53,39 +53,57 @@ const HomeNavBar: React.FC = () => {
     setShowAvatarMenu(false);
   };
 
+  const [showMobileMenu, setShowMobileMenu] = useState(false);
+
   return (
-    <nav className="w-full bg-white shadow-md px-[2.2vw] py-3 flex items-center justify-between sticky top-0 z-[100] min-h-[64px]">
-      {/* Logo */}
-      <div className="flex items-center gap-3.5">
-        <Link href="/home" className="flex items-center no-underline">
-          <Image src="/logos/logo-real.png" alt="IKnow Logo" width={50} height={50} className="mr-2" />
-          <span className="text-primary font-bold font-poppins text-xl tracking-wide">IKnow</span>
-        </Link>
+    
+    <nav className="w-full bg-white shadow-mx px-[2.2vw] py-3 flex items-center justify-between sticky top-0 z-[100] min-h-[64px]">
+      {/* Mobile Menu Button (left) */}
+      <div className="lg:hidden flex items-center gap-3">
+        <button
+          className="p-2 rounded-lg bg-primary/10 text-primary focus:outline-none"
+          onClick={() => setShowMobileMenu((v) => !v)}
+          aria-label="Open menu"
+        >
+          <Image src="/icons/nav-menu.png" alt="Menu" width={18} height={18} />
+        </button>
       </div>
-      {/* Nav Links */}
-      <div className="flex items-center gap-7">
-        {navLinks.map((link, idx) => {
-          const isActive = pathname === link.href || (link.href === '/home/posts' && pathname === '/home');
-          return (
-            <Link
-              key={link.href || idx}
-              href={link.href}
-              className={`flex items-center gap-2 font-poppins font-semibold text-[1.07rem] px-4 py-1 rounded-lg no-underline border-b-4 transition-colors ${isActive ? 'text-primary bg-primary/5 border-primary' : 'text-foreground bg-transparent border-transparent'}`}
-            >
-              <Image src={link.icon} alt={link.label + ' icon'} width={22} height={22} className="mr-1" />
-              {link.label}
-            </Link>
-          );
-        })}
-      </div>
-      {/* Search, Notification, and Avatar */}
-      <div className="flex items-center gap-4.5 relative">
-        <SearchBar value={''} onChange={function (e: React.ChangeEvent<HTMLInputElement>): void {
-          throw new Error('Function not implemented.' + e);
-        } } />
-        <NotificationBell />
-        {/* Avatar with dropdown menu */}
-        <div className="relative">
+      {/* Main nav bar order: Logo, Tabs, Notification, Search, Avatar */}
+      <div className="flex w-full items-center justify-between gap-4 relative">
+        {/* Logo */}
+        <div className="flex items-center flex-shrink-0 mr-2">
+          <Link href="/home" className="flex items-center no-underline">
+            <Image src="/logos/logo-real.png" alt="IKnow Logo" width={50} height={50} />
+            <span className="text-primary font-bold font-poppins text-xl tracking-wide ml-2">IKnow</span>
+          </Link>
+        </div>
+        {/* Tabs - Centered */}
+        <div className="hidden lg:flex flex-1 justify-center items-center gap-7 mx-2">
+          {navLinks.map((link, idx) => {
+            const isActive = pathname === link.href || (link.href === '/home/posts' && pathname === '/home');
+            return (
+              <Link
+                key={link.href || idx}
+                href={link.href}
+                className={`flex items-center gap-2 font-poppins text-[1.07rem] px-4 py-1 rounded-none no-underline transition-colors border-b-2 ${isActive ? 'text-primary bg-primary/5 border-primary' : 'text-foreground bg-transparent border-transparent hover:bg-primary/10'} font-medium`}
+              >
+                {link.label}
+              </Link>
+            );
+          })}
+        </div>
+        {/* Notification */}
+        <div className="flex items-center flex-shrink-0 mx-2">
+          <NotificationBell />
+        </div>
+        {/* Search */}
+        <div className="hidden xl:flex items-center gap-4.5 relative mx-2">
+          <SearchBar value={''} onChange={function (e: React.ChangeEvent<HTMLInputElement>): void {
+            throw new Error('Function not implemented.' + e);
+          } } />
+        </div>
+        {/* Avatar */}
+        <div className="flex items-center flex-shrink-0 ml-2 relative">
           <button
             className="focus:outline-none"
             onClick={() => setShowAvatarMenu((v) => !v)}
@@ -101,6 +119,39 @@ const HomeNavBar: React.FC = () => {
           )}
         </div>
       </div>
+      {/* Mobile Menu Drawer (left side) - Simple Underline, No Shadow */}
+      {showMobileMenu && (
+        <div className="fixed inset-0 bg-black/40 z-[200] flex justify-start">
+          <div className="w-[80vw] max-w-[340px] bg-white h-full shadow-xl p-6 flex flex-col gap-6">
+            <button
+              className="self-end mb-2 p-2 rounded-lg bg-primary/10 text-primary"
+              onClick={() => setShowMobileMenu(false)}
+              aria-label="Close menu"
+            >
+              <Image src="/icons/nav-menu-close.png" alt="Close" width={18} height={18} />
+            </button>
+            <SearchBar value={''} onChange={function (e: React.ChangeEvent<HTMLInputElement>): void {
+              throw new Error('Function not implemented.' + e);
+            } } />
+            <div className="flex flex-col gap-3 mt-2">
+              {navLinks.map((link, idx) => {
+                const isActive = pathname === link.href || (link.href === '/home/posts' && pathname === '/home');
+                return (
+                  <Link
+                    key={link.href || idx}
+                    href={link.href}
+                    className={`flex items-center gap-2 font-poppins font-semibold text-[1.07rem] px-4 py-2 rounded-none no-underline transition-colors border-b-2 ${isActive ? 'text-primary bg-primary/5 border-primary' : 'text-foreground bg-transparent border-transparent hover:bg-primary/10'} font-medium`}
+                    onClick={() => setShowMobileMenu(false)}
+                  >
+                    <Image src={link.icon} alt={link.label + ' icon'} width={22} height={22} className="mr-1" />
+                    {link.label}
+                  </Link>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      )}
     </nav>
   );
 };

@@ -48,63 +48,38 @@ const UserAvatar: React.FC = () => {
   if (loading) {
     return (
       <div
-        style={{
-          width: 38,
-          height: 38,
-          borderRadius: '50%',
-          background: COLORS.inputBg,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          boxShadow: '0 1px 4px #e0e0e0',
-        }}
+        className="w-[38px] h-[38px] rounded-full flex items-center justify-center shadow-[0_1px_4px_#e0e0e0]"
+        style={{ background: COLORS.inputBg }}
         title="Loading user..."
       >
-        <span style={{ color: '#aaa', fontSize: 18 }}>...</span>
+        <span className="text-[18px]" style={{ color: '#aaa' }}>...</span>
       </div>
     );
   }
   if (error) {
     return (
       <div
-        style={{
-          width: 38,
-          height: 38,
-          borderRadius: '50%',
-          background: '#ffeaea',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          boxShadow: '0 1px 4px #e0e0e0',
-        }}
+        className="w-[38px] h-[38px] rounded-full flex items-center justify-center shadow-[0_1px_4px_#e0e0e0]"
+        style={{ background: '#ffeaea' }}
         title={error}
       >
-        <span style={{ color: '#e53e3e', fontSize: 18 }}>!</span>
+        <span className="text-[18px]" style={{ color: '#e53e3e' }}>!</span>
       </div>
     );
   }
   return (
+    
     <div
       title={displayName}
-      style={{
-        width: 38,
-        height: 38,
-        borderRadius: '50%',
-        overflow: 'hidden',
-        background: COLORS.inputBg,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        boxShadow: '0 1px 4px #e0e0e0',
-        cursor: 'pointer',
-      }}
+      className="w-[38px] h-[38px] rounded-full overflow-hidden flex items-center justify-center shadow-[0_1px_4px_#e0e0e0] cursor-pointer"
+      style={{ background: COLORS.inputBg }}
     >
       <Image
         src={avatarUrl}
         alt={displayName}
         width={34}
         height={34}
-        style={{ borderRadius: '50%' }}
+        className="rounded-full"
       />
     </div>
   );
