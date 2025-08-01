@@ -14,24 +14,23 @@ const PostsList: React.FC<PostsListProps> = ({ initialSearch = "" }) => {
   const [posts, setPosts] = useState<Post[]>([]);
   const [backupPosts, setBackupPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(false);
-  
   const [search, setSearch] = useState(initialSearch);
   const [error, setError] = useState<string | null>(null);
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(false);
   const observer = useRef<IntersectionObserver | null>(null);
+  // Track if component is mounted for cleanup
+  const isMounted = useRef(false);
 
   // Prevent infinite loop by only calling setPage when not loading and hasMore
   const lastElementRef = useCallback((node: HTMLDivElement | null) => {
     if (loading || !hasMore) return;
     if (observer.current) observer.current.disconnect();
-
     observer.current = new IntersectionObserver(entries => {
       if (entries[0].isIntersecting && hasMore && !loading) {
         setPage(prevPage => prevPage + 1);
       }
     });
-
     if (node) observer.current.observe(node);
   }, [loading, hasMore]);
 
@@ -78,8 +77,22 @@ const PostsList: React.FC<PostsListProps> = ({ initialSearch = "" }) => {
     }
   };
 
+  // Reset posts and pagination when component mounts or remounts
+  React.useEffect(() => {
+    setPosts([]);
+    setBackupPosts([]);
+    setPage(1);
+    setHasMore(false);
+    setError(null);
+    isMounted.current = true;
+    return () => {
+      isMounted.current = false;
+    };
+  }, []);
+
   // Only fetch when page changes, not on every render
   React.useEffect(() => {
+    if (!isMounted.current) return;
     fetchAllPosts();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [page]);
@@ -150,18 +163,18 @@ const PostsList: React.FC<PostsListProps> = ({ initialSearch = "" }) => {
       ) : posts && posts.length > 0 ? (
         <div className="max-w-[900px] mx-auto mt-10 px-6 font-poppins">
           
-          {posts.map((post, index) => {
-            
-            if (index === posts.length - 1) {
-                return (
-                <div ref={lastElementRef} key={post.id}>
-                  <PostCard post={post} />
-                </div>
-                );
-            } else {
-              return <PostCard post={post} key={post.id} />;
-            }
-          })}
+      {posts.map((post, index) => {
+        const uniqueKey = `${post.id}-${index}`;
+        if (index === posts.length - 1) {
+          return (
+            <div ref={lastElementRef} key={uniqueKey}>
+              <PostCard post={post} />
+            </div>
+          );
+        } else {
+          return <PostCard post={post} key={uniqueKey} />;
+        }
+      })}
           {loading && posts.length > 0 && (
             <div className="text-center mt-6">Loading more...</div>
           )}

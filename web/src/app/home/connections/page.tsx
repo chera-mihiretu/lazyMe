@@ -113,8 +113,6 @@ const ConnectionsPage: React.FC = () => {
             ))}
           </ul>
         )}
-      {/* Suggestions Section */}
-      <UserSuggestionsList/>
     </div>
     </ProtectedRoute>
     </>

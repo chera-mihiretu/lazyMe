@@ -23,7 +23,7 @@ const PostsPage = () => {
         <div style={{ flex: 1, minWidth: 0 }}>
           <PostsList />
         </div>
-        <div style={{ width: 280, minWidth: 240 }}>
+        <div className="hidden xl:block" style={{ width: 280, minWidth: 240 }}>
           <UserSuggestionsList />
         </div>
       </div>

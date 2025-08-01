@@ -27,7 +27,6 @@ const OpportunitiesPage = () => {
           headers: { Authorization: token ? `Bearer ${token}` : '' },
         });
 
-        console.log(res.body);
         const data = await res.json();
         if (res.ok && Array.isArray(data.jobs)) {
           setJobs(data.jobs);
