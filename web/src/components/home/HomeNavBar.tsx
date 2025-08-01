@@ -69,7 +69,7 @@ const HomeNavBar: React.FC = () => {
         </button>
       </div>
       {/* Main nav bar order: Logo, Tabs, Notification, Search, Avatar */}
-      <div className="flex w-full items-center justify-between gap-4 relative">
+      <div className="flex w-full items-center relative">
         {/* Logo */}
         <div className="flex items-center flex-shrink-0 mr-2">
           <Link href="/home" className="flex items-center no-underline">
@@ -77,7 +77,7 @@ const HomeNavBar: React.FC = () => {
             <span className="text-primary font-bold font-poppins text-xl tracking-wide ml-2">IKnow</span>
           </Link>
         </div>
-        {/* Tabs - Centered */}
+        {/* Tabs - Centered on desktop only */}
         <div className="hidden lg:flex flex-1 justify-center items-center gap-7 mx-2">
           {navLinks.map((link, idx) => {
             const isActive = pathname === link.href || (link.href === '/home/posts' && pathname === '/home');
@@ -92,31 +92,31 @@ const HomeNavBar: React.FC = () => {
             );
           })}
         </div>
-        {/* Notification */}
-        <div className="flex items-center flex-shrink-0 mx-2">
-          <NotificationBell />
-        </div>
-        {/* Search */}
-        <div className="hidden xl:flex items-center gap-4.5 relative mx-2">
-          <SearchBar value={''} onChange={function (e: React.ChangeEvent<HTMLInputElement>): void {
-            throw new Error('Function not implemented.' + e);
-          } } />
-        </div>
-        {/* Avatar */}
-        <div className="flex items-center flex-shrink-0 ml-2 relative">
-          <button
-            className="focus:outline-none"
-            onClick={() => setShowAvatarMenu((v) => !v)}
-          >
-            <UserAvatar />
-          </button>
-          {showAvatarMenu && (
-            <div className="absolute right-0 mt-2 w-44 bg-white border border-gray-200 rounded-lg shadow-lg z-20">
-              <button className="w-full text-left px-4 py-2 hover:bg-gray-100" onClick={handleProfile}>Profile</button>
-              <button className="w-full text-left px-4 py-2 hover:bg-gray-100" onClick={handleProfileUpdate}>Profile Update</button>
-              <button className="w-full text-left px-4 py-2 hover:bg-gray-100 text-red-600" onClick={handleLogout}>Logout</button>
-            </div>
-          )}
+        {/* Right section: Notification, Search, Avatar */}
+        <div className="flex items-center ml-auto gap-2">
+          <div className="flex items-center flex-shrink-0 mx-2">
+            <NotificationBell />
+          </div>
+          <div className="hidden xl:flex items-center gap-4.5 relative mx-2">
+            <SearchBar value={''} onChange={function (e: React.ChangeEvent<HTMLInputElement>): void {
+              throw new Error('Function not implemented.' + e);
+            } } />
+          </div>
+          <div className="flex items-center flex-shrink-0 ml-2 relative">
+            <button
+              className="focus:outline-none"
+              onClick={() => setShowAvatarMenu((v) => !v)}
+            >
+              <UserAvatar />
+            </button>
+            {showAvatarMenu && (
+              <div className="absolute right-0 mt-2 w-44 bg-white border border-gray-200 rounded-lg shadow-lg z-20">
+                <button className="w-full text-left px-4 py-2 hover:bg-gray-100" onClick={handleProfile}>Profile</button>
+                <button className="w-full text-left px-4 py-2 hover:bg-gray-100" onClick={handleProfileUpdate}>Profile Update</button>
+                <button className="w-full text-left px-4 py-2 hover:bg-gray-100 text-red-600" onClick={handleLogout}>Logout</button>
+              </div>
+            )}
+          </div>
         </div>
       </div>
       {/* Mobile Menu Drawer (left side) - Simple Underline, No Shadow */}
