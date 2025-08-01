@@ -1,31 +1,27 @@
 
 name: lazyme
-version: "3.8"
 
 services:
-  mongo:
-    image: mongo:6
-    container_name: mongo
-    restart: always
-    ports:
-      - "27017:27017"
-    volumes:
-      - mongo_data:/data/db
+  # mongo:
+  #   image: mongo:6
+  #   container_name: mongo
+  #   restart: always
+  #   ports:
+  #     - "27017:27017"
+  #   volumes:
+  #     - mongo_data:/data/db
 
   backend:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: golang-backend
+    container_name: lazyme
     restart: always
     env_file:
       - .env
-    environment:
-      - MONGODB_URI=mongodb://mongo:27017
     ports:
       - "8080:8080"
-    depends_on:
-      - mongo
+
 
 volumes:
   mongo_data:

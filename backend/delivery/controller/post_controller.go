@@ -6,6 +6,7 @@ import (
 	"strconv"
 
 	"github.com/chera-mihiretu/IKnow/domain/models"
+	"github.com/chera-mihiretu/IKnow/repository"
 	"github.com/chera-mihiretu/IKnow/usecases"
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -77,7 +78,9 @@ func (p *PostController) SearchPosts(ctx *gin.Context) {
 		return
 	}
 
-	filteredPosts, err := p.RemoveMyPost(userIDPrimitive, posts)
+	nextPage := len(posts) > repository.Pagesize
+
+	filteredPosts, err := p.RemoveMyPost(userIDPrimitive, posts[:min(len(posts), repository.Pagesize)])
 	if err != nil {
 		fmt.Println("Error removing user's posts:", err)
 		ctx.JSON(500, gin.H{"error": "Failed to remove user's posts: " + err.Error()})
@@ -93,7 +96,7 @@ func (p *PostController) SearchPosts(ctx *gin.Context) {
 
 	ctx.JSON(200, gin.H{
 		"posts": postViews,
-		"page":  page,
+		"next":  nextPage,
 	})
 
 }
@@ -143,7 +146,9 @@ func (p *PostController) GetPosts(ctx *gin.Context) {
 			})
 		return
 	}
-	userViewPost, err := p.GetPostWithUsers(ctx, post)
+	nextPage := len(post) > repository.Pagesize
+
+	userViewPost, err := p.GetPostWithUsers(ctx, post[:min(len(post), repository.Pagesize)])
 
 	if err != nil {
 		fmt.Println("Error converting post into json:", err)
@@ -159,6 +164,7 @@ func (p *PostController) GetPosts(ctx *gin.Context) {
 		gin.H{
 			"message": "Post are fetched",
 			"posts":   userViewPost,
+			"next":    nextPage,
 		},
 	)
 
@@ -442,7 +448,9 @@ func (p *PostController) GetMyPosts(ctx *gin.Context) {
 		return
 	}
 
-	postViews, err := p.GetPostWithUsers(ctx, posts)
+	nextPage := len(posts) > repository.Pagesize
+
+	postViews, err := p.GetPostWithUsers(ctx, posts[:min(len(posts), repository.Pagesize)])
 	if err != nil {
 		fmt.Println("Error: Failed to get posts (user view):", err)
 		ctx.JSON(500, gin.H{"error": "Failed to get posts " + err.Error()})
@@ -452,6 +460,7 @@ func (p *PostController) GetMyPosts(ctx *gin.Context) {
 	ctx.JSON(200, gin.H{
 		"posts": postViews,
 		"page":  page,
+		"next":  nextPage,
 	})
 }
 
@@ -473,7 +482,9 @@ func (p *PostController) GetPostsByUserID(ctx *gin.Context) {
 		return
 	}
 
-	postViews, err := p.GetPostWithUsers(ctx, posts)
+	nextPage := len(posts) > repository.Pagesize
+
+	postViews, err := p.GetPostWithUsers(ctx, posts[:min(len(posts), repository.Pagesize)])
 
 	if err != nil {
 		fmt.Println("Error: Failed to get posts (user view):", err)
@@ -484,6 +495,7 @@ func (p *PostController) GetPostsByUserID(ctx *gin.Context) {
 	ctx.JSON(200, gin.H{
 		"posts": postViews,
 		"page":  page,
+		"next":  nextPage,
 	})
 }
 

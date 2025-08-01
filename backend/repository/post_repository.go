@@ -130,7 +130,7 @@ func (p *postRepository) GetRecomendedPosts(ctx context.Context, userID string, 
 		}}},
 		// Stage 3: Pagination
 		bson.D{{Key: "$skip", Value: skip}},
-		bson.D{{Key: "$limit", Value: limit}},
+		bson.D{{Key: "$limit", Value: limit + 1}},
 	}
 
 	cursor, err := p.postsDB.Aggregate(ctx, pipeline)

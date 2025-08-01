@@ -184,6 +184,17 @@ func (repo *authRepository) VerifyEmail(ctx context.Context, token models.EmailV
 		return errors.New("user not found")
 	}
 
+	count, err := repo.UsersCollection.CountDocuments(ctx, bson.M{})
+	if err != nil {
+		return errors.New("could not count user documents")
+	}
+
+	if count == 0 {
+		user.Role = string(constants.UserRoleAdmin)
+		user.IsVerified = true
+		user.IsComplete = true
+	}
+	// TODO : Fix the concurent issue if may occur
 	_, err = repo.UsersCollection.InsertOne(ctx, user)
 
 	if err != nil {
