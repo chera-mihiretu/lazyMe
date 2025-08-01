@@ -15,6 +15,7 @@ type UniversityRepository interface {
 	CreateUniversity(ctx context.Context, university models.University) (models.University, error)
 	UpdateUniversity(ctx context.Context, university models.University) (models.University, error)
 	DeleteUniversity(ctx context.Context, id, userID primitive.ObjectID) error
+	VerifyExistence(ctx context.Context, university primitive.ObjectID) (bool, error)
 }
 
 type universityRepository struct {
@@ -92,4 +93,12 @@ func (r *universityRepository) DeleteUniversity(ctx context.Context, id, userID 
 		return mongo.ErrNoDocuments
 	}
 	return nil
+}
+
+func (r *universityRepository) VerifyExistence(ctx context.Context, university primitive.ObjectID) (bool, error) {
+	count, err := r.database.CountDocuments(ctx, bson.M{"_id": university})
+	if err != nil {
+		return false, err
+	}
+	return count > 0, nil
 }

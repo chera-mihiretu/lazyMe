@@ -103,7 +103,7 @@ const SignUpForm: React.FC = () => {
     const errors: { [key: string]: string } = {};
     if (!form.fullName) errors.fullName = 'Full Name is required.';
     if (!form.email) errors.email = 'Email is required.';
-    if (!form.university) errors.university = 'University is required.';
+    // University is now optional
     if (!form.year) errors.year = 'Academic Year is required.';
     if (!form.password) errors.password = 'Password is required.';
     if (!form.agree) errors.agree = 'You must agree to the Terms of Service and Privacy Policy.';
@@ -114,20 +114,22 @@ const SignUpForm: React.FC = () => {
       return;
     }
     try {
+      // Only send university_id if present
+      const payload: any = {
+        name: form.fullName,
+        email: form.email,
+        password: form.password,
+        acedemic_year: parseInt(form.year),
+      };
+      if (form.university) payload.university_id = form.university;
+      if (form.school) payload.school_id = form.school;
+      if (form.department) payload.department_id = form.department;
       const res = await fetch(`${baseUrl}/auth/email/register`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          name: form.fullName,
-          email: form.email,
-          password: form.password,
-          university_id: form.university,
-          school_id: form.school,
-          department_id: form.department,
-          acedemic_year: parseInt(form.year),
-        }),
+        body: JSON.stringify(payload),
       });
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));

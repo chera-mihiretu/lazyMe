@@ -27,13 +27,15 @@ type authRepository struct {
 	UsersCollection           *mongo.Collection
 	UsersCollectionUnverified *mongo.Collection
 	VerificationsCollection   *mongo.Collection
+	universityRepository      UniversityRepository
 }
 
-func NewAuthRepository(db *mongo.Database) AuthRepository {
+func NewAuthRepository(db *mongo.Database, universityRepo UniversityRepository) AuthRepository {
 	return &authRepository{
 		UsersCollection:           db.Collection("users"),
 		UsersCollectionUnverified: db.Collection("users_temp"),
 		VerificationsCollection:   db.Collection("email_verifications"),
+		universityRepository:      universityRepo,
 	}
 }
 
@@ -58,7 +60,17 @@ func (repo *authRepository) RegisterUserWithEmail(ctx context.Context, user mode
 	user.IsVerified = false
 	user.IsTeacher = false
 	user.BlueBadge = false
-	user.IsComplete = true
+	user.IsComplete = false
+	if user.UniversityID != nil && user.UniversityID.Hex() != "" {
+		exist, err := repo.universityRepository.VerifyExistence(ctx, *user.UniversityID)
+		if err != nil {
+
+			return errors.New("could not verify university existence")
+		}
+		if exist {
+			user.IsComplete = true
+		}
+	}
 	user.CreatedAt = time.Now()
 	user.UpdatedAt = time.Now()
 

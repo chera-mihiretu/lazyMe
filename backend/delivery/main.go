@@ -32,10 +32,6 @@ func main() {
 	profileStorageUseCase := StorageInstances(os.Getenv("SUPABASE_BUCKET_NAME"), "profile")
 	materialsStorageUseCase := StorageInstances(os.Getenv("SUPABASE_BUCKET_NAME"), "materials")
 
-	// auth dependecies
-	authRepository := repository.NewAuthRepository(myDatabase)
-	authUseCase := usecases.NewAuthUseCase(authRepository)
-	AuthController := controller.NewAuthController(authUseCase)
 	// user dependencies
 	userRepository := repository.NewUserRepository(myDatabase)
 	userUseCase := usecases.NewUserUseCase(userRepository)
@@ -62,6 +58,7 @@ func main() {
 	commentController := controller.NewCommentController(commentUsecase, userUseCase)
 
 	// post dependencies
+
 	postRepository := repository.NewPostRepository(
 		myDatabase,
 		departmentRepository,
@@ -81,6 +78,10 @@ func main() {
 	universityRepository := repository.NewUniversityRepository(myDatabase)
 	universityUseCase := usecases.NewUniversityUsecase(universityRepository)
 	universityController := controller.NewUniversityController(universityUseCase)
+	// auth dependecies
+	authRepository := repository.NewAuthRepository(myDatabase, universityRepository)
+	authUseCase := usecases.NewAuthUseCase(authRepository)
+	AuthController := controller.NewAuthController(authUseCase)
 	// report dependencies
 	reportRepository := repository.NewReportRepository(myDatabase)
 	reportUseCase := usecases.NewReportUseCase(reportRepository)
