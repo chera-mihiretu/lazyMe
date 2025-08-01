@@ -85,6 +85,7 @@ const PostCard: React.FC<{ post: Post }> = ({ post }) => {
           width={48}
           height={48}
           className="rounded-full object-cover mr-3 bg-[#ececff] border-2 border-[#ececff]"
+          
         />
         <div className="flex flex-col">
           <span className="font-semibold text-[17px] text-[#222]">
@@ -173,9 +174,12 @@ const PostCard: React.FC<{ post: Post }> = ({ post }) => {
         >
           {post.post_attachments.map((url, idx) => (
             <Image
+            priority
               key={idx}
               src={url}
               alt="attachment"
+              width={400}
+              height={320}
               onClick={() => setOpenImg(url)}
               className={`cursor-pointer rounded-xl object-cover bg-[#f0f0f0] flex-1 transition-shadow shadow-[0_2px_8px_#4320d120]`}
               style={{
@@ -202,6 +206,8 @@ const PostCard: React.FC<{ post: Post }> = ({ post }) => {
           <Image
             src={openImg}
             alt="full"
+            width={800}
+            height={600}
             className="max-w-[90vw] max-h-[90vh] rounded-2xl shadow-[0_8px_32px_#0008] bg-white"
           />
         </div>

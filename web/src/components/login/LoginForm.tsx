@@ -1,6 +1,6 @@
 'use client';
 import React, { useState } from 'react';
-import { COLORS, FONT_FAMILY } from '../../utils/color';
+import { COLORS } from '../../utils/color';
 import Link from 'next/link';
 import Image from 'next/image';
 const baseUrl = process.env.NEXT_PUBLIC_BASE_URL;

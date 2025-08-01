@@ -47,67 +47,33 @@ const UserCard: React.FC<UserCardProps> = React.memo(({
   };
   return (
     <div
-      className="user-card-responsive"
-      style={{
-        display: "flex",
-        flexDirection: "row",
-        alignItems: "center",
-        background: "#f3f6fb",
-        borderRadius: 18,
-        boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
-        padding: "1.5rem 2.5rem 1.5rem 1.5rem",
-        marginBottom: 28,
-        minWidth: 420,
-        maxWidth: 820,
-        width: "100%",
-        gap: 36,
-        border: "1.5px solid #e3e6ef",
-        transition: "box-shadow 0.2s, border 0.2s",
-      }}
+      className="user-card-responsive flex flex-row items-center bg-[#f3f6fb] rounded-[18px] shadow-[0_2px_8px_rgba(0,0,0,0.06)] px-[2.5rem] py-[1.5rem] pr-[2.5rem] mb-[28px] min-w-[420px] max-w-[820px] w-full gap-[36px] border-[1.5px] border-[#e3e6ef] transition-[box-shadow,border] duration-200"
     >
       <Image
         src={profile_image_url || "/icons/avatar.png"}
         alt={name + " avatar"}
-        style={{
-          width: 64,
-          height: 64,
-          borderRadius: "50%",
-          objectFit: "cover",
-          background: "#f2f2f2",
-          flexShrink: 0,
-          marginRight: 18,
-        }}
+        width={64}
+        height={64}
+        className="rounded-full object-cover bg-[#f2f2f2] flex-shrink-0 mr-[18px]"
       />
-      <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 8 }}>
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%" }}>
-          <span style={{ fontWeight: 700, fontSize: 21, color: "#222" }}>{name}</span>
+      <div className="flex-1 flex flex-col gap-[8px]">
+        <div className="flex items-center justify-between w-full">
+          <span className="font-bold text-[21px] text-[#222]">{name}</span>
           <button
             onClick={handleConnect}
             disabled={sent || loading}
-            style={{
-              marginLeft: 24,
-              padding: "8px 24px",
-              borderRadius: 8,
-              border: "none",
-              background: sent ? "#b3b3b3" : loading ? "#2563eb99" : "#2563eb",
-              color: "#fff",
-              fontWeight: 600,
-              fontSize: 16,
-              cursor: sent || loading ? "not-allowed" : "pointer",
-              transition: "background 0.2s",
-              boxShadow: "0 1px 4px rgba(0,0,0,0.04)",
-            }}
+            className={`ml-[24px] px-[24px] py-[8px] rounded-[8px] border-none font-semibold text-[16px] transition-colors duration-200 shadow-[0_1px_4px_rgba(0,0,0,0.04)] ${sent ? 'bg-[#b3b3b3] cursor-not-allowed' : loading ? 'bg-[#2563eb99] cursor-not-allowed' : 'bg-[#2563eb] cursor-pointer'} text-white`}
           >
             {sent ? "Sent" : loading ? "Sending..." : "Connect"}
           </button>
         </div>
-        <div style={{ color: "#2563eb", fontSize: 15, fontWeight: 500, margin: "2px 0 0 0" }}>
+        <div className="text-[#2563eb] text-[15px] font-medium mt-[2px]">
           {acedemic_year ? `Year ${acedemic_year}` : ""}
         </div>
-        <div style={{ color: "#4320d1", fontWeight: 600, fontSize: 16, background: "#e8eafd", borderRadius: 6, padding: "2px 10px", margin: "10px 0 0 0", display: "inline-block", width: "fit-content" }}>
+        <div className="text-[#4320d1] font-semibold text-[16px] bg-[#e8eafd] rounded-[6px] px-[10px] py-[2px] mt-[10px] inline-block w-fit">
           Follow: {follow_count}
         </div>
-        <div style={{ color: "#888", fontSize: 16, marginTop: 14, padding: "7px 0 0 0", borderTop: "1px solid #e3e6ef", wordBreak: "break-all" }}>
+        <div className="text-[#888] text-[16px] mt-[14px] pt-[7px] border-t border-[#e3e6ef] break-all">
           {email}
         </div>
       </div>

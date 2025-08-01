@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useCallback } from "react";
 import UserCard from "@/components/home/UserCard";
 import Image from "next/image";
+import Loading from "@/components/general/Loading";
 const baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
 
 interface UserSuggestion {
@@ -59,7 +60,7 @@ const UserSuggestionsList: React.FC<UserSuggestionsListProps> = ({ page = 1 }) =
         <h3 style={{ fontWeight: 600, fontSize: 18, marginBottom: 16 }}>Suggestions</h3>
       )}
       {loading ? (
-        <div style={{ textAlign: "center", margin: "2rem 0" }}>Loading...</div>
+        <Loading />
       ) : users.length === 0 ? (
         <div style={{
           textAlign: "center",
@@ -74,7 +75,7 @@ const UserSuggestionsList: React.FC<UserSuggestionsListProps> = ({ page = 1 }) =
           alignItems: 'center',
           justifyContent: 'center',
         }}>
-          <Image src="/icons/empty_state.png" alt="No suggestions" style={{ width: 80, height: 80, marginBottom: 18, opacity: 0.8 }} />
+          <Image src="/icons/empty_state.png" alt="No suggestions" width={80} height={80} style={{  marginBottom: 18, opacity: 0.8 }} />
           <div style={{ fontWeight: 600, fontSize: 18, marginBottom: 6 }}>No Connection Requests</div>
           <div style={{ color: '#888', fontSize: 15, marginBottom: 0 }}>You&apos;re all caught up! Check back later for new suggestions.</div>
         </div>
