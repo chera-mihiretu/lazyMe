@@ -30,7 +30,7 @@ func GothSetup() {
 		google.New(
 			os.Getenv("GOOGLE_CLIENT_ID"),
 			os.Getenv("GOOGLE_CLIENT_SECRET"),
-			"http://localhost:8080/api/auth/google/callback",
+			os.Getenv("BASE_URL")+"/api/auth/google/callback",
 			"email",
 			"profile",
 		),
