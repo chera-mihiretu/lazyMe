@@ -23,7 +23,7 @@ const Navbar: React.FC = () => {
     >
       {/* Logo on the left */}
        <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-        <Link href="/home" style={{ display: 'flex', alignItems: 'center', textDecoration: 'none' }}>
+        <Link href="/admin/dashboard" style={{ display: 'flex', alignItems: 'center', textDecoration: 'none' }}>
           <Image src="/logos/logo-real.png" alt="IKnow Logo" width={50} height={50} style={{ marginRight: 8 }} />
           <span style={{ color: COLORS.primary, fontWeight: 700, fontFamily: FONT_FAMILY.poppins, fontSize: '1.25rem', letterSpacing: 0.5 }}>IKnow</span>
         </Link>

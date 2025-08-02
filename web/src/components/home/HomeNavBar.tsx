@@ -72,7 +72,7 @@ const HomeNavBar: React.FC = () => {
       <div className="flex w-full items-center relative">
         {/* Logo */}
         <div className="flex items-center flex-shrink-0 mr-2">
-          <Link href="/home" className="flex items-center no-underline">
+          <Link href="/home/posts" className="flex items-center no-underline">
             <Image src="/logos/logo-real.png" alt="IKnow Logo" width={50} height={50} />
             <span className="text-primary font-bold font-poppins text-xl tracking-wide ml-2">IKnow</span>
           </Link>
