@@ -36,7 +36,7 @@ func SetupRoutes(
 	r := gin.New()
 	r.Use(gin.Logger(), gin.Recovery())
 	corsConfig := cors.Config{
-		AllowOrigins:     []string{"http://localhost:3000", "http://127.0.0.1:3000"}, // Not "*"
+		AllowOrigins:     []string{"http://localhost:3000", "http://127.0.0.1:3000", "https://lazyme.vercel.app"}, // Not "*"
 		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
 		AllowHeaders:     []string{"Origin", "Content-Type", "Authorization"},
 		ExposeHeaders:    []string{"Content-Length"},
