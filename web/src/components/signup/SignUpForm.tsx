@@ -6,6 +6,7 @@ import { COLORS } from '../../utils/color';
 import Image from 'next/image';
 import type { University } from '@/types/university';
 import type { School } from '@/types/schools';
+import type { User } from '@/types/post';
 import { Department } from './useDepartments';
 const baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
 const years = [
@@ -36,6 +37,7 @@ const SignUpForm: React.FC = () => {
   const [error, setError] = useState('');
   const [showError, setShowError] = useState(false);
   const [passwordStrength, setPasswordStrength] = useState(0);
+  const [showPassword, setShowPassword] = useState(false);
   const [departments, setDepartments] = useState<Department[]>([]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
@@ -115,7 +117,7 @@ const SignUpForm: React.FC = () => {
     }
     try {
       // Only send university_id if present
-      const payload: any = {
+      const payload: User = {
         name: form.fullName,
         email: form.email,
         password: form.password,
@@ -238,15 +240,26 @@ const SignUpForm: React.FC = () => {
       </div>
       <div className="mb-2">
         <label htmlFor="password" className="font-semibold text-foreground font-poppins mb-1 block">Password</label>
-        <input
-          id="password"
-          name="password"
-          type="password"
-          placeholder="Create a strong password"
-          value={form.password}
-          onChange={handleChange}
-          className={`w-full px-4 py-3 rounded-lg font-poppins text-base outline-none bg-inputBg text-[#171717] shadow-md transition-all duration-200 ${fieldErrors.password ? 'border-error border-[1.5px] shadow-[0_0_0_2px_rgba(211,47,47,0.2),0_2px_8px_#e0e0e0]' : 'border-inputBorder border-[1.5px] shadow-[0_2px_8px_#e0e0e0]'}`}
-        />
+        <div className="relative">
+          <input
+            id="password"
+            name="password"
+            type={showPassword ? "text" : "password"}
+            placeholder="Create a strong password"
+            value={form.password}
+            onChange={handleChange}
+            className={`w-full px-4 py-3 pr-12 rounded-lg font-poppins text-base outline-none bg-inputBg text-[#171717] shadow-md transition-all duration-200 ${fieldErrors.password ? 'border-error border-[1.5px] shadow-[0_0_0_2px_rgba(211,47,47,0.2),0_2px_8px_#e0e0e0]' : 'border-inputBorder border-[1.5px] shadow-[0_2px_8px_#e0e0e0]'}`}
+          />
+          <button
+            type="button"
+            tabIndex={-1}
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-[#888] text-[1.1rem] font-medium px-2 py-1 focus:outline-none"
+            onClick={() => setShowPassword(v => !v)}
+            aria-label={showPassword ? "Hide password" : "Show password"}
+          >
+            {showPassword ? "Hide" : "Show"}
+          </button>
+        </div>
         {fieldErrors.password && <div className="text-error text-[0.98rem] mt-1" style={{color: COLORS.error}}>{fieldErrors.password}</div>}
         {/* Password strength meter */}
         <div className="h-[6px] bg-[#ececec] rounded mt-1 mb-2">

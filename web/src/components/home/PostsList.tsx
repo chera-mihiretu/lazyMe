@@ -135,7 +135,7 @@ const PostsList: React.FC<PostsListProps> = ({ initialSearch = "" }) => {
       }
     }, 500); // 500ms debounce
     return () => clearTimeout(delayDebounce);
-  }, [search]);
+  }, [search, posts, backupPosts.length]);
 
   // Restore backup when search is cleared
   React.useEffect(() => {
