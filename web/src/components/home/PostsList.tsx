@@ -15,6 +15,7 @@ const PostsList: React.FC<PostsListProps> = ({ initialSearch = "" }) => {
   const [backupPosts, setBackupPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(false);
   const [search, setSearch] = useState(initialSearch);
+  const [debouncedSearch, setDebouncedSearch] = useState(initialSearch);
   const [error, setError] = useState<string | null>(null);
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(false);
@@ -60,7 +61,6 @@ const PostsList: React.FC<PostsListProps> = ({ initialSearch = "" }) => {
         } catch {}
         setError(msg);
        
-        setLoading(false);
         return;
       }
       const data = await res.json();
@@ -69,12 +69,11 @@ const PostsList: React.FC<PostsListProps> = ({ initialSearch = "" }) => {
       });
       setBackupPosts(prev => [...prev, ...(data.posts || [])]);
       setHasMore(data.next || false);
-      setLoading(false);
     } catch (e) {
       setError("Failed to fetch posts." + e);
-      setLoading(false);
      
     }
+    setLoading(false);
   };
 
   // Reset posts and pagination when component mounts or remounts
@@ -99,22 +98,30 @@ const PostsList: React.FC<PostsListProps> = ({ initialSearch = "" }) => {
 
   // Debounced search effect: triggers search when user stops typing
   React.useEffect(() => {
-    if (!search.trim()) return;
-    const delayDebounce = setTimeout(async () => {
-      if (!backupPosts.length && posts.length) {
-        setBackupPosts(posts);
-      }
-      setLoading(true);
-      setError(null);
-      const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
-      try {
-        const res = await fetch(`${baseUrl}/posts/search?q=${encodeURIComponent(search)}&page=1`, {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: token ? `Bearer ${token}` : "",
-          },
-        });
+    // Debounce search input and update debouncedSearch only once after user stops typing
+    const handler = setTimeout(() => {
+      setDebouncedSearch(search);
+    }, 500);
+    return () => clearTimeout(handler);
+  }, [search]);
+
+  // Only send search request when debouncedSearch changes
+  React.useEffect(() => {
+    if (!debouncedSearch.trim()) return;
+    if (!backupPosts.length && posts.length) {
+      setBackupPosts(posts);
+    }
+    setLoading(true);
+    setError(null);
+    const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
+    fetch(`${baseUrl}/posts/search?q=${encodeURIComponent(debouncedSearch)}&page=1`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: token ? `Bearer ${token}` : "",
+      },
+    })
+      .then(async res => {
         if (!res.ok) {
           let msg = `Error fetching post: ${res.status} ${res.statusText}`;
           try {
@@ -129,21 +136,26 @@ const PostsList: React.FC<PostsListProps> = ({ initialSearch = "" }) => {
         setPosts(data.posts || []);
         setHasMore(data.next || false);
         setLoading(false);
-      } catch (e) {
+      })
+      .catch(e => {
         setError("Failed to fetch posts." + e);
         setLoading(false);
-      }
-    }, 500); // 500ms debounce
-    return () => clearTimeout(delayDebounce);
-  }, [search, posts, backupPosts.length]);
+      });
+  }, [debouncedSearch]);
 
   // Restore backup when search is cleared
   React.useEffect(() => {
     if (search.trim() === "" && backupPosts.length) {
+      setLoading(true);
       setPosts(backupPosts);
+      setTimeout(() => setLoading(false), 100); // allow posts to render before hiding loading
+    } else if (search.trim() === "") {
+      // If search is empty and no backup, don't clear posts
+      setLoading(false);
     } else {
       setLoading(true);
-      setPosts([])
+      setPosts([]);
+      setTimeout(() => setLoading(false), 100);
     }
   }, [search, backupPosts]);
 
@@ -153,28 +165,32 @@ const PostsList: React.FC<PostsListProps> = ({ initialSearch = "" }) => {
         search={search}
         setSearch={setSearch}
         onAddPost={handleAddPost}
+        
       />
       {loading && posts.length === 0 ? (
         <Loading />
       ) : error ? (
         <div className="text-center mt-16 text-[#d32f2f] font-semibold text-[18px]">{error}</div>
       ) : posts && posts.length === 0 ? (
-        <div className="text-center mt-16 text-[#888]">No posts found.</div>
+        <div className="flex flex-col items-center justify-center mt-16 gap-4">
+          <div className="text-[2rem] font-bold text-[#4320d1] mb-2">No posts found</div>
+          <div className="text-[#888] text-[1.08rem] mb-2">You haven't added any posts yet.</div>
+          <div className="text-[#aaa] text-[0.98rem]">Click the Add Post button above to create your first post!</div>
+        </div>
       ) : posts && posts.length > 0 ? (
         <div className="max-w-[900px] mx-auto mt-10 px-6 font-poppins">
-          
-      {posts.map((post, index) => {
-        const uniqueKey = `${post.id}-${index}`;
-        if (index === posts.length - 1) {
-          return (
-            <div ref={lastElementRef} key={uniqueKey}>
-              <PostCard post={post} />
-            </div>
-          );
-        } else {
-          return <PostCard post={post} key={uniqueKey} />;
-        }
-      })}
+          {posts.map((post, index) => {
+            const uniqueKey = `${post.id}-${index}`;
+            if (index === posts.length - 1) {
+              return (
+                <div ref={lastElementRef} key={uniqueKey}>
+                  <PostCard post={post} />
+                </div>
+              );
+            } else {
+              return <PostCard post={post} key={uniqueKey} />;
+            }
+          })}
           {loading && posts.length > 0 && (
             <div className="text-center mt-6">Loading more...</div>
           )}
