@@ -47,7 +47,7 @@ const LoginForm: React.FC = () => {
               const decoded = JSON.parse(atob(payload));
               const role = decoded.role;
               if (role === 'admin') {
-                window.location.href = '/admin';
+                window.location.href = '/admin/dashboard';
               } else {
                 window.location.href = '/home/posts';
               }
