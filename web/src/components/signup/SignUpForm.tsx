@@ -6,7 +6,7 @@ import { COLORS } from '../../utils/color';
 import Image from 'next/image';
 import type { University } from '@/types/university';
 import type { School } from '@/types/schools';
-import type { User } from '@/types/post';
+import { UserRequest } from '@/types/users';
 import { Department } from './useDepartments';
 const baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
 const years = [
@@ -117,7 +117,7 @@ const SignUpForm: React.FC = () => {
     }
     try {
       // Only send university_id if present
-      const payload: User = {
+      const payload: UserRequest = {
         name: form.fullName,
         email: form.email,
         password: form.password,
