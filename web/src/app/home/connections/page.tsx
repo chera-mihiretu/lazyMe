@@ -4,7 +4,6 @@ import React, { useEffect, useState } from "react";
 import Image from "next/image";
 import { User } from "../../../types/post";
 import HomeNavBar from "../../../components/home/HomeNavBar";
-import UserSuggestionsList from "@/components/home/UserSuggestionsList";
 import ProtectedRoute from "@/app/ProtectedRoute";
 
 const baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
