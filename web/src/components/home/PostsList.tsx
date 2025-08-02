@@ -141,7 +141,7 @@ const PostsList: React.FC<PostsListProps> = ({ initialSearch = "" }) => {
         setError("Failed to fetch posts." + e);
         setLoading(false);
       });
-  }, [debouncedSearch]);
+  }, [debouncedSearch, posts, backupPosts.length]);
 
   // Restore backup when search is cleared
   React.useEffect(() => {
@@ -174,7 +174,7 @@ const PostsList: React.FC<PostsListProps> = ({ initialSearch = "" }) => {
       ) : posts && posts.length === 0 ? (
         <div className="flex flex-col items-center justify-center mt-16 gap-4">
           <div className="text-[2rem] font-bold text-[#4320d1] mb-2">No posts found</div>
-          <div className="text-[#888] text-[1.08rem] mb-2">You haven't added any posts yet.</div>
+          <div className="text-[#888] text-[1.08rem] mb-2">You haven&apos;t added any posts yet.</div>
           <div className="text-[#aaa] text-[0.98rem]">Click the Add Post button above to create your first post!</div>
         </div>
       ) : posts && posts.length > 0 ? (
