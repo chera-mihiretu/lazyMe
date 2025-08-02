@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
-	"time"
 
 	"github.com/chera-mihiretu/IKnow/domain/models"
 	"github.com/chera-mihiretu/IKnow/usecases"
@@ -263,8 +262,6 @@ func (mc *MaterialController) UpdateMaterial(ctx *gin.Context) {
 		return
 	}
 	material.UploadedBy = userIDPrimitive
-
-	material.UpdatedAt = time.Now()
 
 	updatedMaterial, err := mc.MaterialUsecase.UpdateMaterial(ctx, material)
 	if err != nil {

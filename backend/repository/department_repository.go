@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"time"
 
 	"github.com/chera-mihiretu/IKnow/domain/models"
 	"go.mongodb.org/mongo-driver/bson"
@@ -71,6 +72,8 @@ func (r *departmentRepository) GetDepartmentByID(ctx context.Context, id primiti
 
 func (r *departmentRepository) CreateDepartment(ctx context.Context, department models.Departments) (models.Departments, error) {
 	department.ID = primitive.NewObjectID() // Ensure the ID is set before insertion
+	department.CreatedAt = time.Now()
+	department.UpdatedAt = time.Now()
 	_, err := r.departments.InsertOne(ctx, department)
 	if err != nil {
 		return models.Departments{}, err
@@ -80,6 +83,7 @@ func (r *departmentRepository) CreateDepartment(ctx context.Context, department 
 
 func (r *departmentRepository) UpdateDepartment(ctx context.Context, department models.Departments) (models.Departments, error) {
 	update := bson.M{"$set": department}
+	department.UpdatedAt = time.Now()
 	_, err := r.departments.UpdateOne(ctx, bson.M{"_id": department.ID}, update)
 	if err != nil {
 		return models.Departments{}, err

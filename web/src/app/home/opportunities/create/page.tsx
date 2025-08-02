@@ -58,7 +58,7 @@ const CreateJobPage: React.FC = () => {
       if (res.ok) {
         router.push('/home/opportunities');
       } else {
-        setError('Failed to create job post.');
+        setError('Failed to create job post.' );
       }
     } catch {
       setError('Network error.');
@@ -136,7 +136,7 @@ const CreateJobPage: React.FC = () => {
             </div>
           )}
         </div>
-        {error && <div className="text-error text-[0.98rem] mb-2">{error}</div>}
+        {error && <div className="text-red-500 text-[0.98rem] mb-2">{error}</div>}
         <button
           type="submit"
           disabled={loading}

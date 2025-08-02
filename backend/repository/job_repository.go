@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"github.com/chera-mihiretu/IKnow/domain/models"
@@ -21,22 +22,32 @@ type JobRepository interface {
 }
 
 type jobRepository struct {
-	jobs           *mongo.Collection
-	departmentRepo DepartmentRepository
+	jobs             *mongo.Collection
+	departmentRepo   DepartmentRepository
+	geminiRepository GeminiRepository
 }
 
 func NewJobRepository(db *mongo.Database,
-	departmentRepo DepartmentRepository) JobRepository {
+	departmentRepo DepartmentRepository,
+	geminiRepository GeminiRepository) JobRepository {
 	return &jobRepository{
-		jobs:           db.Collection("jobs"),
-		departmentRepo: departmentRepo,
+		jobs:             db.Collection("jobs"),
+		departmentRepo:   departmentRepo,
+		geminiRepository: geminiRepository,
 	}
 }
 
 func (r *jobRepository) CreateJob(ctx context.Context, job models.Opportunities) (models.Opportunities, error) {
 	job.ID = primitive.NewObjectID()
 	job.CreatedAt = primitive.NewDateTimeFromTime(time.Now())
-	_, err := r.jobs.InsertOne(ctx, job)
+	formattedJobInfo := fmt.Sprintf("Title: %s\nDescription: %s\nLink: %s", job.Title, job.Description, job.Link)
+	validated, err := r.geminiRepository.EvaluateJob(ctx, formattedJobInfo)
+	if err != nil {
+		return models.Opportunities{}, err
+	}
+	fmt.Println("Job validation result:", validated)
+	job.IsValidated = validated
+	_, err = r.jobs.InsertOne(ctx, job)
 	if err != nil {
 		return models.Opportunities{}, err
 	}
@@ -124,7 +135,7 @@ func (r *jobRepository) GetRecommendedJobs(ctx context.Context, userDepartmentID
 		return []models.Opportunities{}, nil
 	}
 
-	filter := bson.M{"department_ids": bson.M{"$in": departmentIDs}}
+	filter := bson.M{"department_ids": bson.M{"$in": departmentIDs}, "is_validated": true, "is_flagged": false}
 	findOptions := options.Find().SetSort(bson.D{{Key: "like", Value: -1}, {Key: "created_at", Value: -1}}).
 		SetSkip(int64((page - 1) * 10)).SetLimit(10)
 	cursor, err := r.jobs.Find(ctx, filter, findOptions)

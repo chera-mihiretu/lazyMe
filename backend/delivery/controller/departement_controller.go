@@ -3,7 +3,6 @@ package controller
 import (
 	"fmt"
 	"strconv"
-	"time"
 
 	"github.com/chera-mihiretu/IKnow/domain/models"
 	"github.com/chera-mihiretu/IKnow/usecases"
@@ -31,6 +30,9 @@ func (d *DepartmentController) GetDepartments(ctx *gin.Context) {
 	if err != nil {
 		ctx.JSON(500, gin.H{"error": "Failed to get departments"})
 		return
+	}
+	if departments == nil {
+		departments = []models.Departments{}
 	}
 	ctx.JSON(200, gin.H{
 		"message":     "Departments retrieved successfully",
@@ -101,7 +103,6 @@ func (d *DepartmentController) CreateDepartment(ctx *gin.Context) {
 	}
 
 	department.CreatedBy = userIDPrimitive
-	department.CreatedAt = time.Now()
 	createdDepartment, err := d.DepartmentUsecase.CreateDepartment(ctx, department)
 	if err != nil {
 		ctx.JSON(500, gin.H{"error": "Failed to create department"})
@@ -206,6 +207,10 @@ func (d *DepartmentController) GetDepartmentsInTree(ctx *gin.Context) {
 		fmt.Println("Failed to get departments in tree:", err)
 		ctx.JSON(500, gin.H{"error": "Failed to get departments in tree"})
 		return
+	}
+
+	if departments == nil {
+		departments = []models.Departments{}
 	}
 
 	ctx.JSON(200, gin.H{

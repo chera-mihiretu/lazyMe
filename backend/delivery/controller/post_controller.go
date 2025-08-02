@@ -158,6 +158,7 @@ func (p *PostController) GetPosts(ctx *gin.Context) {
 			})
 		return
 	}
+
 	ctx.Header("Access-Control-Allow-Origin", "*")
 	ctx.JSON(
 		200,

@@ -13,6 +13,8 @@ type Opportunities struct {
 	Description   string               `bson:"description" json:"description"`
 	Link          string               `bson:"link" json:"link"`
 	Type          string               `bson:"type" json:"type"` // internship or job
+	IsValidated   bool                 `bson:"is_validated" json:"is_validated"`
+	IsFlagged     bool                 `bson:"is_flagged" json:"is_flagged"`
 	PostedBy      primitive.ObjectID   `bson:"posted_by" json:"posted_by"`
 	CreatedAt     primitive.DateTime   `bson:"created_at" json:"created_at"`
 }

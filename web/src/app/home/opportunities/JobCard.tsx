@@ -18,7 +18,6 @@ export interface JobPost {
 }
 
 const JobCard: React.FC<{ job: JobPost }> = ({ job }) => {
-  console.log(job)
   const avatar = job.user?.profile_image_url || '/icons/avatar.png';
   const [likes, setLikes] = useState(job.like || 0);
   const [liked, setLiked] = useState(job.liked || false);

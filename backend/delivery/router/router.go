@@ -158,9 +158,9 @@ func SetupRoutes(
 	{
 		job.GET("/", middleware.AuthUserMiddleware(RoleAll), jobController.GetRecommendedJobs)
 		job.GET("/:id", middleware.AuthUserMiddleware(RoleAll), jobController.GetJobByID)
-		job.POST("/", middleware.AuthUserMiddleware(RoleAdmin), jobController.CreateJob)
-		job.PUT("/:id", middleware.AuthUserMiddleware(RoleAdmin), jobController.UpdateJob)
-		job.DELETE("/:id", middleware.AuthUserMiddleware(RoleAdmin), jobController.DeleteJob)
+		job.POST("/", middleware.AuthUserMiddleware(RoleStudent), jobController.CreateJob)
+		job.PUT("/:id", middleware.AuthUserMiddleware(RoleStudent), jobController.UpdateJob)
+		job.DELETE("/:id", middleware.AuthUserMiddleware(RoleStudent), jobController.DeleteJob)
 		// likes
 		job.POST("/like", middleware.AuthUserMiddleware(RoleStudent), jobLikeController.AddLike)
 		job.POST("/dislike", middleware.AuthUserMiddleware(RoleStudent), jobLikeController.RemoveLike)

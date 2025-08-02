@@ -32,16 +32,19 @@ type postRepository struct {
 	postsDB           *mongo.Collection
 	connectRepository ConnectRepository
 	userRepository    UserRepository
+	geminiRepository  GeminiRepository
 }
 
 func NewPostRepository(db *mongo.Database,
 	department DepartmentRepository,
 	connect ConnectRepository,
-	userRepo userRepository) PostRepository {
+	userRepo userRepository,
+	geminiRepo GeminiRepository) PostRepository {
 	return &postRepository{
 		postsDB:           db.Collection("posts"),
 		connectRepository: connect,
 		userRepository:    &userRepo,
+		geminiRepository:  geminiRepo,
 	}
 }
 
@@ -109,6 +112,11 @@ func (p *postRepository) GetRecomendedPosts(ctx context.Context, userID string, 
 
 	// Build the aggregation pipeline
 	pipeline := mongo.Pipeline{
+		// Stage 0: Exclude posts with IsVerified=false or IsFlagged=true
+		bson.D{{Key: "$match", Value: bson.M{
+			"is_validated": true,
+			"is_flagged":   false,
+		}}},
 		// Stage 1: Add a priority field
 		bson.D{{Key: "$addFields", Value: bson.D{
 			{Key: "priority", Value: bson.D{
@@ -177,9 +185,16 @@ func (p *postRepository) GetPostByID(ctx context.Context, id string) (models.Pos
 func (p *postRepository) CreatePost(ctx context.Context, post models.Posts) (models.Posts, error) {
 	id := primitive.NewObjectID()
 	post.ID = id
+
+	validate, err := p.geminiRepository.EvaluatePost(ctx, post.Content)
+	if err != nil {
+		return models.Posts{}, fmt.Errorf("failed to evaluate post content: %v", err)
+	}
+	post.IsValidated = validate
 	post.CreatedAt = time.Now()
 	post.UpdatedAt = time.Now()
-	_, err := p.postsDB.InsertOne(ctx, post)
+
+	_, err = p.postsDB.InsertOne(ctx, post)
 	if err != nil {
 		return models.Posts{}, err
 	}

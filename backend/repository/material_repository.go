@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
 
 	"github.com/chera-mihiretu/IKnow/domain/models"
 	"go.mongodb.org/mongo-driver/bson"
@@ -92,6 +93,9 @@ func (r *materialsRepository) CreateMaterials(ctx context.Context, materials mod
 		return models.Materials{}, errors.New("invalid year for the department")
 	}
 
+	materials.CreatedAt = time.Now()
+	materials.UpdatedAt = time.Now()
+
 	result, err := r.materialss.InsertOne(ctx, materials)
 
 	if err != nil {
@@ -102,6 +106,7 @@ func (r *materialsRepository) CreateMaterials(ctx context.Context, materials mod
 }
 
 func (r *materialsRepository) UpdateMaterials(ctx context.Context, materials models.Materials) (models.Materials, error) {
+	materials.UpdatedAt = time.Now()
 	res, err := r.materialss.UpdateOne(ctx, bson.M{"_id": materials.ID, "uploaded_by": materials.UploadedBy}, bson.M{"$set": bson.M{
 		"title": materials.Title,
 	}})

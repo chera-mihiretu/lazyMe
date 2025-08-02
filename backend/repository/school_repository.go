@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"time"
 
 	"github.com/chera-mihiretu/IKnow/domain/models"
 	"go.mongodb.org/mongo-driver/bson"
@@ -70,6 +71,9 @@ func (r *schoolRepository) GetSchoolByID(ctx context.Context, id primitive.Objec
 
 func (r *schoolRepository) CreateSchool(ctx context.Context, school models.School) (models.School, error) {
 	school.ID = primitive.NewObjectID()
+
+	school.CreatedAt = time.Now()
+	school.UpdatedAt = time.Now()
 	_, err := r.schools.InsertOne(ctx, school)
 	if err != nil {
 		return models.School{}, err
@@ -83,6 +87,8 @@ func (r *schoolRepository) UpdateSchool(ctx context.Context, school models.Schoo
 		"description":   school.Description,
 		"university_id": school.UniversityID,
 	}}
+
+	school.UpdatedAt = time.Now()
 	res, err := r.schools.UpdateOne(ctx, bson.M{"_id": school.ID}, update)
 	if err != nil {
 		return models.School{}, err

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"log"
 	"os"
 
@@ -56,14 +57,21 @@ func main() {
 	commentRepository := repository.NewCommentRepository(myDatabase)
 	commentUsecase := usecases.NewCommentUsecase(commentRepository)
 	commentController := controller.NewCommentController(commentUsecase, userUseCase)
-
+	// gemini dependencies
+	geminiClient, err := GeminiClient(context.Background())
+	if err != nil {
+		log.Fatal("Failed to create Gemini client:", err)
+	}
+	geminiRepository := repository.NewGeminiRepository(geminiClient)
 	// post dependencies
 
 	postRepository := repository.NewPostRepository(
 		myDatabase,
 		departmentRepository,
 		connectionRepository,
-		*userRepository)
+		*userRepository,
+		geminiRepository,
+	)
 	postUseCase := usecases.NewPostUseCase(postRepository)
 	PostController := controller.NewPostController(postUseCase, userUseCase, departmentUsecase, postsStorageUseCase, postLikeUsecase)
 	// material dependencies
@@ -87,7 +95,7 @@ func main() {
 	reportUseCase := usecases.NewReportUseCase(reportRepository)
 	reportController := controller.NewReportController(reportUseCase, userUseCase, postUseCase)
 	// job dependencies
-	jobRepository := repository.NewJobRepository(myDatabase, departmentRepository)
+	jobRepository := repository.NewJobRepository(myDatabase, departmentRepository, geminiRepository)
 	jobUsecase := usecases.NewJobUsecase(jobRepository)
 	jobController := controller.NewJobController(jobUsecase, userUseCase, jobLikeUsecase)
 	router := router.SetupRoutes(

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"net/http"
 	"os"
 
@@ -8,6 +9,7 @@ import (
 	"github.com/markbates/goth"
 	"github.com/markbates/goth/gothic"
 	"github.com/markbates/goth/providers/google"
+	"google.golang.org/genai"
 )
 
 func GothSetup() {
@@ -33,4 +35,13 @@ func GothSetup() {
 			"profile",
 		),
 	)
+}
+
+func GeminiClient(ctx context.Context) (*genai.Client, error) {
+	client, err := genai.NewClient(ctx, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return client, nil
 }

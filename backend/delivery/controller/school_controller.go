@@ -53,6 +53,7 @@ func (c *SchoolController) GetSchoolByID(ctx *gin.Context) {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
+
 	ctx.JSON(http.StatusOK, gin.H{"school": school})
 }
 
@@ -120,6 +121,7 @@ func (c *SchoolController) UpdateSchool(ctx *gin.Context) {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
+
 	ctx.JSON(http.StatusOK, gin.H{"school": school})
 }
 
@@ -166,6 +168,10 @@ func (c *SchoolController) GetAllSchools(ctx *gin.Context) {
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
+	}
+
+	if schools == nil {
+		schools = []models.School{} // Ensure schools is not nil
 	}
 	ctx.JSON(http.StatusOK, gin.H{"schools": schools})
 }

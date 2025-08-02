@@ -163,20 +163,26 @@ func (c *JobController) GetRecommendedJobs(ctx *gin.Context) {
 	jobs, err := c.usecase.GetRecommendedJobs(ctx, *user.DepartmentID, *user.SchoolID, pageInt)
 
 	if err != nil {
+		fmt.Println(err)
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
 	jobsUsers, err := c.AppendUserInfoToJobs(ctx, jobs)
 	if err != nil {
+		fmt.Println(err)
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
+
 	ctx.JSON(http.StatusOK, gin.H{"jobs": jobsUsers, "page": pageInt})
 }
 
 func (c *JobController) AppendUserInfoToJobs(ctx *gin.Context, jobs []models.Opportunities) ([]models.OpportunitiesView, error) {
 
+	if len(jobs) == 0 {
+		return []models.OpportunitiesView{}, nil
+	}
 	userIDSet := make(map[string]struct{})
 
 	for _, job := range jobs {
