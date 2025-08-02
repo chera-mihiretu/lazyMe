@@ -60,6 +60,8 @@ const SchoolsSection: React.FC = () => {
           <div className="text-[#888] font-medium py-3">Loading...</div>
         ) : error ? (
           <div className="text-[#e53e3e] font-medium py-3">{error}</div>
+        ) : schools.length === 0 ? (
+          <div className="text-[#888] font-medium py-3">No schools found.</div>
         ) : (
           <div className="flex flex-col gap-2 flex-1">
             {schools.slice(0, 4).map(s => (
