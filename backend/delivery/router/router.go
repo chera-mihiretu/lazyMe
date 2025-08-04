@@ -60,6 +60,8 @@ func SetupRoutes(
 		emailAuth.POST("/register", authController.RegisterWithEmail)
 		emailAuth.POST("/login", authController.LoginWithEmail)
 		emailAuth.GET("/verify-email", authController.VerifyEmail)
+		emailAuth.POST("/forgot-password", authController.ForgotPassword)
+		emailAuth.POST("/reset-password", authController.ResetPassword)
 	}
 
 	postsInfo := r.Group("/api/posts")

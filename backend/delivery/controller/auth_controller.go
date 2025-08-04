@@ -161,3 +161,58 @@ func (auth *AuthController) VerifyEmail(ctx *gin.Context) {
 
 	ctx.Redirect(http.StatusFound, front_url+"/auth/verified")
 }
+
+func (auth *AuthController) ForgotPassword(ctx *gin.Context) {
+	var user models.User
+
+	if err := ctx.ShouldBindJSON(&user); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	if user.Email == "" {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Email is required"})
+		return
+	}
+
+	err := auth.authUseCase.ForgotPassword(ctx, user)
+
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to send reset password email: " + err.Error()})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{"message": "Reset password email sent successfully"})
+}
+
+func (auth *AuthController) ResetPassword(ctx *gin.Context) {
+	token := ctx.DefaultQuery("token", "")
+
+	var user models.User
+	var tokenModel models.EmailVerification
+
+	if err := ctx.ShouldBindJSON(&user); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	tokenModel.Token = token
+
+	email, err := middleware.VerificationTokenValidate(tokenModel.Token)
+
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid token: " + err.Error()})
+		return
+	}
+
+	tokenModel.UserEmail = email
+
+	err = auth.authUseCase.ResetPassword(ctx, user, tokenModel)
+
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to reset password: " + err.Error()})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{"message": "Password reset successfully"})
+}

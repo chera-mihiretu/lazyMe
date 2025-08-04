@@ -21,12 +21,15 @@ type AuthRepository interface {
 	LoginWithEmail(ctx context.Context, user models.User) (string, error)
 	SignInWithGoogle(ctx context.Context, user models.User) (string, error)
 	VerifyEmail(ctx context.Context, token models.EmailVerification) error
+	ForgotPassword(ctx context.Context, user models.User) error
+	ResetPassword(ctx context.Context, user models.User, token models.EmailVerification) error
 }
 
 type authRepository struct {
 	UsersCollection           *mongo.Collection
 	UsersCollectionUnverified *mongo.Collection
 	VerificationsCollection   *mongo.Collection
+	PasswordResetsCollection  *mongo.Collection
 	universityRepository      UniversityRepository
 }
 
@@ -35,6 +38,7 @@ func NewAuthRepository(db *mongo.Database, universityRepo UniversityRepository) 
 		UsersCollection:           db.Collection("users"),
 		UsersCollectionUnverified: db.Collection("users_temp"),
 		VerificationsCollection:   db.Collection("email_verifications"),
+		PasswordResetsCollection:  db.Collection("password_resets"),
 		universityRepository:      universityRepo,
 	}
 }
@@ -93,7 +97,7 @@ func (repo *authRepository) RegisterUserWithEmail(ctx context.Context, user mode
 
 	repo.VerificationsCollection.InsertOne(ctx, verification)
 
-	err = email.SendEmail(user.Email, token)
+	err = email.SendVerificationEmail(user.Email, token)
 
 	if err != nil {
 		return errors.New("could not send verification email")
@@ -222,6 +226,77 @@ func (repo *authRepository) VerifyEmail(ctx context.Context, token models.EmailV
 	_, err = repo.VerificationsCollection.DeleteMany(ctx, filter)
 	if err != nil {
 		return errors.New("could not delete verification token")
+	}
+	return nil
+
+}
+
+func (repo *authRepository) ForgotPassword(ctx context.Context, user models.User) error {
+
+	var newUser models.User
+
+	err := repo.UsersCollection.FindOne(ctx, bson.M{"email": user.Email}).Decode(&newUser)
+
+	if err != nil {
+		if err == mongo.ErrNoDocuments {
+			return errors.New("user not found")
+		}
+		return err
+	}
+
+	token, err := middleware.GenerateVerficationToken(newUser.Email)
+
+	if err != nil {
+		return errors.New("could not generate verification token")
+	}
+
+	var verification models.EmailVerification
+	verification.UserID = newUser.ID
+	verification.Token = token
+	verification.UserEmail = user.Email
+	verification.SentAt = time.Now()
+	verification.ExpiresAt = time.Now().Add(24 * time.Hour)
+
+	err = email.SendPasswordResetEmail(newUser.Email, token)
+	if err != nil {
+		return errors.New("could not send password reset email")
+	}
+	_, err = repo.PasswordResetsCollection.InsertOne(ctx, verification)
+
+	if err != nil {
+		return errors.New("could not insert password reset token")
+	}
+	return nil
+}
+
+func (repo *authRepository) ResetPassword(ctx context.Context, theUser models.User, token models.EmailVerification) error {
+	filter := bson.M{"user_email": token.UserEmail, "token": token.Token}
+
+	var reset models.EmailVerification
+
+	err := repo.PasswordResetsCollection.FindOne(ctx, filter).Decode(&reset)
+
+	if err != nil {
+		return errors.New("password reset token Invalid")
+	}
+
+	if reset.ExpiresAt.Before(time.Now()) {
+		return errors.New("password reset token has expired")
+	}
+
+	filter = bson.M{"_id": reset.UserID}
+
+	newPass, err := hashing.HashPassword(theUser.PasswordHash)
+	if err != nil {
+		return errors.New("could not hash new password")
+	}
+	_, err = repo.UsersCollection.UpdateOne(ctx, filter, bson.M{"$set": bson.M{"password_hash": newPass}})
+	if err != nil {
+		return errors.New("could not update password")
+	}
+	_, err = repo.PasswordResetsCollection.DeleteMany(ctx, bson.M{"user_email": reset.UserEmail})
+	if err != nil {
+		return errors.New("could not delete password reset tokens")
 	}
 	return nil
 

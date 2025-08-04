@@ -12,6 +12,8 @@ type AuthUseCase interface {
 	LoginWithEmail(ctx context.Context, user models.User) (string, error)
 	SignInWithGoogle(ctx context.Context, user models.User) (string, error)
 	VerifyEmail(ctx context.Context, token models.EmailVerification) error
+	ForgotPassword(ctx context.Context, user models.User) error
+	ResetPassword(ctx context.Context, user models.User, token models.EmailVerification) error
 }
 
 type authUseCase struct {
@@ -38,4 +40,12 @@ func (auth *authUseCase) LoginWithEmail(ctx context.Context, user models.User) (
 
 func (auth *authUseCase) VerifyEmail(ctx context.Context, token models.EmailVerification) error {
 	return auth.AuthRepository.VerifyEmail(ctx, token)
+}
+
+func (auth *authUseCase) ForgotPassword(ctx context.Context, user models.User) error {
+	return auth.AuthRepository.ForgotPassword(ctx, user)
+}
+
+func (auth *authUseCase) ResetPassword(ctx context.Context, user models.User, token models.EmailVerification) error {
+	return auth.AuthRepository.ResetPassword(ctx, user, token)
 }
