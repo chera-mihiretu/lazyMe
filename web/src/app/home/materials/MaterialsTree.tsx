@@ -111,7 +111,7 @@ const MaterialsTree: React.FC = () => {
     ));
 
   return (
-    <div style={{ maxWidth: 900, margin: "3rem auto", background: "#fff", borderRadius: 16, boxShadow: "0 2px 16px #4320d10a", padding: 32 }}>
+    <div style={{ maxWidth: 1200, margin: "3rem auto", background: "#fff", borderRadius: 16, boxShadow: "0 2px 16px #4320d10a", padding: 32 }}>
       <h2 style={{ fontWeight: 700, fontSize: 24, marginBottom: 24 }}>Materials</h2>
       {tree.length === 0 ? (
         <div style={{ color: "#888", textAlign: "center", marginTop: 40 }}>No universities found.</div>
