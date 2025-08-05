@@ -103,10 +103,22 @@ const ExamsTree: React.FC = () => {
     ));
 
   return (
-    <div style={{ maxWidth: 1200, minWidth: 400, margin: "3rem auto", background: "#fff", borderRadius: 16, boxShadow: "0 2px 16px #4320d10a", padding: 48 }}>
-      <h2 style={{ fontWeight: 700, fontSize: 28, marginBottom: 32 }}>Exams</h2>
+    <div
+      style={{
+        maxWidth: 1200,
+        width: '100%',
+        margin: '3rem auto',
+        background: '#fff',
+        borderRadius: 16,
+        boxShadow: '0 2px 16px #4320d10a',
+        padding: '32px',
+        minWidth: 0,
+      }}
+      className="px-2 sm:px-6"
+    >
+      <h2 style={{ fontWeight: 700, fontSize: 24, marginBottom: 24 }}>Exams</h2>
       {tree.length === 0 ? (
-        <div style={{ color: "#888", textAlign: "center", marginTop: 40 }}>No universities found.</div>
+        <div style={{ color: '#888', textAlign: 'center', marginTop: 40 }}>No universities found.</div>
       ) : (
         renderTree(tree)
       )}
