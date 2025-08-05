@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import Image from "next/image";
+import Loading from "@/components/general/Loading";
 import { User } from "../../../types/post";
 import HomeNavBar from "../../../components/home/HomeNavBar";
 import ProtectedRoute from "@/app/ProtectedRoute";
@@ -76,9 +77,7 @@ const ConnectionsPage: React.FC = () => {
         >
           <h3 style={{ fontWeight: 600, fontSize: 18, marginBottom: 16, color: '#4320d1' }}>Connection Requests</h3>
           {loading ? (
-            <div className="flex justify-center items-center py-12">
-              <Image src="/icons/loading_spinner.svg" alt="Loading" width={40} height={40} className="animate-spin opacity-80" />
-            </div>
+            <Loading />
           ) : error ? (
             <div className="text-error text-base mb-3 text-center">{error}</div>
           ) : requests.length === 0 ? (
