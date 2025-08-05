@@ -1,24 +1,15 @@
 "use client";
 
-import HomeNavBar from "../../../components/home/HomeNavBar";
 import ProtectedRoute from "@/app/ProtectedRoute";
-import ProfileHero from "@/components/profile/ProfileHero";
 import PostCard from "@/components/home/PostCard";
 import { useUserProfile } from "@/hooks/useUserProfile";
 import { useUserPosts } from "@/hooks/useUserPosts";
 import Image from "next/image";
 
 const ProfilePage: React.FC = () => {
-  const { user, loading: userLoading, error: userError } = useUserProfile();
+  const { user } = useUserProfile();
   const { posts, loading: postsLoading, error: postsError } = useUserPosts(1);
 
-  // Helper for animated stats
-  const StatCard = ({ label, value }: { label: string; value: number | string }) => (
-    <div className="bg-white/70 backdrop-blur-md px-5 py-2 rounded-xl shadow-lg flex flex-col items-center animate-fade-in-up">
-      <span className="text-[#4320d1] font-bold text-lg">{value}</span>
-      <span className="text-xs text-[#888] font-medium">{label}</span>
-    </div>
-  );
 
   return (
     <ProtectedRoute role="student">
@@ -97,7 +88,7 @@ const ProfilePage: React.FC = () => {
           <div className="flex flex-col items-center justify-center py-16 animate-fade-in-up">
             <Image src="/icons/empty_state.png" alt="No posts" width={100} height={100} className="mb-6 opacity-80" />
             <div className="font-bold text-xl mb-2 text-[#4320d1]">No Posts Found</div>
-            <div className="text-[#888] text-base mb-4">You haven't posted anything yet.</div>
+            <div className="text-[#888] text-base mb-4">You haven&apos;t posted anything yet.</div>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 animate-fade-in-up">

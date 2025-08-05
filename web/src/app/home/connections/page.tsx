@@ -5,7 +5,6 @@ import Image from "next/image";
 import { User } from "../../../types/post";
 import HomeNavBar from "../../../components/home/HomeNavBar";
 import ProtectedRoute from "@/app/ProtectedRoute";
-import { COLORS } from "@/utils/color";
 
 const baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
 

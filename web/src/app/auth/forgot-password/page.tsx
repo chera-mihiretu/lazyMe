@@ -30,7 +30,7 @@ const ForgotPassword: React.FC = () => {
       }
       setSuccess("If your email exists, a reset link has been sent.");
     } catch (err) {
-      setError("Network error. Please try again.");
+      setError("Network error. Please try again." + err);
     }
     setLoading(false);
   };

@@ -34,13 +34,7 @@ const HomeNavBar: React.FC = () => {
       .then(data => setUser(data))
       .catch(() => setUser(null));
   }, []);
-  // Avatar menu handlers
-  const handleProfile = () => {
-    if (user && user.id && typeof window !== 'undefined') {
-      window.location.href = `/profile`;
-    }
-    setShowAvatarMenu(false);
-  };
+ 
   const handleProfileUpdate = () => {
     if (user && user.id && typeof window !== 'undefined') {
       window.location.href = `/profile/edit`;

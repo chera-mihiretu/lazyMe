@@ -22,7 +22,7 @@ export function useUserPosts(page: number = 1) {
           setError("Failed to load posts.");
         }
       } catch (err) {
-        setError("Network error. Please try again.");
+        setError("Network error. Please try again." + err);
       } finally {
         setLoading(false);
       }

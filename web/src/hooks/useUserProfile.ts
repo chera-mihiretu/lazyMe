@@ -38,7 +38,7 @@ export function useUserProfile() {
           setError("Failed to load user profile.");
         }
       } catch (err) {
-        setError("Network error. Please try again.");
+        setError("Network error. Please try again." + err);
       } finally {
         setLoading(false);
       }

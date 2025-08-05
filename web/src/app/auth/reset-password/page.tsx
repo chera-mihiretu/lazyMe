@@ -1,9 +1,11 @@
 "use client";
 import React, { useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
+import { Suspense } from "react";
+import Image from "next/image";
 const baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
 
-const ResetPassword: React.FC = () => {
+function ResetPasswordContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const token = searchParams.get("token") || "";
@@ -31,9 +33,9 @@ const ResetPassword: React.FC = () => {
         return;
       }
       setSuccess("Password reset successful! You can now log in.");
-      setTimeout(() => router.push("/auth/login"), 2000);
+      setTimeout(() => router.push("/auth/login"), 1000);
     } catch (err) {
-      setError("Network error. Please try again.");
+      setError("Network error. Please try again." + err);
     }
     setLoading(false);
   };
@@ -52,7 +54,7 @@ const ResetPassword: React.FC = () => {
         overflow: 'hidden',
       }}
     >
-      {/* Background image with reduced opacity */}
+      {/* ...existing code... */}
       <div
         style={{
           position: 'fixed',
@@ -65,7 +67,7 @@ const ResetPassword: React.FC = () => {
           opacity: 0.55,
         }}
       />
-      {/* Weak 4318D1 gradient at the bottom */}
+      {/* ...existing code... */}
       <div
         style={{
           position: 'fixed',
@@ -78,6 +80,7 @@ const ResetPassword: React.FC = () => {
           background: 'linear-gradient(0deg, #4318D122 0%, transparent 100%)',
         }}
       />
+      {/* ...existing code... */}
       <div style={{
         width: '100%',
         maxWidth: 410,
@@ -92,8 +95,9 @@ const ResetPassword: React.FC = () => {
         zIndex: 2,
         position: 'relative',
       }}>
+        {/* ...existing code... */}
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: 18 }}>
-          <img src="/logos/logo-real.png" alt="IKnow Logo" width={80} height={80} style={{ marginBottom: 8 }} />
+          <Image src="/logos/logo-real.png" alt="IKnow Logo" width={80} height={80} style={{ marginBottom: 8 }} />
           <span style={{
             fontFamily: 'Poppins, sans-serif',
             fontWeight: 700,
@@ -102,7 +106,9 @@ const ResetPassword: React.FC = () => {
             letterSpacing: 1.5,
           }}>lazyME</span>
         </div>
+        {/* ...existing code... */}
         <form onSubmit={handleSubmit} className="w-full max-w-[380px] mx-auto mt-16">
+          {/* ...existing code... */}
           <div className="mb-5">
             <div className="flex items-center my-4">
               <div className="flex-1 h-[1px] bg-inputBorder opacity-50" />
@@ -158,6 +164,12 @@ const ResetPassword: React.FC = () => {
       </div>
     </div>
   );
-};
+}
+
+const ResetPassword: React.FC = () => (
+  <Suspense>
+    <ResetPasswordContent />
+  </Suspense>
+);
 
 export default ResetPassword;
