@@ -3,9 +3,9 @@ import Image from "next/image";
 import { TreeNodeProps } from "./types";
 
 const iconMap: Record<string, string> = {
-  university: "/icons/school.png", // fallback to school icon for university
+  university: "/icons/university.png", // fallback to school icon for university
   school: "/icons/school.png",
-  department: "/icons/school.png", // fallback, or add department.png if you have
+  department: "/icons/department.png", // fallback, or add department.png if you have
   year: "/icons/year.png",
   semester: "/icons/semister.png",
   material: "/icons/material.png",
