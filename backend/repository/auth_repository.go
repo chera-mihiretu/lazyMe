@@ -206,7 +206,7 @@ func (repo *authRepository) VerifyEmail(ctx context.Context, token models.EmailV
 	}
 
 	if count == 0 {
-		user.Role = string(constants.UserRoleAdmin)
+		user.Role = string(constants.UserRoleSuperAdmin)
 		user.IsVerified = true
 		user.IsComplete = true
 	}

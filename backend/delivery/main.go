@@ -8,6 +8,7 @@ import (
 	"github.com/chera-mihiretu/IKnow/delivery/controller"
 	"github.com/chera-mihiretu/IKnow/delivery/router"
 	"github.com/chera-mihiretu/IKnow/infrastructure/mongodb"
+	"github.com/chera-mihiretu/IKnow/infrastructure/redis"
 	"github.com/chera-mihiretu/IKnow/repository"
 	"github.com/chera-mihiretu/IKnow/usecases"
 	"github.com/joho/godotenv"
@@ -26,6 +27,8 @@ func main() {
 	if err != nil {
 		log.Fatal("Failed to connect to MongoDB:", err)
 	}
+
+	redis.RateLimiter()
 
 	myDatabase := client.Database("lazyme")
 	// posts storage dependencies
@@ -98,6 +101,20 @@ func main() {
 	jobRepository := repository.NewJobRepository(myDatabase, departmentRepository, geminiRepository)
 	jobUsecase := usecases.NewJobUsecase(jobRepository)
 	jobController := controller.NewJobController(jobUsecase, userUseCase, jobLikeUsecase)
+	// admin dependencies
+	redisClient := redis.RedisClient()
+	if redisClient == nil {
+		log.Fatal("Failed to connect to Redis")
+	}
+	log.Println("✅✅✅✅ Connected to Redis successfully")
+	defer redisClient.Close()
+	adminRepository := repository.NewAdminRepository(
+		geminiRepository,
+		userRepository,
+		redisClient,
+	)
+	adminUsecase := usecases.NewAdminUseCase(adminRepository)
+	adminController := controller.NewAdminController(adminUsecase)
 	router := router.SetupRoutes(
 		AuthController,
 		PostController,
@@ -112,6 +129,7 @@ func main() {
 		jobLikeController,
 		commentController,
 		reportController,
+		adminController,
 	)
 
 	if err := router.Run(":8080"); err != nil {

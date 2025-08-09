@@ -24,6 +24,9 @@ func (c *UniversityController) GetUniversities(ctx *gin.Context) {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
+	if universities == nil {
+		universities = []models.University{}
+	}
 	ctx.JSON(http.StatusOK, gin.H{"universities": universities})
 }
 

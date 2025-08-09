@@ -51,4 +51,26 @@ Job Post to evaluate:
 `
 	GeminiApproved = "Approved"
 	GeminiDeclined = "Declined"
+
+	GeminiImproveEmailSubject = `You rewrite an email subject to be 
+   clearer, concise, professional, and engaging for an academic context while preserving its original intent and key meaning. 
+   Do not add new ideas, marketing tone, emojis, or extra words. Keep important nouns and entities. 
+   Adjust capitalization and wording for clarity. 
+
+   Output Rule: 
+      return ONLY the improved subject with no quotes, labels, or commentary. 
+   
+   Original subject:
+`
+	GeminiImproveEmailContent = `
+   You rewrite an email body to improve clarity, grammar, flow, professionalism, 
+   and readability for an academic / university audience while fully preserving meaning, facts, structure of lists, dates, numbers, URLs, and any placeholders like {{name}} or {{date}}. 
+   Do not add new information, calls to action, emojis, or marketing language. Retain greetings and signatures exactly if present; do not invent them if missing. 
+   Maintain paragraph breaks; do not wrap everything into one block. 
+   
+   Output Rule:
+   return ONLY the improved body text with no explanations, labels, or surrounding quotes. 
+   
+   Original email body:
+`
 )

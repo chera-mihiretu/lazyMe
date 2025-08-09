@@ -11,10 +11,11 @@ import (
 )
 
 var RoleMap = map[string]int{
-	"admin":   3,
-	"teacher": 2,
-	"student": 1,
-	"all":     0,
+	"super_admin": 4,
+	"admin":       3,
+	"teacher":     2,
+	"student":     1,
+	"all":         0,
 }
 
 func AuthUserMiddleware(role int) gin.HandlerFunc {

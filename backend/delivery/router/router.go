@@ -11,6 +11,7 @@ import (
 )
 
 const (
+	SuperAdmin  = 4
 	RoleAdmin   = 3
 	RoleTeacher = 2
 	RoleStudent = 1
@@ -31,12 +32,13 @@ func SetupRoutes(
 	jobLikeController *controller.JobLikeController,
 	commentController *controller.CommentController,
 	reportController *controller.ReportController,
+	adminController *controller.AdminController,
 ) *gin.Engine {
 	fmt.Println("FRONT_BASE_URL:", os.Getenv("FRONT_BASE_URL"))
 	r := gin.New()
 	r.Use(gin.Logger(), gin.Recovery())
 	corsConfig := cors.Config{
-		AllowOrigins:     []string{"http://localhost:3000", "http://127.0.0.1:3000", "https://lazyme.vercel.app"}, // Not "*"
+		AllowOrigins:     []string{"http://localhost:3000", "http://127.0.0.1:3000", "https://lazyme.vercel.app", "http://192.168.1.*:30007"},
 		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
 		AllowHeaders:     []string{"Origin", "Content-Type", "Authorization"},
 		ExposeHeaders:    []string{"Content-Length"},
@@ -174,6 +176,14 @@ func SetupRoutes(
 		user.POST("/complete-account", middleware.AuthUserMiddleware(RoleAll), userController.CompleteUser)
 		user.GET("/analytics", middleware.AuthUserMiddleware(RoleAdmin), userController.UserAnalytics)
 	}
+
+	admins := r.Group("/api/admins")
+
+	{
+		admins.POST("/send-email", middleware.AuthUserMiddleware(SuperAdmin), adminController.SendEmailToUsers)
+		admins.POST("/improve-email", middleware.AuthUserMiddleware(SuperAdmin), adminController.ImproveEmail)
+	}
+
 	r.GET("api/health", func(c *gin.Context) {
 		c.JSON(200, gin.H{
 			"message": "Server is running",

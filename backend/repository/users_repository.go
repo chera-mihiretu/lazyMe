@@ -21,6 +21,7 @@ type UserRepository interface {
 	GetListOfUsers(ctx context.Context, ids []primitive.ObjectID) ([]models.UserView, error)
 	CompleteUser(ctx context.Context, user models.User) (models.UserView, error)
 	UserAnalytics(ctx context.Context) (models.UserAnalytics, error)
+	GetAllUsers(ctx context.Context) ([]models.UserView, error)
 }
 
 type userRepository struct {
@@ -190,4 +191,26 @@ func (c *userRepository) UserAnalytics(ctx context.Context) (models.UserAnalytic
 	}
 
 	return analytics, nil
+}
+
+func (c *userRepository) GetAllUsers(ctx context.Context) ([]models.UserView, error) {
+	var users []models.UserView
+	cursor, err := c.users.Find(ctx, bson.M{})
+	if err != nil {
+		return nil, err
+	}
+
+	for cursor.Next(ctx) {
+		var user models.UserView
+		if err := cursor.Decode(&user); err != nil {
+			return nil, err
+		}
+		users = append(users, user)
+	}
+
+	if err := cursor.Err(); err != nil {
+		return nil, err
+	}
+
+	return users, nil
 }

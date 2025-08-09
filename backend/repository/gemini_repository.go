@@ -13,6 +13,8 @@ import (
 type GeminiRepository interface {
 	EvaluatePost(ctx context.Context, post string) (bool, error)
 	EvaluateJob(ctx context.Context, comment string) (bool, error)
+	ImproveEmailSubject(ctx context.Context, subject string) (string, error)
+	ImproveEmailBody(ctx context.Context, body string) (string, error)
 }
 
 type geminiRepository struct {
@@ -78,4 +80,44 @@ func (r *geminiRepository) EvaluateJob(ctx context.Context, job string) (bool, e
 	}
 
 	return false, errors.New("unexpected response from gemini")
+}
+
+func (r *geminiRepository) ImproveEmailSubject(ctx context.Context, subject string) (string, error) {
+	model := string(constants.GeminiModel)
+	result, err := r.geminiClient.Models.GenerateContent(
+		ctx,
+		model,
+		genai.Text(constants.GeminiImproveEmailSubject+subject),
+		nil,
+	)
+
+	if err != nil {
+		return "", err
+	}
+
+	resultString := result.Text()
+
+	resultString = strings.Trim(resultString, " ")
+
+	return resultString, nil
+}
+
+func (r *geminiRepository) ImproveEmailBody(ctx context.Context, body string) (string, error) {
+	model := string(constants.GeminiModel)
+	result, err := r.geminiClient.Models.GenerateContent(
+		ctx,
+		model,
+		genai.Text(constants.GeminiImproveEmailContent+body),
+		nil,
+	)
+
+	if err != nil {
+		return "", err
+	}
+
+	resultString := result.Text()
+
+	resultString = strings.Trim(resultString, " ")
+
+	return resultString, nil
 }
