@@ -14,6 +14,7 @@ import SchoolsSection from "@/components/admin/SchoolsSection";
 import DepartmentsSection from "@/components/admin/DepartmentsSection";
 import MaterialsSection from "@/components/admin/MaterialsSection";
 import ProtectedRoute from "@/app/ProtectedRoute";
+import AdminEmailDialog from "@/components/admin/AdminEmailDialog";
 
 const AdminDashboard: React.FC = () => {
   // Dialog open/close state only
@@ -21,8 +22,8 @@ const AdminDashboard: React.FC = () => {
   const [showDepartmentDialog, setShowDepartmentDialog] = useState(false);
   const [showUniversityDialog, setShowUniversityDialog] = useState(false);
   const [showSchoolDialog, setShowSchoolDialog] = useState(false);
+  const [showEmailDialog, setShowEmailDialog] = useState(false);
 
-  
   return (
     <ProtectedRoute role="admin">
     <div className="w-screen min-h-screen bg-[#f7f7fa]">
@@ -50,7 +51,7 @@ const AdminDashboard: React.FC = () => {
               className="bg-white rounded-[14px] shadow-[0_2px_8px_#4320d120] px-8 py-6 flex items-center min-w-[220px] cursor-pointer transition-shadow duration-200 gap-[18px]"
               onClick={() => setShowUniversityDialog(true)}
             >
-              <Image src="/icons/school.png" alt="Add University" width={36} height={36} className="w-9 h-9" />
+              <Image src="/icons/university.png" alt="Add University" width={36} height={36} className="w-9 h-9" />
               <span className="font-semibold text-[18px] text-[#4320d1]">Add University</span>
             </div>
             <AddUniversityDialog
@@ -78,7 +79,7 @@ const AdminDashboard: React.FC = () => {
               className="bg-white rounded-[14px] shadow-[0_2px_8px_#4320d120] px-8 py-6 flex items-center min-w-[220px] cursor-pointer transition-shadow duration-200 gap-[18px]"
               onClick={() => setShowDepartmentDialog(true)}
             >
-              <Image src="/icons/school.png" alt="Add Department" width={36} height={36} className="w-9 h-9" />
+              <Image src="/icons/department.png" alt="Add Department" width={36} height={36} className="w-9 h-9" />
               <span className="font-semibold text-[18px] text-[#4320d1]">Add Department</span>
             </div>
             <AddDepartmentDialog
@@ -98,6 +99,20 @@ const AdminDashboard: React.FC = () => {
             <AddMaterialDialog
               open={showMaterialDialog}
               onClose={() => setShowMaterialDialog(false)}
+            />
+          </div>
+          {/* Send Users Email - Dialog */}
+          <div className="relative">
+            <div
+              className="bg-white rounded-[14px] shadow-[0_2px_8px_#4320d120] px-8 py-6 flex items-center min-w-[220px] cursor-pointer transition-shadow duration-200 gap-[18px]"
+              onClick={() => setShowEmailDialog(true)}
+            >
+              <Image src="/icons/email.png" alt="Send Users Email" width={36} height={36} className="w-9 h-9" />
+              <span className="font-semibold text-[18px] text-[#4320d1]">Send Users Email</span>
+            </div>
+            <AdminEmailDialog
+              open={showEmailDialog}
+              onClose={() => setShowEmailDialog(false)}
             />
           </div>
         </div>

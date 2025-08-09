@@ -20,7 +20,7 @@ export default function ProtectedRoute({ children, role }: { children: React.Rea
         if (thisRole !== role) {
           if (thisRole === "student") {
             router.replace("/home/posts");
-          } else if (thisRole === "admin") {
+          } else if (thisRole === "admin" || thisRole === "super_admin") {
             router.replace("/admin/dashboard");
           }
         }

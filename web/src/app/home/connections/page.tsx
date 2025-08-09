@@ -75,6 +75,7 @@ const ConnectionsPage: React.FC = () => {
           className="user-suggestions-responsive"
           style={{ minWidth: 240, maxWidth: 520, margin: '32px auto 0 auto' }}
         >
+          
           <h3 style={{ fontWeight: 600, fontSize: 18, marginBottom: 16, color: '#4320d1' }}>Connection Requests</h3>
           {loading ? (
             <Loading />
