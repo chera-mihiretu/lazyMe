@@ -1,9 +1,11 @@
 "use client";
 import React, { useState, useCallback, useRef } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { AlertCircle, Loader2, FileText, Plus } from "lucide-react";
 import PostCard from "@/components/home/PostCard";
 import type { Post } from "@/types/post";
 import PostSearchBar from "@/components/home/PostSearchBar";
-import Loading from "@/components/general/Loading";
+
 const baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
 
 interface PostsListProps {
@@ -20,7 +22,6 @@ const PostsList: React.FC<PostsListProps> = ({ initialSearch = "" }) => {
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(false);
   const observer = useRef<IntersectionObserver | null>(null);
-  // Track if component is mounted for cleanup
   const isMounted = useRef(false);
 
   // Prevent infinite loop by only calling setPage when not loading and hasMore
@@ -60,7 +61,6 @@ const PostsList: React.FC<PostsListProps> = ({ initialSearch = "" }) => {
           if (data?.message) msg = data.message;
         } catch {}
         setError(msg);
-       
         return;
       }
       const data = await res.json();
@@ -71,7 +71,6 @@ const PostsList: React.FC<PostsListProps> = ({ initialSearch = "" }) => {
       setHasMore(data.next || false);
     } catch (e) {
       setError("Failed to fetch posts." + e);
-     
     }
     setLoading(false);
   };
@@ -98,105 +97,169 @@ const PostsList: React.FC<PostsListProps> = ({ initialSearch = "" }) => {
 
   // Debounced search effect: triggers search when user stops typing
   React.useEffect(() => {
-    // Debounce search input and update debouncedSearch only once after user stops typing
     const handler = setTimeout(() => {
       setDebouncedSearch(search);
     }, 500);
     return () => clearTimeout(handler);
   }, [search]);
 
-  // Only send search request when debouncedSearch changes
+  // Filter posts based on search
   React.useEffect(() => {
-    if (!debouncedSearch.trim()) return;
-    if (!backupPosts.length && posts.length) {
-      setBackupPosts(posts);
-    }
-    setLoading(true);
-    setError(null);
-    const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
-    fetch(`${baseUrl}/posts/search?q=${encodeURIComponent(debouncedSearch)}&page=1`, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: token ? `Bearer ${token}` : "",
-      },
-    })
-      .then(async res => {
-        if (!res.ok) {
-          let msg = `Error fetching post: ${res.status} ${res.statusText}`;
-          try {
-            const data = await res.json();
-            if (data?.message) msg = data.message;
-          } catch {}
-          setError(msg);
-          setLoading(false);
-          return;
-        }
-        const data = await res.json();
-        setPosts(data.posts || []);
-        setHasMore(data.next || false);
-        setLoading(false);
-      })
-      .catch(e => {
-        setError("Failed to fetch posts." + e);
-        setLoading(false);
-      });
-  }, [debouncedSearch, posts, backupPosts.length]);
-
-  // Restore backup when search is cleared
-  React.useEffect(() => {
-    if (search.trim() === "" && backupPosts.length) {
-      setLoading(true);
+    if (!debouncedSearch.trim()) {
       setPosts(backupPosts);
-      setTimeout(() => setLoading(false), 100); // allow posts to render before hiding loading
-    } else if (search.trim() === "") {
-      // If search is empty and no backup, don't clear posts
       setLoading(false);
-    } else {
-      setLoading(true);
-      setPosts([]);
-      setTimeout(() => setLoading(false), 100);
+      return;
     }
-  }, [search, backupPosts]);
+    
+    setLoading(true);
+    const filtered = backupPosts.filter(post =>
+      post.content?.toLowerCase().includes(debouncedSearch.toLowerCase()) ||
+      post.user?.name?.toLowerCase().includes(debouncedSearch.toLowerCase())
+    );
+    
+    setTimeout(() => {
+      setPosts(filtered);
+      setLoading(false);
+    }, 100);
+  }, [debouncedSearch, backupPosts]);
+
+  // Loading Component
+  const LoadingComponent = () => (
+    <motion.div
+      className="flex items-center justify-center py-12"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.6 }}
+    >
+      <div className="bg-white rounded-2xl border border-gray-200 p-8 shadow-lg">
+        <div className="flex flex-col items-center">
+          <Loader2 className="w-8 h-8 animate-spin text-purple-600 mb-4" />
+          <span className="text-gray-600 font-medium">Loading posts...</span>
+        </div>
+      </div>
+    </motion.div>
+  );
+
+  // Error Component
+  const ErrorComponent = ({ message }: { message: string }) => (
+    <motion.div
+      className="flex items-center justify-center py-12"
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.6 }}
+    >
+      <div className="bg-white rounded-2xl border border-red-200 p-8 shadow-lg max-w-md">
+        <div className="flex flex-col items-center text-center">
+          <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mb-4">
+            <AlertCircle className="w-6 h-6 text-red-500" />
+          </div>
+          <h3 className="text-lg font-semibold text-gray-900 mb-2">Something went wrong</h3>
+          <p className="text-red-600 text-sm">{message}</p>
+        </div>
+      </div>
+    </motion.div>
+  );
+
+  // Empty State Component
+  const EmptyStateComponent = () => (
+    <motion.div
+      className="flex items-center justify-center py-16"
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.6 }}
+    >
+      <div className="bg-white rounded-2xl border border-gray-200 p-12 shadow-lg max-w-lg text-center">
+        <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-6">
+          <FileText className="w-8 h-8 text-purple-600" />
+        </div>
+        <h3 className="text-2xl font-bold text-gray-900 mb-3">No posts found</h3>
+        <p className="text-gray-600 mb-6">
+          {search ? "No posts match your search criteria." : "You haven't added any posts yet."}
+        </p>
+        {!search && (
+          <motion.button
+            onClick={handleAddPost}
+            className="bg-gradient-to-r from-purple-600 to-blue-600 text-white font-semibold px-6 py-3 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 flex items-center gap-2 mx-auto"
+            whileHover={{ scale: 1.02, y: -2 }}
+            whileTap={{ scale: 0.98 }}
+          >
+            <Plus className="w-5 h-5" />
+            Create your first post
+          </motion.button>
+        )}
+      </div>
+    </motion.div>
+  );
 
   return (
-    <>
+    <div className="max-w-4xl mx-auto px-4">
       <PostSearchBar
         search={search}
         setSearch={setSearch}
         onAddPost={handleAddPost}
-        
       />
-      {loading && posts.length === 0 ? (
-        <Loading />
-      ) : error ? (
-        <div className="text-center mt-16 text-[#d32f2f] font-semibold text-[18px]">{error}</div>
-      ) : posts && posts.length === 0 ? (
-        <div className="flex flex-col items-center justify-center mt-16 gap-4">
-          <div className="text-[2rem] font-bold text-[#4320d1] mb-2">No posts found</div>
-          <div className="text-[#888] text-[1.08rem] mb-2">You haven&apos;t added any posts yet.</div>
-          <div className="text-[#aaa] text-[0.98rem]">Click the Add Post button above to create your first post!</div>
-        </div>
-      ) : posts && posts.length > 0 ? (
-        <div className="max-w-[900px] mx-auto mt-10 px-6 font-poppins">
-          {posts.map((post, index) => {
-            const uniqueKey = `${post.id}-${index}`;
-            if (index === posts.length - 1) {
-              return (
-                <div ref={lastElementRef} key={uniqueKey}>
-                  <PostCard post={post} />
+
+      <AnimatePresence mode="wait">
+        {loading && posts.length === 0 ? (
+          <LoadingComponent key="loading" />
+        ) : error ? (
+          <ErrorComponent key="error" message={error} />
+        ) : posts && posts.length === 0 ? (
+          <EmptyStateComponent key="empty" />
+        ) : posts && posts.length > 0 ? (
+          <motion.div
+            key="posts"
+            className="space-y-6"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.6 }}
+          >
+            {posts.map((post, index) => {
+              const uniqueKey = `${post.id}-${index}`;
+              if (index === posts.length - 1) {
+                return (
+                  <motion.div
+                    ref={lastElementRef}
+                    key={uniqueKey}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: index * 0.1, duration: 0.6 }}
+                  >
+                    <PostCard post={post} />
+                  </motion.div>
+                );
+              } else {
+                return (
+                  <motion.div
+                    key={uniqueKey}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: index * 0.1, duration: 0.6 }}
+                  >
+                    <PostCard post={post} />
+                  </motion.div>
+                );
+              }
+            })}
+            
+            {/* Load More Indicator */}
+            {loading && posts.length > 0 && (
+              <motion.div
+                className="flex items-center justify-center py-8"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.3 }}
+              >
+                <div className="flex items-center gap-3 bg-white rounded-full border border-gray-200 px-6 py-3 shadow-lg">
+                  <Loader2 className="w-5 h-5 animate-spin text-purple-600" />
+                  <span className="text-gray-600 font-medium">Loading more posts...</span>
                 </div>
-              );
-            } else {
-              return <PostCard post={post} key={uniqueKey} />;
-            }
-          })}
-          {loading && posts.length > 0 && (
-            <div className="text-center mt-6">Loading more...</div>
-          )}
-        </div>
-      ) : null}
-    </>
+              </motion.div>
+            )}
+          </motion.div>
+        ) : null}
+      </AnimatePresence>
+    </div>
   );
 };
 

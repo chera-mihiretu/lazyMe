@@ -73,7 +73,7 @@ const AboutSection: React.FC = () => {
   const isInView = useInView(ref, { once: true, margin: "-100px" });
 
   return (
-    <section
+  <section
       id="about"
       ref={ref}
       className="relative bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 overflow-hidden"
@@ -149,12 +149,12 @@ const AboutSection: React.FC = () => {
               >
                 <div className="w-20 h-20 bg-gradient-to-br from-purple-500 to-blue-500 rounded-2xl flex items-center justify-center shadow-2xl">
                   <BookOpen className="w-10 h-10 text-white" />
-                </div>
+    </div>
                 <div className="absolute inset-0 bg-gradient-to-br from-purple-500/30 to-blue-500/30 rounded-2xl blur-xl transform rotate-6 scale-110"></div>
               </motion.div>
             </motion.div>
 
-            {/* Mission Statement */}
+    {/* Mission Statement */}
             <motion.div
               className="mb-16"
               initial={{ opacity: 0, y: 30 }}
@@ -199,7 +199,7 @@ const AboutSection: React.FC = () => {
                     </span>
                     <div className="absolute inset-0 bg-gradient-to-r from-purple-600 via-purple-500 to-blue-500 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                   </motion.button>
-                </Link>
+      </Link>
 
                 <motion.button
                   className="group flex items-center px-8 py-4 text-white border border-white/30 rounded-xl backdrop-blur-sm hover:bg-white/10 transition-all duration-300"
@@ -213,7 +213,7 @@ const AboutSection: React.FC = () => {
             </motion.div>
 
           </div>
-        </div>
+    </div>
 
         {/* Footer */}
         <footer className="border-t border-white/10 bg-black/20 backdrop-blur-sm">
@@ -262,8 +262,8 @@ const AboutSection: React.FC = () => {
                   <motion.a
                     key={social.label}
                     href={social.href}
-                    target="_blank"
-                    rel="noopener noreferrer"
+        target="_blank"
+        rel="noopener noreferrer"
                     className={`w-10 h-10 bg-white/10 backdrop-blur-sm rounded-full flex items-center justify-center text-gray-400 ${social.color} transition-all duration-300 border border-white/20`}
                     whileHover={{ scale: 1.1, y: -2 }}
                     whileTap={{ scale: 0.95 }}
@@ -307,7 +307,7 @@ const AboutSection: React.FC = () => {
             >
               <div className="flex items-center mb-4 sm:mb-0">
                 <span>© 2024 IKnow. All rights reserved.</span>
-              </div>
+    </div>
               <div className="flex items-center">
                 <span>Made with</span>
                 <motion.div
@@ -321,10 +321,10 @@ const AboutSection: React.FC = () => {
               </div>
             </motion.div>
           </div>
-        </footer>
+    </footer>
       </div>
-    </section>
-  );
+  </section>
+);
 };
 
 export default AboutSection;

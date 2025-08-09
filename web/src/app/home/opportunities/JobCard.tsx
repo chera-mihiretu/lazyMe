@@ -1,8 +1,27 @@
 import React, { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { 
+  Heart, 
+  MoreHorizontal, 
+  Edit3, 
+  Trash2, 
+  Flag, 
+  X, 
+  AlertTriangle, 
+  User, 
+  Loader2, 
+  ExternalLink,
+  Clock,
+  Building,
+  GraduationCap,
+  Eye,
+  Globe,
+  Briefcase,
+  Send
+} from 'lucide-react';
 import { formatTimeAgo } from '@/app/helpers/time_formatter';
-import { COLORS, FONT_FAMILY } from '../../../utils/color';
 import Image from "next/image";
-import type { User } from '../../../types/post';
+import type { User as UserType } from '../../../types/post';
 
 export interface JobPost {
   id: string;
@@ -12,7 +31,7 @@ export interface JobPost {
   like: number;
   link: string;
   type: string;
-  user: User;
+  user: UserType;
   created_at: string;
   liked: boolean;
 }
@@ -22,8 +41,9 @@ const JobCard: React.FC<{ job: JobPost }> = ({ job }) => {
   const [likes, setLikes] = useState(job.like || 0);
   const [liked, setLiked] = useState(job.liked || false);
   const [error, setError] = useState<string | null>(null);
+  const [likeLoading, setLikeLoading] = useState(false);
 
-  // Menu logic (copied from PostCard)
+  // Menu logic
   const [showMenu, setShowMenu] = useState(false);
   const menuButtonRef = React.useRef<HTMLButtonElement>(null);
   const menuRef = React.useRef<HTMLDivElement>(null);
@@ -45,10 +65,11 @@ const JobCard: React.FC<{ job: JobPost }> = ({ job }) => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
   }, [showMenu]);
+
   const [showReportDialog, setShowReportDialog] = useState(false);
   const [reportReason, setReportReason] = useState("");
   const [reportLoading, setReportLoading] = useState(false);
-  // You may need to adjust this logic to match your auth/user system
+  
   const getUserID = () => (typeof window !== 'undefined' ? localStorage.getItem('user_id') : null);
   const isCurrentUser = getUserID() === job.user?.id;
 
@@ -56,14 +77,17 @@ const JobCard: React.FC<{ job: JobPost }> = ({ job }) => {
     alert('Edit job ' + job.id);
     setShowMenu(false);
   };
+  
   const handleDelete = () => {
     alert('Delete job ' + job.id);
     setShowMenu(false);
   };
+  
   const handleReport = () => {
     setShowMenu(false);
     setShowReportDialog(true);
   };
+  
   const submitReport = async () => {
     if (!reportReason.trim()) return;
     setReportLoading(true);
@@ -87,7 +111,6 @@ const JobCard: React.FC<{ job: JobPost }> = ({ job }) => {
     }
     setReportLoading(false);
   };
-
 
   // Microlink.io Link Preview
   interface MicrolinkData {
@@ -121,58 +144,120 @@ const JobCard: React.FC<{ job: JobPost }> = ({ job }) => {
   const renderLinkPreview = () => {
     if (!job.link) {
       return (
-        <div style={{ color: COLORS.error, background: "#fffbe9", borderRadius: 8, padding: 12, marginBottom: 10 }}>
-          No link provided for this job post.
-        </div>
+        <motion.div 
+          className="flex items-center gap-3 p-4 bg-amber-50 border border-amber-200 rounded-xl mb-4"
+          initial={{ opacity: 0, height: 0 }}
+          animate={{ opacity: 1, height: 'auto' }}
+          transition={{ duration: 0.3 }}
+        >
+          <AlertTriangle className="w-5 h-5 text-amber-500 flex-shrink-0" />
+          <p className="text-amber-700 text-sm">No link provided for this job post.</p>
+        </motion.div>
       );
     }
+    
     if (job.link.match(/\.(jpeg|jpg|gif|png|webp|svg)$/i)) {
       return (
-        <Image src={job.link} alt="Job Attachment" width={600} height={260} style={{ width: '100%', maxHeight: 260, objectFit: 'contain', borderRadius: 8, border: '1px solid #ececec', marginBottom: 10 }} />
+        <motion.div 
+          className="mb-4 rounded-xl overflow-hidden border border-gray-200"
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.4 }}
+        >
+          <Image 
+            src={job.link} 
+            alt="Job Attachment" 
+            width={600} 
+            height={260} 
+            className="w-full max-h-64 object-contain"
+          />
+        </motion.div>
       );
     }
+    
     if (microlinkLoading) {
       return (
-        <div style={{ color: COLORS.primary, background: "#f7f7fb", borderRadius: 8, padding: 12, marginBottom: 10 }}>
-          Loading preview...
-        </div>
+        <motion.div 
+          className="flex items-center gap-3 p-4 bg-blue-50 border border-blue-200 rounded-xl mb-4"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.3 }}
+        >
+          <Loader2 className="w-5 h-5 text-blue-600 animate-spin" />
+          <p className="text-blue-700 text-sm">Loading preview...</p>
+        </motion.div>
       );
     }
+    
     if (microlinkError) {
       return (
-        <div style={{ color: COLORS.error, background: "#fffbe9", borderRadius: 8, padding: 12, marginBottom: 10 }}>
-          {microlinkError}
-        </div>
+        <motion.div 
+          className="flex items-center gap-3 p-4 bg-red-50 border border-red-200 rounded-xl mb-4"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.3 }}
+        >
+          <AlertTriangle className="w-5 h-5 text-red-500 flex-shrink-0" />
+          <p className="text-red-700 text-sm">{microlinkError}</p>
+        </motion.div>
       );
     }
+    
     if (microlink) {
       return (
-        <a href={job.link} target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 16, background: '#f7f7fb', border: '1px solid #ececec', borderRadius: 8, padding: 16, marginBottom: 10 }}>
+        <motion.a 
+          href={job.link} 
+          target="_blank" 
+          rel="noopener noreferrer"
+          className="block mb-4 group"
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4 }}
+          whileHover={{ scale: 1.02 }}
+        >
+          <div className="flex items-center gap-4 p-4 bg-gray-50 border border-gray-200 rounded-xl hover:border-blue-300 hover:bg-blue-50/30 transition-all duration-300">
             {microlink.image && (
-              <Image src={microlink.image.url} alt="preview" width={60} height={60} style={{ objectFit: 'cover', borderRadius: 8, border: '1px solid #ececec' }} />
+              <div className="flex-shrink-0">
+                <Image 
+                  src={microlink.image.url} 
+                  alt="preview" 
+                  width={60} 
+                  height={60} 
+                  className="object-cover rounded-lg border border-gray-200"
+                />
+              </div>
             )}
-            <div style={{ flex: 1 }}>
-              <div style={{ fontWeight: 600, fontSize: 16, color: COLORS.primary, marginBottom: 4 }}>{microlink.title || microlink.url}</div>
-              <div style={{ color: COLORS.muted, fontSize: 14, marginBottom: 2 }}>{microlink.description}</div>
-              <div style={{ color: COLORS.muted, fontSize: 13, display: 'flex', alignItems: 'center', gap: 6 }}>
-                <Image src={`https://www.google.com/s2/favicons?domain=${microlink.url ? new URL(microlink.url).hostname : ''}`} alt="favicon" width={16} height={16} />
-                {microlink.url ? new URL(microlink.url).hostname : ''}
+            <div className="flex-1 min-w-0">
+              <h4 className="font-semibold text-gray-900 group-hover:text-blue-700 transition-colors duration-300 truncate">
+                {microlink.title || microlink.url}
+              </h4>
+              <p className="text-gray-600 text-sm mt-1 line-clamp-2">
+                {microlink.description}
+              </p>
+              <div className="flex items-center gap-2 mt-2 text-xs text-gray-500">
+                <Globe className="w-3 h-3" />
+                <span>{microlink.url ? new URL(microlink.url).hostname : ''}</span>
               </div>
             </div>
+            <ExternalLink className="w-5 h-5 text-gray-400 group-hover:text-blue-600 transition-colors duration-300" />
           </div>
-        </a>
+        </motion.a>
       );
     }
     return null;
   };
 
   const handleLike = async () => {
+    if (likeLoading) return;
+    
+    setLikeLoading(true);
     const baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
     const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
     const url = liked ? `${baseUrl}/jobs/dislike` : `${baseUrl}/jobs/like`;
     const body = JSON.stringify({ post_id: job.id });
+    
     try {
+      // Optimistic update
       if (liked) {
         setLikes(likes - 1);
         setLiked(false);
@@ -180,6 +265,7 @@ const JobCard: React.FC<{ job: JobPost }> = ({ job }) => {
         setLikes(likes + 1);
         setLiked(true);
       }
+      
       await fetch(url, {
         method: 'POST',
         headers: {
@@ -189,160 +275,331 @@ const JobCard: React.FC<{ job: JobPost }> = ({ job }) => {
         body,
       });
     } catch (e) {
-      setError('Failed to update like. Please try again.' + e) ;
+      // Revert on error
+      if (liked) {
+        setLikes(likes + 1);
+        setLiked(true);
+      } else {
+        setLikes(likes - 1);
+        setLiked(false);
+      }
+      setError('Failed to update like. Please try again.');
     }
+    setLikeLoading(false);
   };
 
   return (
-    <div style={{
-      background: '#fff',
-      borderRadius: 14,
-      boxShadow: '0 2px 12px #e0e0e0',
-      padding: '1.5rem 1.7rem',
-      marginBottom: 28,
-      display: 'flex',
-      flexDirection: 'column',
-      gap: 10,
-      position: 'relative',
-    }}>
-      {/* Header: Avatar, Name, Date, Menu */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-          <Image src={avatar} alt={job.user?.name || 'User'} width={38} height={38} style={{ borderRadius: '50%', objectFit: 'cover', border: '2px solid #ececec', marginRight: 8 }} />
-          <div>
-            <div style={{ fontWeight: 600, fontSize: 16, color: COLORS.primary }}>{job.user?.name || 'Unknown User'}</div>
-            <div style={{ color: COLORS.muted, fontSize: 13 }}>{job.user?.department || ''} {job.user?.school ? `- ${job.user.school}` : ''}</div>
-          </div>
-        </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <span style={{ color: COLORS.muted, fontSize: 14 }}>{formatTimeAgo(job.created_at)}</span>
-          <button
-            ref={menuButtonRef}
-            style={{ padding: 8, borderRadius: '50%', background: 'transparent', border: 'none', cursor: 'pointer' }}
-            onClick={e => {
-              e.stopPropagation();
-              setShowMenu(v => !v);
-            }}
-          >
-            <Image src="/icons/menu.png" alt="menu" width={22} height={22} />
-          </button>
-          {showMenu && (
-            <div
-              ref={menuRef}
-              style={{ position: 'absolute', right: 0, marginTop: 32, width: 160, background: '#fff', border: '1px solid #e5e7eb', borderRadius: 10, boxShadow: '0 2px 12px #e0e0e0', zIndex: 10 }}
+    <motion.div
+      className="group bg-white rounded-2xl border border-gray-200 p-6 shadow-lg hover:shadow-xl transition-all duration-300 relative"
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4 }}
+      whileHover={{ y: -2 }}
+    >
+      {/* Background gradient on hover */}
+      <div className="absolute inset-0 bg-gradient-to-br from-blue-50/0 via-purple-50/0 to-blue-50/0 group-hover:from-blue-50/30 group-hover:via-purple-50/20 group-hover:to-blue-50/30 rounded-2xl transition-all duration-500" />
+      
+      <div className="relative">
+        {/* Header: Avatar, Name, Date, Menu */}
+        <motion.div 
+          className="flex items-center justify-between mb-4"
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1, duration: 0.4 }}
+        >
+          <div className="flex items-center gap-3">
+            {/* Avatar */}
+            <motion.div
+              className="relative flex-shrink-0"
+              whileHover={{ scale: 1.05 }}
+              transition={{ duration: 0.3 }}
             >
-              {isCurrentUser ? (
-                <>
-                  <button style={{ width: '100%', textAlign: 'left', padding: '8px 16px', background: 'none', border: 'none', cursor: 'pointer' }} onClick={handleEdit}>Edit</button>
-                  <button style={{ width: '100%', textAlign: 'left', padding: '8px 16px', background: 'none', border: 'none', color: '#e53e3e', cursor: 'pointer' }} onClick={handleDelete}>Delete</button>
-                </>
-              ) : (
-                <>
-                  <button style={{ width: '100%', textAlign: 'left', padding: '8px 16px', background: 'none', border: 'none', cursor: 'pointer' }} onClick={handleReport}>Report</button>
-                </>
-              )}
+              <div className="absolute inset-0 bg-gradient-to-br from-blue-500/20 to-purple-500/20 rounded-full blur-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+              <div className="relative w-12 h-12 rounded-full overflow-hidden border-2 border-gray-200 group-hover:border-blue-300 transition-colors duration-300">
+                {job.user?.profile_image_url ? (
+                  <Image
+                    src={avatar}
+                    alt={job.user?.name || 'User'}
+                    width={48}
+                    height={48}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <div className="w-full h-full bg-gradient-to-br from-blue-100 to-purple-100 flex items-center justify-center">
+                    <User className="w-6 h-6 text-blue-600" />
+                  </div>
+                )}
+              </div>
+            </motion.div>
+
+            {/* User Info */}
+            <div>
+              <h4 className="font-semibold text-gray-900 group-hover:text-blue-700 transition-colors duration-300">
+                {job.user?.name || 'Unknown User'}
+              </h4>
+              <div className="flex items-center gap-2 text-sm text-gray-600">
+                {job.user?.department && (
+                  <span className="flex items-center gap-1">
+                    <GraduationCap className="w-3 h-3" />
+                    {job.user.department}
+                  </span>
+                )}
+                {job.user?.school && (
+                  <span className="flex items-center gap-1">
+                    <Building className="w-3 h-3" />
+                    {job.user.school}
+                  </span>
+                )}
+              </div>
             </div>
+          </div>
+
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-1 text-sm text-gray-500">
+              <Clock className="w-4 h-4" />
+              <span>{formatTimeAgo(job.created_at)}</span>
+            </div>
+            
+            {/* Menu Button */}
+            <motion.button
+              ref={menuButtonRef}
+              className="p-2 rounded-full hover:bg-gray-100 transition-colors duration-300 opacity-0 group-hover:opacity-100"
+              onClick={e => {
+                e.stopPropagation();
+                setShowMenu(v => !v);
+              }}
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.9 }}
+            >
+              <MoreHorizontal className="w-5 h-5 text-gray-600" />
+            </motion.button>
+
+            {/* Dropdown Menu */}
+            <AnimatePresence>
+              {showMenu && (
+                <motion.div
+                  ref={menuRef}
+                  className="absolute top-full right-0 mt-2 w-48 bg-white border border-gray-200 rounded-xl shadow-2xl z-50 overflow-hidden"
+                  initial={{ opacity: 0, scale: 0.95, y: -10 }}
+                  animate={{ opacity: 1, scale: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.95, y: -10 }}
+                  transition={{ duration: 0.2 }}
+                >
+                  {isCurrentUser ? (
+                    <>
+                      <motion.button
+                        className="w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-gray-50 transition-colors duration-200"
+                        onClick={handleEdit}
+                        whileHover={{ x: 4 }}
+                      >
+                        <Edit3 className="w-4 h-4 text-blue-600" />
+                        <span className="text-gray-900">Edit</span>
+                      </motion.button>
+                      <motion.button
+                        className="w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-red-50 transition-colors duration-200"
+                        onClick={handleDelete}
+                        whileHover={{ x: 4 }}
+                      >
+                        <Trash2 className="w-4 h-4 text-red-500" />
+                        <span className="text-red-600">Delete</span>
+                      </motion.button>
+                    </>
+                  ) : (
+                    <motion.button
+                      className="w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-red-50 transition-colors duration-200"
+                      onClick={handleReport}
+                      whileHover={{ x: 4 }}
+                    >
+                      <Flag className="w-4 h-4 text-red-500" />
+                      <span className="text-red-600">Report</span>
+                    </motion.button>
+                  )}
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+        </motion.div>
+
+        {/* Job Type Badge */}
+        {job.type && (
+          <motion.div
+            className="inline-flex items-center gap-1.5 px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm font-medium mb-3"
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: 0.2, duration: 0.4 }}
+          >
+            <Briefcase className="w-3 h-3" />
+            {job.type}
+          </motion.div>
+        )}
+
+        {/* Title */}
+        <motion.h3 
+          className="text-xl font-bold text-gray-900 mb-3 group-hover:text-blue-700 transition-colors duration-300"
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3, duration: 0.4 }}
+        >
+          {job.title}
+        </motion.h3>
+
+        {/* Description */}
+        <motion.div 
+          className="text-gray-700 mb-4 leading-relaxed"
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.4, duration: 0.4 }}
+        >
+          <p className="whitespace-pre-wrap">{job.description}</p>
+        </motion.div>
+
+        {/* Error Message */}
+        <AnimatePresence>
+          {error && (
+            <motion.div
+              className="flex items-center gap-3 p-4 bg-red-50 border border-red-200 rounded-xl mb-4"
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              transition={{ duration: 0.3 }}
+            >
+              <AlertTriangle className="w-5 h-5 text-red-500 flex-shrink-0" />
+              <p className="text-red-700 text-sm">{error}</p>
+            </motion.div>
           )}
-          {/* Report Dialog */}
-          {showReportDialog && (
-            <div style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', background: 'rgba(0,0,0,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1100 }}>
-              <div style={{ background: '#fff', borderRadius: 16, boxShadow: '0 2px 16px #4320d10a', padding: 24, width: '100%', maxWidth: 400 }}>
-                <h3 style={{ fontWeight: 700, fontSize: 20, marginBottom: 12, color: '#4320d1' }}>Report Job</h3>
-                <label style={{ display: 'block', marginBottom: 8, fontWeight: 500 }}>Reason for report</label>
+        </AnimatePresence>
+
+        {/* Link Preview */}
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.5, duration: 0.4 }}
+        >
+          {renderLinkPreview()}
+        </motion.div>
+
+        {/* Actions */}
+        <motion.div 
+          className="flex items-center justify-between pt-4 border-t border-gray-200"
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.6, duration: 0.4 }}
+        >
+          {/* Like Button */}
+          <motion.button
+            className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-all duration-300 ${
+              liked 
+                ? 'bg-red-50 text-red-600 hover:bg-red-100' 
+                : 'bg-gray-50 text-gray-600 hover:bg-gray-100'
+            }`}
+            onClick={handleLike}
+            disabled={likeLoading}
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+          >
+            {likeLoading ? (
+              <Loader2 className="w-5 h-5 animate-spin" />
+            ) : (
+              <Heart className={`w-5 h-5 ${liked ? 'fill-current' : ''}`} />
+            )}
+            <span className="font-semibold">{likes}</span>
+          </motion.button>
+
+          {/* Apply Button */}
+          <motion.a
+            href={job.link}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all duration-300"
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+          >
+            <Send className="w-4 h-4" />
+            Apply Now
+          </motion.a>
+        </motion.div>
+      </div>
+
+      {/* Report Dialog */}
+      <AnimatePresence>
+        {showReportDialog && (
+          <motion.div
+            className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.3 }}
+          >
+            <motion.div
+              className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6"
+              initial={{ opacity: 0, scale: 0.9, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 20 }}
+              transition={{ duration: 0.3 }}
+            >
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-10 h-10 rounded-xl bg-red-100 p-2.5">
+                  <Flag className="w-full h-full text-red-600" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900">Report Job</h3>
+                  <p className="text-sm text-gray-600">Help us keep the community safe</p>
+                </div>
+              </div>
+              
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Reason for report
+                </label>
                 <textarea
-                  style={{ width: '100%', border: '1px solid #e5e7eb', borderRadius: 8, padding: 8, marginBottom: 12, resize: 'vertical' }}
+                  className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-red-500/20 focus:border-red-500 transition-all duration-300 resize-none"
                   rows={3}
                   value={reportReason}
                   onChange={e => setReportReason(e.target.value)}
-                  placeholder="Describe the reason..."
+                  placeholder="Describe the reason for reporting this job..."
                   disabled={reportLoading}
                 />
-                <div style={{ display: 'flex', gap: 12, marginTop: 8 }}>
-                  <button
-                    style={{ border: 'none', borderRadius: 8, padding: '8px 0', fontWeight: 600, width: '100%', fontSize: 18, color: '#fff', background: reportLoading || !reportReason.trim() ? '#aaa' : '#4320d1', cursor: reportLoading || !reportReason.trim() ? 'not-allowed' : 'pointer' }}
-                    disabled={reportLoading || !reportReason.trim()}
-                    onClick={submitReport}
-                  >
-                    {reportLoading ? 'Reporting...' : 'Report'}
-                  </button>
-                  <button
-                    style={{ background: '#eee', color: '#4320d1', border: 'none', borderRadius: 8, padding: '8px 0', fontWeight: 600, width: '100%', fontSize: 18, cursor: reportLoading ? 'not-allowed' : 'pointer' }}
-                    onClick={() => { setShowReportDialog(false); setReportReason(''); }}
-                    disabled={reportLoading}
-                  >
-                    Cancel
-                  </button>
-                </div>
               </div>
-            </div>
-          )}
-        </div>
-      </div>
-      {/* Title */}
-      <h3 style={{ fontFamily: FONT_FAMILY.poppins, fontWeight: 700, fontSize: 22, color: COLORS.primary, margin: 0 }}>{job.title}</h3>
-      {/* Description */}
-      <div style={{ color: COLORS.foreground, fontSize: 16, marginBottom: 8 }}>{job.description}</div>
-      {/* Error Message */}
-      {error && (
-        <div style={{ color: COLORS.error, background: "#fffbe9", borderRadius: 8, padding: 10, marginBottom: 10 }}>
-          {error}
-        </div>
-      )}
-      {/* Link Preview */}
-      {renderLinkPreview()}
-      {/* Apply Button with Icon */}
-      <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 8 }}>
-        <a
-          href={job.link}
-          target="_blank"
-          rel="noopener noreferrer"
-          style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: 10,
-            background: '#2563eb',
-            color: '#ffffff', // Changed color to white
-            fontFamily: FONT_FAMILY.poppins,
-            fontWeight: 600,
-            fontSize: '1.08rem',
-            borderRadius: 8,
-            padding: '0.7rem 2.1rem',
-            border: 'none',
-            boxShadow: '0 2px 8px rgba(67,24,209,0.07)',
-            cursor: 'pointer',
-            textDecoration: 'none',
-            transition: 'background 0.2s',
-          }}
-        >
-          <Image
-            src="/icons/open_link.svg"
-            alt="open link"
-            width={24}
-            height={24}
-            style={{
-              marginRight: 6,
-              filter: 'invert(100%)', // Makes the SVG white
-            }}
-          />
-          Apply
-        </a>
-      </div>
-      {/* Like Button (left side) */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-start', marginTop: 8 }}>
-        <span
-          style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer' }}
-          onClick={handleLike}
-        >
-          <Image
-            src={liked ? "/icons/liked.png" : "/icons/like.png"}
-            alt="like"
-            width={30}
-            height={30}
-          />
-          <span style={{ fontSize: 20, color: "#4320d1", fontWeight: 600 }}>{likes}</span>
-        </span>
-      </div>
-    </div>
+              
+              <div className="flex gap-3">
+                <motion.button
+                  className="flex-1 px-4 py-3 bg-gray-100 text-gray-700 rounded-xl font-semibold hover:bg-gray-200 transition-colors duration-300"
+                  onClick={() => { setShowReportDialog(false); setReportReason(''); }}
+                  disabled={reportLoading}
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                >
+                  Cancel
+                </motion.button>
+                <motion.button
+                  className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl font-semibold transition-all duration-300 ${
+                    reportLoading || !reportReason.trim()
+                      ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                      : 'bg-red-600 text-white hover:bg-red-700 shadow-lg hover:shadow-xl'
+                  }`}
+                  disabled={reportLoading || !reportReason.trim()}
+                  onClick={submitReport}
+                  whileHover={reportLoading || !reportReason.trim() ? {} : { scale: 1.02 }}
+                  whileTap={reportLoading || !reportReason.trim() ? {} : { scale: 0.98 }}
+                >
+                  {reportLoading ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      Reporting...
+                    </>
+                  ) : (
+                    <>
+                      <Flag className="w-4 h-4" />
+                      Report
+                    </>
+                  )}
+                </motion.button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </motion.div>
   );
 };
 

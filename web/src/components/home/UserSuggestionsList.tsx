@@ -1,7 +1,9 @@
 import React, { useEffect, useState, useCallback } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Users, Loader2, UserPlus, ChevronRight } from "lucide-react";
 import UserCard from "@/components/home/UserCard";
 import Image from "next/image";
-import Loading from "@/components/general/Loading";
+
 const baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
 
 interface UserSuggestion {
@@ -49,76 +51,113 @@ const UserSuggestionsList: React.FC<UserSuggestionsListProps> = ({ page = 1 }) =
     fetchSuggestions();
   }, [fetchSuggestions]);
 
-  // Responsive: hide the entire suggestion box on mobile
   return (
-    <div
-      className="user-suggestions-responsive"
-      style={{ minWidth: 240, maxWidth: 520, marginLeft: 24 }}
+    <motion.div
+      className="w-full max-w-sm"
+      initial={{ opacity: 0, x: 20 }}
+      animate={{ opacity: 1, x: 0 }}
+      transition={{ duration: 0.6 }}
     >
-      {/* Only show title if there are users */}
-      {users.length > 0 && (
-        <h3 style={{ fontWeight: 600, fontSize: 18, marginBottom: 16 }}>Suggestions</h3>
-      )}
-      {loading ? (
-        <Loading />
-      ) : users.length === 0 ? (
-        <div style={{
-          textAlign: "center",
-          color: "#4320d1",
-          margin: "2.5rem 0 2rem 0",
-          background: "#f7f7fb",
-          borderRadius: 14,
-          padding: "2.5rem 1.5rem 2rem 1.5rem",
-          boxShadow: "0 2px 12px #e0e0e0",
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center',
-        }}>
-          <Image src="/icons/empty_state.png" alt="No suggestions" width={80} height={80} style={{  marginBottom: 18, opacity: 0.8 }} />
-          <div style={{ fontWeight: 600, fontSize: 18, marginBottom: 6 }}>No Connection Requests</div>
-          <div style={{ color: '#888', fontSize: 15, marginBottom: 0 }}>You&apos;re all caught up! Check back later for new suggestions.</div>
+      <motion.div
+        className="bg-white rounded-2xl border border-gray-200 shadow-lg overflow-hidden"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.2, duration: 0.6 }}
+      >
+        {/* Header */}
+        <div className="p-6 border-b border-gray-100">
+          <motion.div
+            className="flex items-center gap-3"
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.3, duration: 0.6 }}
+          >
+            <div className="w-10 h-10 bg-gradient-to-br from-purple-500/20 to-blue-500/20 rounded-full flex items-center justify-center">
+              <Users className="w-5 h-5 text-purple-600" />
+            </div>
+            <div>
+              <h3 className="text-lg font-bold text-gray-900">Suggestions</h3>
+              <p className="text-sm text-gray-500">Connect with peers</p>
+            </div>
+          </motion.div>
         </div>
-      ) : (
-        <>
-          {users.map((user) => <UserCard key={user.id} {...user} />)}
-          <div style={{ display: "flex", justifyContent: "center", marginTop: 18 }}>
-            <button
-              style={{
-                padding: "8px 28px",
-                borderRadius: 8,
-                border: "none",
-                background: "#2563eb",
-                color: "#fff",
-                fontWeight: 600,
-                fontSize: 16,
-                cursor: "pointer",
-                transition: "background 0.2s",
-                boxShadow: "0 1px 4px rgba(0,0,0,0.04)",
-              }}
-              onClick={() => setCurrentPage(currentPage + 1) }
+
+        {/* Content */}
+        <div className="p-6">
+          <AnimatePresence mode="wait">
+            {loading ? (
+              <motion.div
+                key="loading"
+                className="flex flex-col items-center justify-center py-8"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.3 }}
+              >
+                <Loader2 className="w-6 h-6 animate-spin text-purple-600 mb-3" />
+                <span className="text-gray-500 text-sm">Finding suggestions...</span>
+              </motion.div>
+            ) : users.length === 0 ? (
+              <motion.div
+                key="empty"
+                className="text-center py-8"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                transition={{ duration: 0.3 }}
+              >
+                <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <UserPlus className="w-8 h-8 text-purple-600" />
+                </div>
+                <h4 className="text-lg font-semibold text-gray-900 mb-2">All caught up!</h4>
+                <p className="text-gray-500 text-sm">
+                  Check back later for new connection suggestions.
+                </p>
+              </motion.div>
+            ) : (
+              <motion.div
+                key="users"
+                className="space-y-4"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.3 }}
+              >
+                {users.map((user, index) => (
+                  <motion.div
+                    key={user.id}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: index * 0.1, duration: 0.6 }}
+                  >
+                    <UserCard {...user} />
+                  </motion.div>
+                ))}
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+
+        {/* View More Button */}
+        {users.length > 0 && (
+          <div className="p-6 pt-0">
+            <motion.button
+              onClick={() => setCurrentPage(currentPage + 1)}
+              className="w-full bg-gradient-to-r from-purple-600 to-blue-600 text-white font-semibold py-3 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center gap-2 group"
+              whileHover={{ scale: 1.02, y: -2 }}
+              whileTap={{ scale: 0.98 }}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.5, duration: 0.6 }}
             >
-              View More
-            </button>
+              <span>View More</span>
+              <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform duration-300" />
+            </motion.button>
           </div>
-        </>
-      )}
-    </div>
+        )}
+      </motion.div>
+    </motion.div>
   );
 };
-
-
-// Responsive style: hide the whole suggestion box on mobile
-if (typeof window !== "undefined") {
-  const style = document.createElement("style");
-  style.innerHTML = `
-    @media (max-width: 700px) {
-      .user-suggestions-responsive {
-        display: none !important;
-      }
-    }
-  `;
-  document.head.appendChild(style);
-}
 
 export default UserSuggestionsList;

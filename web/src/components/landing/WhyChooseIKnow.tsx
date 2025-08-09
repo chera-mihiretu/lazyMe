@@ -40,7 +40,7 @@ const WhyChooseIKnow: React.FC = () => {
   const isInView = useInView(ref, { once: true, margin: "-100px" });
 
   return (
-    <section
+   <section
       id="why-choose"
       ref={ref}
       className="relative py-20 lg:py-32 bg-white overflow-hidden"
@@ -264,8 +264,8 @@ const WhyChooseIKnow: React.FC = () => {
           </motion.div>
         </div>
       </div>
-    </section>
-  );
+	</section>
+);
 };
 
 export default WhyChooseIKnow;

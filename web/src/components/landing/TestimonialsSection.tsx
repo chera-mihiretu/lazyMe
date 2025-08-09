@@ -6,11 +6,11 @@ import Image from 'next/image';
 import { ChevronLeft, ChevronRight, Star, Quote, Users, ArrowRight, Sparkles } from 'lucide-react';
 
 const testimonials = [
-  {
+	{
     text: 'IKnow completely transformed my university experience. The platform made it so easy to connect with peers, find study resources, and stay updated with campus events. My academic performance has improved significantly!',
-    name: 'Chera Mihiretu',
+		name: 'Chera Mihiretu',
     affiliation: 'Software Engineering Student, ASTU',
-    photo: '/my.png',
+		photo: '/my.png',
     rating: 5,
     course: 'Computer Science',
     year: '3rd Year',
@@ -109,7 +109,7 @@ const TestimonialCard = ({ testimonial, isActive }: { testimonial: typeof testim
               <div className="w-full h-full bg-gradient-to-br from-purple-400 to-blue-400 flex items-center justify-center">
                 <span className="text-white font-bold text-lg">
                   {testimonial.name.split(' ').map(n => n[0]).join('')}
-                </span>
+		</span>
               </div>
             </div>
             <motion.div
@@ -119,7 +119,7 @@ const TestimonialCard = ({ testimonial, isActive }: { testimonial: typeof testim
             >
               <div className="w-2 h-2 bg-white rounded-full"></div>
             </motion.div>
-          </div>
+			</div>
 
           <div className="ml-4">
             <h4 className="font-bold text-gray-900 text-lg">{testimonial.name}</h4>
@@ -131,8 +131,8 @@ const TestimonialCard = ({ testimonial, isActive }: { testimonial: typeof testim
               <span className="text-xs bg-purple-100 text-purple-700 px-2 py-1 rounded-full">
                 {testimonial.year}
               </span>
-            </div>
-          </div>
+		</div>
+	</div>
         </motion.div>
       </div>
 
@@ -173,10 +173,10 @@ const TestimonialsSection: React.FC = () => {
   const goToTestimonial = (index: number) => {
     setCurrentIndex(index);
     setIsAutoPlaying(false);
-  };
+	};
 
-  return (
-    <section
+	return (
+		<section
       id="testimonials"
       ref={ref}
       className="relative py-20 lg:py-32 bg-gradient-to-br from-gray-50 to-white overflow-hidden"
@@ -256,21 +256,21 @@ const TestimonialsSection: React.FC = () => {
           transition={{ delay: 0.5, duration: 0.8 }}
         >
           {/* Navigation Buttons */}
-          <button
+				<button
             onClick={prevTestimonial}
             className="absolute left-4 top-1/2 -translate-y-1/2 z-20 w-12 h-12 bg-white/90 backdrop-blur-sm rounded-full shadow-lg border border-gray-200 flex items-center justify-center text-gray-600 hover:text-purple-600 hover:bg-white transition-all duration-300 group"
-            aria-label="Previous testimonial"
-          >
+					aria-label="Previous testimonial"
+				>
             <ChevronLeft className="w-6 h-6 group-hover:-translate-x-0.5 transition-transform duration-300" />
-          </button>
+				</button>
 
-          <button
+				<button
             onClick={nextTestimonial}
             className="absolute right-4 top-1/2 -translate-y-1/2 z-20 w-12 h-12 bg-white/90 backdrop-blur-sm rounded-full shadow-lg border border-gray-200 flex items-center justify-center text-gray-600 hover:text-purple-600 hover:bg-white transition-all duration-300 group"
-            aria-label="Next testimonial"
-          >
+					aria-label="Next testimonial"
+				>
             <ChevronRight className="w-6 h-6 group-hover:translate-x-0.5 transition-transform duration-300" />
-          </button>
+				</button>
 
           {/* Testimonial Cards */}
           <div className="px-16">
@@ -285,7 +285,7 @@ const TestimonialsSection: React.FC = () => {
                 <TestimonialCard testimonial={testimonials[currentIndex]} isActive={true} />
               </motion.div>
             </AnimatePresence>
-          </div>
+			</div>
 
           {/* Dots Indicator */}
           <div className="flex justify-center mt-8 space-x-3">
@@ -299,8 +299,8 @@ const TestimonialsSection: React.FC = () => {
                     : 'bg-gray-300 hover:bg-gray-400'
                 }`}
                 aria-label={`Go to testimonial ${index + 1}`}
-              />
-            ))}
+					/>
+				))}
           </div>
 
           {/* Auto-play indicator */}
@@ -340,9 +340,9 @@ const TestimonialsSection: React.FC = () => {
             <div className="absolute inset-0 bg-gradient-to-r from-purple-600 via-purple-500 to-blue-500 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
           </motion.button>
         </motion.div>
-      </div>
-    </section>
-  );
+			</div>
+		</section>
+	);
 };
 
 export default TestimonialsSection;

@@ -1,5 +1,6 @@
 import React, { useState } from "react";
-
+import { motion, AnimatePresence } from "framer-motion";
+import { Building, Edit, Trash2, AlertTriangle, Loader2, Info, ChevronRight } from 'lucide-react';
 
 interface University {
   id: string;
@@ -8,6 +9,7 @@ interface University {
 }
 
 const baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
+
 const UniversitiesSection: React.FC = () => {
   const [universities, setUniversities] = useState<University[]>([]);
   const [loading, setLoading] = useState(true);
@@ -62,80 +64,224 @@ const UniversitiesSection: React.FC = () => {
   };
 
   return (
-    <section className="bg-white rounded-[14px] shadow-[0_2px_8px_#4320d120] px-6 pt-6 pb-4 flex flex-col min-h-[180px]">
-      <h3 className="font-bold text-[20px] text-[#4320d1] mb-3">Universities</h3>
-      {loading ? (
-        <div className="text-[#888] font-medium py-3">Loading...</div>
-      ) : error ? (
-        <div className="text-[#e53e3e] font-medium py-3">{error}</div>
-      ) : universities.length === 0 ? (
-        <div className="text-[#888] font-medium py-3">No universities found.</div>
-      ) : (
-        <div className="flex flex-col gap-2 flex-1">
-          {universities.slice(0, 4).map(u => (
-            <div key={u.id} className="flex flex-col bg-[#f7f7fa] rounded-lg px-3 py-2 mb-0.5">
-              <div className="flex items-center justify-between">
-                <span className="text-[#333] font-medium">{u.name}</span>
-                <div className="flex gap-2">
-                  <button className="bg-[#eee] text-[#4320d1] border-none rounded-md px-2.5 py-1 font-medium cursor-pointer text-[14px]">Edit</button>
-                  <button
-                    className="bg-[#f44336] text-white border-none rounded-md px-2.5 py-1 font-medium cursor-pointer text-[14px]"
-                    onClick={() => { setShowDeleteDialog(u.id); setDeleteInput(""); setDeleteError(""); }}
-                  >Delete</button>
+    <>
+      <motion.section
+        className="bg-white rounded-2xl border border-gray-200 p-6 shadow-lg"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6 }}
+      >
+        {/* Header */}
+        <motion.div
+          className="flex items-center mb-6"
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ delay: 0.1, duration: 0.6 }}
+        >
+          <Building className="w-5 h-5 text-purple-600 mr-3" />
+          <h3 className="text-xl font-bold text-gray-900">Universities</h3>
+          <span className="ml-3 px-2 py-1 bg-purple-100 text-purple-700 text-xs rounded-full">
+            {universities.length}
+          </span>
+        </motion.div>
+
+        {/* Content */}
+        {loading ? (
+          <motion.div
+            className="flex items-center justify-center py-8"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.2, duration: 0.6 }}
+          >
+            <Loader2 className="w-6 h-6 animate-spin text-purple-600 mr-3" />
+            <span className="text-gray-600">Loading universities...</span>
+          </motion.div>
+        ) : error ? (
+          <motion.div
+            className="flex items-center justify-center py-8"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.2, duration: 0.6 }}
+          >
+            <AlertTriangle className="w-6 h-6 text-red-500 mr-3" />
+            <span className="text-red-500">{error}</span>
+          </motion.div>
+        ) : universities.length === 0 ? (
+          <motion.div
+            className="flex items-center justify-center py-8"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.2, duration: 0.6 }}
+          >
+            <Building className="w-6 h-6 text-gray-400 mr-3" />
+            <span className="text-gray-500">No universities found</span>
+          </motion.div>
+        ) : (
+          <motion.div
+            className="space-y-3"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.2, duration: 0.6 }}
+          >
+            {universities.slice(0, 4).map((university, index) => (
+              <motion.div
+                key={university.id}
+                className="group bg-gray-50 rounded-xl p-4 border border-gray-100 hover:border-purple-200 hover:bg-purple-50/30 transition-all duration-300"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3 + index * 0.1, duration: 0.6 }}
+                whileHover={{ scale: 1.01 }}
+              >
+                <div className="flex items-center justify-between">
+                  <div className="flex-1">
+                    <h4 className="font-semibold text-gray-900 group-hover:text-purple-700 transition-colors duration-300">
+                      {university.name}
+                    </h4>
+                    {university.description && (
+                      <div className="flex items-center mt-2 text-sm text-gray-500">
+                        <Info className="w-3 h-3 mr-1 flex-shrink-0" />
+                        <span className="line-clamp-1">{university.description}</span>
+                      </div>
+                    )}
+                  </div>
+                  
+                  <div className="flex items-center gap-2 ml-4">
+                    <motion.button
+                      className="p-2 text-gray-500 hover:text-blue-600 hover:bg-blue-100 rounded-lg transition-all duration-300"
+                      whileHover={{ scale: 1.1 }}
+                      whileTap={{ scale: 0.95 }}
+                    >
+                      <Edit className="w-4 h-4" />
+                    </motion.button>
+                    <motion.button
+                      className="p-2 text-gray-500 hover:text-red-600 hover:bg-red-100 rounded-lg transition-all duration-300"
+                      whileHover={{ scale: 1.1 }}
+                      whileTap={{ scale: 0.95 }}
+                      onClick={() => { 
+                        setShowDeleteDialog(university.id); 
+                        setDeleteInput(""); 
+                        setDeleteError(""); 
+                      }}
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </motion.button>
+                  </div>
+                </div>
+              </motion.div>
+            ))}
+          </motion.div>
+        )}
+
+        {/* More Button */}
+        <motion.button
+          className="w-full mt-6 px-4 py-3 bg-gradient-to-r from-purple-600 to-blue-600 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center group"
+          whileHover={{ scale: 1.02, y: -1 }}
+          whileTap={{ scale: 0.98 }}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.8, duration: 0.6 }}
+        >
+          <span>View All Universities</span>
+          <ChevronRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform duration-300" />
+        </motion.button>
+      </motion.section>
+
+      {/* Delete Confirmation Dialog */}
+      <AnimatePresence>
+        {showDeleteDialog && (
+          <motion.div
+            className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.3 }}
+          >
+            <motion.div
+              className="bg-white rounded-2xl shadow-2xl p-6 w-full max-w-md"
+              initial={{ opacity: 0, scale: 0.9, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 20 }}
+              transition={{ duration: 0.3 }}
+            >
+              {/* Header */}
+              <div className="flex items-center mb-4">
+                <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mr-4">
+                  <AlertTriangle className="w-6 h-6 text-red-600" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-bold text-gray-900">Delete University</h3>
+                  <p className="text-sm text-gray-500">This action cannot be undone</p>
                 </div>
               </div>
-              {u.description && (
-                <div className="text-[#aaa] text-[13px] mt-0.5 flex items-center gap-1">
-                  <span className="inline-block w-4 h-4">
-                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <circle cx="8" cy="8" r="8" fill="#aaa" />
-                      <text x="8" y="11" textAnchor="middle" fontSize="10" fill="#fff">i</text>
-                    </svg>
-                  </span>
-                  {u.description}
-                </div>
-              )}
-            </div>
-          ))}
-        </div>
-      )}
-      <button className="mt-3 bg-[#4320d1] text-white border-none rounded-lg py-2 font-semibold w-full text-[16px] cursor-pointer">More</button>
-      {/* Delete Warning Dialog */}
-      {showDeleteDialog && (
-        <div className="fixed top-0 left-0 w-screen h-screen bg-black/20 flex items-center justify-center z-[1000]">
-          <div className="bg-white rounded-2xl shadow-[0_4px_32px_#4320d120] px-8 py-6 min-w-[320px] w-full max-w-md flex flex-col gap-4">
-            <h3 className="font-bold text-[20px] text-[#e53e3e] mb-2">Delete University</h3>
-            <div className="text-[#333] font-medium mb-2">Type <span className="text-[#e53e3e] font-bold">&quot;delete university&quot;</span> to confirm deletion.</div>
-            <input
-              type="text"
-              value={deleteInput}
-              onChange={e => setDeleteInput(e.target.value)}
-              placeholder="Type here..."
-              className="px-4 py-3 rounded-lg border border-[#ececec] text-[16px] mb-2"
-              disabled={deleteLoading}
-            />
-            {deleteError && <div className="text-[#e53e3e] font-medium">{deleteError}</div>}
-            <button
-              onClick={() => {
-                if (deleteInput.trim().toLowerCase() === "delete university") {
-                  handleDelete(showDeleteDialog);
-                } else {
-                  setDeleteError("You must type 'delete university' to confirm.");
-                }
-              }}
-              className={`bg-[#f44336] text-white border-none rounded-lg px-8 py-3 font-semibold text-[16px] ${deleteLoading ? 'opacity-70 cursor-not-allowed' : 'cursor-pointer'}`}
-              disabled={deleteLoading}
-            >{deleteLoading ? "Deleting..." : "Confirm Delete"}</button>
-            <button
-              onClick={() => { setShowDeleteDialog(null); setDeleteInput(""); setDeleteError(""); }}
-              className="bg-[#eee] text-[#4320d1] border-none rounded-lg py-2 font-semibold w-full text-[18px] disabled:cursor-not-allowed"
-              style={{ cursor: deleteLoading ? 'not-allowed' : 'pointer' }}
-              disabled={deleteLoading}
-            >Cancel</button>
-          </div>
-        </div>
-      )}
-    </section>
+
+              {/* Content */}
+              <div className="mb-4">
+                <p className="text-gray-700 mb-3">
+                  Type <span className="font-semibold text-red-600">"delete university"</span> to confirm deletion.
+                </p>
+                <input
+                  type="text"
+                  value={deleteInput}
+                  onChange={e => setDeleteInput(e.target.value)}
+                  placeholder="Type here..."
+                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500 transition-all duration-300"
+                  disabled={deleteLoading}
+                />
+                {deleteError && (
+                  <motion.div
+                    className="mt-2 text-sm text-red-600 flex items-center"
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                  >
+                    <AlertTriangle className="w-4 h-4 mr-1" />
+                    {deleteError}
+                  </motion.div>
+                )}
+              </div>
+
+              {/* Actions */}
+              <div className="flex gap-3">
+                <motion.button
+                  onClick={() => { 
+                    setShowDeleteDialog(null); 
+                    setDeleteInput(""); 
+                    setDeleteError(""); 
+                  }}
+                  className="flex-1 px-4 py-3 bg-gray-100 text-gray-700 font-semibold rounded-xl hover:bg-gray-200 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                  disabled={deleteLoading}
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                >
+                  Cancel
+                </motion.button>
+                <motion.button
+                  onClick={() => {
+                    if (deleteInput.trim().toLowerCase() === "delete university") {
+                      handleDelete(showDeleteDialog);
+                    } else {
+                      setDeleteError("You must type 'delete university' to confirm.");
+                    }
+                  }}
+                  className="flex-1 px-4 py-3 bg-red-600 text-white font-semibold rounded-xl hover:bg-red-700 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+                  disabled={deleteLoading}
+                  whileHover={{ scale: deleteLoading ? 1 : 1.02 }}
+                  whileTap={{ scale: deleteLoading ? 1 : 0.98 }}
+                >
+                  {deleteLoading ? (
+                    <>
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      Deleting...
+                    </>
+                  ) : (
+                    "Confirm Delete"
+                  )}
+                </motion.button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </>
   );
 };
 

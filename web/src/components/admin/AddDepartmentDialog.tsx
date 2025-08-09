@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { BookOpen, X, AlertTriangle, Loader2, Plus, ChevronDown } from 'lucide-react';
 import { University } from "../signup/useUniversities";
 import { School } from "../signup/useSchools";
 
@@ -8,6 +10,7 @@ interface AddDepartmentDialogProps {
 }
 
 const baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
+
 const AddDepartmentDialog: React.FC<AddDepartmentDialogProps> = ({ open, onClose }) => {
   const [selectedUniversity, setSelectedUniversity] = useState("");
   const [selectedSchool, setSelectedSchool] = useState("");
@@ -41,6 +44,7 @@ const AddDepartmentDialog: React.FC<AddDepartmentDialogProps> = ({ open, onClose
   useEffect(() => {
     if (!selectedUniversity) {
       setSchools([]);
+      setSelectedSchool("");
       return;
     }
     setLoadingSchools(true);
@@ -57,7 +61,7 @@ const AddDepartmentDialog: React.FC<AddDepartmentDialogProps> = ({ open, onClose
         setLoadingSchools(false);
       });
   }, [selectedUniversity]);
-  if (!open) return null;
+
   const handleSubmit = async () => {
     setAddError("");
     setAddLoading(true);
@@ -92,82 +96,178 @@ const AddDepartmentDialog: React.FC<AddDepartmentDialogProps> = ({ open, onClose
       setAddLoading(false);
     }
   };
+
   return (
-    <div className="fixed top-0 left-0 w-screen h-screen bg-black/20 flex items-center justify-center z-[1000]">
-      <div className="bg-white rounded-2xl shadow-[0_2px_16px_#4320d120] px-8 py-6 min-w-[320px] w-full max-w-md flex flex-col gap-[22px]">
-        <h2 className="m-0 font-bold text-[22px] text-[#4320d1]">Add Department</h2>
-        <label className="font-medium text-[16px] text-[#333]">
-          University
-          <select
-            value={selectedUniversity}
-            onChange={e => setSelectedUniversity(e.target.value)}
-            className="mt-2 w-full px-3 py-2 rounded-lg border border-[#ccc] text-[16px]"
+    <AnimatePresence>
+      {open && (
+        <motion.div
+          className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.3 }}
+        >
+          <motion.div
+            className="bg-white rounded-2xl shadow-2xl p-6 w-full max-w-md max-h-[90vh] overflow-y-auto"
+            initial={{ opacity: 0, scale: 0.9, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.9, y: 20 }}
+            transition={{ duration: 0.3 }}
           >
-            <option value="">{loadingUniversities ? "Loading..." : "Select University"}</option>
-            {universities.map(u => (
-              <option key={u.id} value={u.id}>{u.name}</option>
-            ))}
-          </select>
-        </label>
-        <label className="font-medium text-[16px] text-[#333]">
-          School
-          <select
-            value={selectedSchool}
-            onChange={e => setSelectedSchool(e.target.value)}
-            className="mt-2 w-full px-3 py-2 rounded-lg border border-[#ccc] text-[16px]"
-          >
-            <option value="">{loadingSchools ? "Loading..." : "Select School"}</option>
-            {schools.map(s => (
-              <option key={s.id} value={s.id}>{s.name}</option>
-            ))}
-          </select>
-        </label>
-        <label className="font-medium text-[16px] text-[#333]">
-          Department Name
-          <input
-            type="text"
-            value={departmentName}
-            onChange={e => setDepartmentName(e.target.value)}
-            placeholder="Enter department name"
-            className="mt-2 w-full px-3 py-2 rounded-lg border border-[#ccc] text-[16px]"
-          />
-        </label>
-        <label className="font-medium text-[16px] text-[#333]">
-          Description (optional)
-          <input
-            type="text"
-            value={description}
-            onChange={e => setDescription(e.target.value)}
-            placeholder="Enter department description"
-            className="mt-2 w-full px-3 py-2 rounded-lg border border-[#ccc] text-[16px]"
-          />
-        </label>
-        <label className="font-medium text-[16px] text-[#333]">
-          Department Year
-          <input
-            type="number"
-            value={year}
-            onChange={e => setYear(e.target.value)}
-            placeholder="Enter department year"
-            className="mt-2 w-full px-3 py-2 rounded-lg border border-[#ccc] text-[16px]"
-          />
-        </label>
-        <div className="flex flex-col gap-4 mt-3 w-full">
-          {addError && <div className="text-[#e53e3e] font-medium mb-2">{addError}</div>}
-          <button
-            onClick={onClose}
-            className="bg-[#eee] text-[#4320d1] border-none rounded-lg py-2 font-semibold w-full text-[18px] disabled:cursor-not-allowed"
-            style={{ cursor: addLoading ? "not-allowed" : "pointer" }}
-            disabled={addLoading}
-          >Cancel</button>
-          <button
-            onClick={handleSubmit}
-            className={`border-none rounded-lg py-2 font-semibold w-full text-[18px] text-white ${addLoading ? 'bg-[#aaa] cursor-not-allowed' : 'bg-[#4320d1] cursor-pointer'}`}
-            disabled={!selectedUniversity || !selectedSchool || !departmentName.trim() || addLoading}
-          >{addLoading ? "Adding..." : "Add Department"}</button>
-        </div>
-      </div>
-    </div>
+            {/* Header */}
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center">
+                <div className="w-10 h-10 bg-indigo-100 rounded-full flex items-center justify-center mr-3">
+                  <BookOpen className="w-5 h-5 text-indigo-600" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-bold text-gray-900">Add Department</h3>
+                  <p className="text-sm text-gray-500">Create a new department</p>
+                </div>
+              </div>
+              <motion.button
+                onClick={onClose}
+                className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-all duration-300"
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.95 }}
+                disabled={addLoading}
+              >
+                <X className="w-5 h-5" />
+              </motion.button>
+            </div>
+
+            {/* Form */}
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  University *
+                </label>
+                <div className="relative">
+                  <select
+                    value={selectedUniversity}
+                    onChange={e => setSelectedUniversity(e.target.value)}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all duration-300 appearance-none bg-white pr-10"
+                    disabled={addLoading}
+                  >
+                    <option value="">{loadingUniversities ? "Loading..." : "Select University"}</option>
+                    {universities.map(u => (
+                      <option key={u.id} value={u.id}>{u.name}</option>
+                    ))}
+                  </select>
+                  <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  School *
+                </label>
+                <div className="relative">
+                  <select
+                    value={selectedSchool}
+                    onChange={e => setSelectedSchool(e.target.value)}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all duration-300 appearance-none bg-white pr-10"
+                    disabled={addLoading || !selectedUniversity}
+                  >
+                    <option value="">{loadingSchools ? "Loading..." : "Select School"}</option>
+                    {schools.map(s => (
+                      <option key={s.id} value={s.id}>{s.name}</option>
+                    ))}
+                  </select>
+                  <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Department Name *
+                </label>
+                <input
+                  type="text"
+                  value={departmentName}
+                  onChange={e => setDepartmentName(e.target.value)}
+                  placeholder="Enter department name"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all duration-300"
+                  disabled={addLoading}
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Description (Optional)
+                </label>
+                <input
+                  type="text"
+                  value={description}
+                  onChange={e => setDescription(e.target.value)}
+                  placeholder="Enter department description"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all duration-300"
+                  disabled={addLoading}
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Department Year (Optional)
+                </label>
+                <input
+                  type="number"
+                  value={year}
+                  onChange={e => setYear(e.target.value)}
+                  placeholder="Enter department year"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all duration-300"
+                  disabled={addLoading}
+                />
+              </div>
+
+              {/* Error Message */}
+              {addError && (
+                <motion.div
+                  className="p-3 bg-red-50 border border-red-200 rounded-lg flex items-center"
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                >
+                  <AlertTriangle className="w-4 h-4 text-red-500 mr-2" />
+                  <span className="text-red-700 text-sm">{addError}</span>
+                </motion.div>
+              )}
+            </div>
+
+            {/* Actions */}
+            <div className="flex gap-3 mt-6">
+              <motion.button
+                onClick={onClose}
+                className="flex-1 px-4 py-3 bg-gray-100 text-gray-700 font-semibold rounded-xl hover:bg-gray-200 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                disabled={addLoading}
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+              >
+                Cancel
+              </motion.button>
+              <motion.button
+                onClick={handleSubmit}
+                className="flex-1 px-4 py-3 bg-gradient-to-r from-indigo-600 to-indigo-700 text-white font-semibold rounded-xl hover:from-indigo-700 hover:to-indigo-800 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+                disabled={!selectedUniversity || !selectedSchool || !departmentName.trim() || addLoading}
+                whileHover={{ scale: (!selectedUniversity || !selectedSchool || !departmentName.trim() || addLoading) ? 1 : 1.02 }}
+                whileTap={{ scale: (!selectedUniversity || !selectedSchool || !departmentName.trim() || addLoading) ? 1 : 0.98 }}
+              >
+                {addLoading ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Adding...
+                  </>
+                ) : (
+                  <>
+                    <Plus className="w-4 h-4 mr-2" />
+                    Add Department
+                  </>
+                )}
+              </motion.button>
+            </div>
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
   );
 };
 

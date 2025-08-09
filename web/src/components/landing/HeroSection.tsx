@@ -210,7 +210,7 @@ const HeroSection: React.FC = () => {
         </div>
       </motion.div>
     </section>
-  );
+);
 };
 
 export default HeroSection;
