@@ -1,93 +1,207 @@
 'use client';
 
-import React, { useEffect } from 'react';
-import Image from 'next/image';
-import { COLORS } from '../../utils/color';
+import React, { useRef } from 'react';
+import { motion, useInView } from 'framer-motion';
+import { Megaphone, BookOpen, Users, Briefcase, ArrowRight, Sparkles } from 'lucide-react';
 
 const features = [
-	{
-		icon: 'Campus Announcements',
-		title: 'Campus Announcements',
-		description:
-			'Stay updated with real-time campus news, events, and important announcements tailored for you.',
-	},
-	{
-		icon: 'Study Resources',
-		title: 'Study Resources',
-		description:
-			'Access curated study materials, notes, and guides to boost your academic performance.',
-	},
-	{
-		icon: 'Peer Networking',
-		title: 'Peer Networking',
-		description:
-			'Connect with fellow students, join study groups, and expand your university network.',
-	},
-	{
-		icon: 'Opportunities',
-		title: 'Opportunities',
-		description:
-			'Discover internships, scholarships, and extracurricular activities to enrich your journey.',
-	},
+  {
+    icon: Megaphone,
+    title: 'Campus Announcements',
+    description: 'Stay updated with real-time campus news, events, and important announcements tailored specifically for you.',
+    color: 'from-blue-500 to-cyan-500',
+    bgColor: 'bg-blue-50',
+    delay: 0.1,
+  },
+  {
+    icon: BookOpen,
+    title: 'Study Resources',
+    description: 'Access curated study materials, notes, and guides to boost your academic performance and excel in your courses.',
+    color: 'from-purple-500 to-pink-500',
+    bgColor: 'bg-purple-50',
+    delay: 0.2,
+  },
+  {
+    icon: Users,
+    title: 'Peer Networking',
+    description: 'Connect with fellow students, join study groups, and expand your university network for lifelong friendships.',
+    color: 'from-green-500 to-emerald-500',
+    bgColor: 'bg-green-50',
+    delay: 0.3,
+  },
+  {
+    icon: Briefcase,
+    title: 'Opportunities',
+    description: 'Discover internships, scholarships, and extracurricular activities to enrich your academic journey.',
+    color: 'from-orange-500 to-red-500',
+    bgColor: 'bg-orange-50',
+    delay: 0.4,
+  },
 ];
 
-const WhatWeOffer: React.FC = () => {
-	useEffect(() => {
-		if (typeof window !== 'undefined') {
-			// Enable smooth scroll globally for anchor links
-			document.documentElement.style.scrollBehavior = 'smooth';
-			// Optionally, handle hashchange for browsers that don't animate by default
-			const onHashChange = () => {
-				if (window.location.hash === '#what-we-offer') {
-					const el = document.getElementById('what-we-offer');
-					if (el) {
-						el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-					}
-				}
-			};
-			window.addEventListener('hashchange', onHashChange);
-			return () => window.removeEventListener('hashchange', onHashChange);
-		}
-	}, []);
+const FeatureCard = ({ feature, index }: { feature: typeof features[0], index: number }) => {
+  const ref = useRef(null);
+  const isInView = useInView(ref, { once: true, margin: "-100px" });
+  const Icon = feature.icon;
 
-	return (
-		<section
-			id="what-we-offer"
-			className="w-full flex flex-col items-center box-border py-16"
-			style={{ background: COLORS.sectionBg }}
-		>
-			<h2 className="text-[2.2rem] font-bold text-center mb-4 font-poppins" style={{ color: COLORS.primary }}>
-				What We Offer
-			</h2>
-			<p className="text-[1.15rem] mb-10 max-w-[600px] text-center font-poppins" style={{ color: COLORS.foreground }}>
-				Comprehensive tools and resources designed to enhance your university experience and accelerate your academic success.
-			</p>
-	  		<div className="grid w-[95%] max-w-[1400px] gap-8 grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-4">
-				{features.map((feature) => (
-					<div
-						key={feature.title}
-						className="bg-white rounded-xl shadow-none p-8 flex flex-col items-center text-center cursor-pointer transition-transform hover:-translate-y-2 hover:scale-[1.04] hover:shadow-lg hover:bg-white"
-					>
-						<div className="w-14 h-14 mb-4 rounded-full overflow-hidden bg-[#f0f0f7] flex items-center justify-center">
-							<Image
-								src={`/what_we_offer/${feature.icon.replace(/\s+/g, '_').toLowerCase()}.png`}
-								alt={feature.title}
-								width={40}
-								height={40}
-								style={{ objectFit: 'contain' }}
-							/>
-						</div>
-						<h3 className="text-[1.25rem] font-semibold text-[#171717] mb-2 font-poppins">
-							{feature.title}
-						</h3>
-						<p className="text-[1rem] opacity-85 font-poppins" style={{ color: COLORS.foreground }}>
-							{feature.description}
-						</p>
-					</div>
-				))}
-			</div>
-		</section>
-	);
+  return (
+    <motion.div
+      ref={ref}
+      className="group relative"
+      initial={{ opacity: 0, y: 50 }}
+      animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 50 }}
+      transition={{ 
+        duration: 0.6, 
+        delay: feature.delay,
+        ease: "easeOut"
+      }}
+    >
+      <div className="relative h-full bg-white rounded-2xl p-8 shadow-lg hover:shadow-2xl transition-all duration-500 border border-gray-100 group-hover:border-gray-200 overflow-hidden">
+        {/* Background Gradient */}
+        <div className={`absolute inset-0 bg-gradient-to-br ${feature.color} opacity-0 group-hover:opacity-5 transition-opacity duration-500`}></div>
+        
+        {/* Icon Container */}
+        <motion.div
+          className={`relative w-16 h-16 rounded-xl bg-gradient-to-br ${feature.color} p-4 mb-6 shadow-lg`}
+          whileHover={{ scale: 1.1, rotate: 5 }}
+          transition={{ duration: 0.3 }}
+        >
+          <Icon className="w-full h-full text-white" />
+          
+          {/* Sparkle Effect */}
+          <motion.div
+            className="absolute -top-1 -right-1"
+            animate={{ 
+              scale: [0, 1, 0],
+              rotate: [0, 180, 360]
+            }}
+            transition={{ 
+              duration: 2,
+              repeat: Infinity,
+              repeatDelay: 3
+            }}
+          >
+            <Sparkles className="w-4 h-4 text-yellow-400" />
+          </motion.div>
+        </motion.div>
+
+        {/* Content */}
+        <div className="relative z-10">
+          <motion.h3 
+            className="text-xl font-bold text-gray-900 mb-3 group-hover:text-gray-800 transition-colors duration-300"
+            whileHover={{ x: 5 }}
+            transition={{ duration: 0.2 }}
+          >
+            {feature.title}
+          </motion.h3>
+          
+          <p className="text-gray-600 leading-relaxed mb-6 group-hover:text-gray-700 transition-colors duration-300">
+            {feature.description}
+          </p>
+
+          {/* Learn More Link */}
+          <motion.div
+            className="flex items-center text-sm font-medium opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+            whileHover={{ x: 5 }}
+          >
+            <span className={`bg-gradient-to-r ${feature.color} bg-clip-text text-transparent`}>
+              Learn more
+            </span>
+            <ArrowRight className="ml-2 w-4 h-4 text-gray-400 group-hover:text-gray-600 transition-colors duration-300" />
+          </motion.div>
+        </div>
+
+        {/* Hover Effect Border */}
+        <div className={`absolute inset-0 rounded-2xl border-2 border-gradient-to-br ${feature.color} opacity-0 group-hover:opacity-20 transition-opacity duration-500`}></div>
+      </div>
+    </motion.div>
+  );
+};
+
+const WhatWeOffer: React.FC = () => {
+  const ref = useRef(null);
+  const isInView = useInView(ref, { once: true, margin: "-50px" });
+
+  return (
+    <section
+      id="what-we-offer"
+      ref={ref}
+      className="relative py-20 lg:py-32 bg-gradient-to-br from-gray-50 to-white overflow-hidden"
+    >
+      {/* Background Elements */}
+      <div className="absolute inset-0">
+        <div className="absolute top-1/4 left-1/4 w-64 h-64 bg-purple-200/30 rounded-full blur-3xl"></div>
+        <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-blue-200/30 rounded-full blur-3xl"></div>
+      </div>
+
+      <div className="relative z-10 container mx-auto px-6">
+        {/* Header */}
+        <motion.div
+          className="text-center mb-16"
+          initial={{ opacity: 0, y: 30 }}
+          animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
+          transition={{ duration: 0.8, ease: "easeOut" }}
+        >
+          <motion.div
+            className="inline-flex items-center px-4 py-2 rounded-full bg-gradient-to-r from-purple-100 to-blue-100 text-purple-800 text-sm font-medium mb-4"
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={isInView ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0.9 }}
+            transition={{ delay: 0.2, duration: 0.6 }}
+          >
+            <Sparkles className="w-4 h-4 mr-2" />
+            What We Offer
+          </motion.div>
+
+          <motion.h2
+            className="text-4xl md:text-5xl font-bold text-gray-900 mb-6 leading-tight"
+            initial={{ opacity: 0, y: 20 }}
+            animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+            transition={{ delay: 0.3, duration: 0.8 }}
+          >
+            Comprehensive Tools for
+            <span className="bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent"> Academic Success</span>
+          </motion.h2>
+
+          <motion.p
+            className="text-lg md:text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed"
+            initial={{ opacity: 0, y: 20 }}
+            animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+            transition={{ delay: 0.4, duration: 0.8 }}
+          >
+            Everything you need for campus life—resources, networking, and opportunities—designed to enhance your university experience and accelerate your academic journey.
+          </motion.p>
+        </motion.div>
+
+        {/* Features Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+          {features.map((feature, index) => (
+            <FeatureCard key={feature.title} feature={feature} index={index} />
+          ))}
+        </div>
+
+        {/* Bottom CTA */}
+        <motion.div
+          className="text-center mt-16"
+          initial={{ opacity: 0, y: 30 }}
+          animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
+          transition={{ delay: 0.6, duration: 0.8 }}
+        >
+          <motion.button
+            className="group relative px-8 py-4 bg-gradient-to-r from-purple-600 to-blue-600 text-white font-semibold rounded-xl shadow-xl hover:shadow-2xl transition-all duration-300"
+            whileHover={{ scale: 1.05, y: -2 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={() => document.getElementById('why-choose')?.scrollIntoView({ behavior: 'smooth' })}
+          >
+            <span className="relative z-10 flex items-center">
+              Explore All Features
+              <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform duration-300" />
+            </span>
+            <div className="absolute inset-0 bg-gradient-to-r from-purple-600 via-purple-500 to-blue-500 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+          </motion.button>
+        </motion.div>
+      </div>
+    </section>
+  );
 };
 
 export default WhatWeOffer;

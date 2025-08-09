@@ -1,98 +1,330 @@
-import React from 'react';
+'use client';
+
+import React, { useRef } from 'react';
+import { motion, useInView } from 'framer-motion';
 import Image from 'next/image';
 import Link from 'next/link';
-import { COLORS, FONT_FAMILY } from '../../utils/color';
+import { 
+  ArrowRight, 
+  Mail, 
+  Phone, 
+  MapPin, 
+  Twitter, 
+  Facebook, 
+  Linkedin, 
+  Instagram,
+  Heart,
+  Sparkles,
+  Users,
+  BookOpen,
+  Target,
+  Award
+} from 'lucide-react';
 
-const AboutSection: React.FC = () => (
-  <section
-    className="w-full max-w-full bg-white flex flex-col items-center justify-center py-16 pb-10 relative box-border overflow-hidden m-0 left-auto right-auto ml-0 mr-0"
-  >
-    {/* Subtle abstract background element (optional) */}
-    <svg
-      width="120"
-      height="120"
-      viewBox="0 0 120 120"
-      fill="none"
-      className="absolute top-6 left-8 opacity-5 z-0 pointer-events-none"
-      aria-hidden="true"
+const stats = [
+  { icon: Users, number: '10,000+', label: 'Students Empowered' },
+  { icon: BookOpen, number: '500+', label: 'Universities Connected' },
+  { icon: Target, number: '99.9%', label: 'Platform Uptime' },
+  { icon: Award, number: '4.9/5', label: 'User Satisfaction' },
+];
+
+const socialLinks = [
+  { icon: Twitter, href: 'https://twitter.com/iknow', label: 'Twitter', color: 'hover:text-blue-400' },
+  { icon: Facebook, href: 'https://facebook.com/iknow', label: 'Facebook', color: 'hover:text-blue-600' },
+  { icon: Linkedin, href: 'https://linkedin.com/company/iknow', label: 'LinkedIn', color: 'hover:text-blue-700' },
+  { icon: Instagram, href: 'https://instagram.com/iknow', label: 'Instagram', color: 'hover:text-pink-600' },
+];
+
+const footerLinks = [
+  {
+    title: 'Product',
+    links: [
+      { name: 'Features', href: '#what-we-offer' },
+      { name: 'Updates', href: '#upcoming-features' },
+    ]
+  },
+  {
+    title: 'Company',
+    links: [
+      { name: 'About Us', href: '#about' },
+      { name: 'Careers', href: '#careers' },
+      { name: 'Contact', href: '#contact' },
+    ]
+  },
+  {
+    title: 'Support',
+    links: [
+      { name: 'Help Center', href: '#help' },
+      { name: 'Community', href: '#community' },
+      { name: 'Documentation', href: '#docs' },
+    ]
+  },
+  {
+    title: 'Legal',
+    links: [
+      { name: 'Privacy Policy', href: '#privacy' },
+      { name: 'Terms of Service', href: '#terms' },
+    ]
+  },
+];
+
+const AboutSection: React.FC = () => {
+  const ref = useRef(null);
+  const isInView = useInView(ref, { once: true, margin: "-100px" });
+
+  return (
+    <section
+      id="about"
+      ref={ref}
+      className="relative bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 overflow-hidden"
     >
-      {/* Graduation cap outline */}
-      <path d="M20 60L60 40L100 60L60 80L20 60Z" stroke={COLORS.primary} strokeWidth="2.5" fill="none" />
-      <circle cx="60" cy="60" r="56" stroke={COLORS.primary} strokeWidth="1.5" fill="none" />
-    </svg>
-    {/* Brand Logo */}
-    <div className="z-[1] mb-4.5 flex flex-col items-center">
-      <Image
-        src="/logos/logo-real.png"
-        alt="IKnow Logo"
-        width={64}
-        height={64}
-        className="mb-2"
-        priority
-      />
-    </div>
-    {/* Mission Statement */}
-    <div className="z-[1] max-w-[600px] text-center mx-auto px-6">
-      <p
-        style={{ fontFamily: FONT_FAMILY.poppins }}
-        className="font-medium text-[1.35rem] text-[var(--foreground)] leading-[1.7] tracking-[0.01em] mb-0"
-      >
-        Empowering students with the tools and connections they need to <span style={{ color: COLORS.primary, fontWeight: 600 }}>succeed</span> in their academic journey and beyond.
-      </p>
-    </div>
-    {/* Get Started Button */}
-    <div className="z-[1] mt-8">
-      <Link
-        href="/auth/login"
-        style={{
-          background: COLORS.primary,
-          fontFamily: FONT_FAMILY.poppins,
-        }}
-        className="text-white font-semibold text-[1.08rem] rounded-lg px-9 py-[0.7rem] no-underline shadow-[0_2px_8px_rgba(67,24,209,0.07)] transition-colors duration-200 tracking-[0.01em] inline-block mr-2"
-      >
-        Get Started
-      </Link>
-    </div>
-    {/* Social Media Links (optional) */}
-    <div className="flex gap-[18px] mt-9 justify-center z-[1]">
-      <a
-        href="https://twitter.com/"
-        target="_blank"
-        rel="noopener noreferrer"
-        aria-label="Twitter"
-        style={{ color: COLORS.primary, opacity: 0.7 }}
-      >
-        <svg width="24" height="24" fill="none" viewBox="0 0 24 24"><path d="M22 5.92a8.38 8.38 0 0 1-2.36.65A4.13 4.13 0 0 0 21.4 4.1a8.27 8.27 0 0 1-2.61 1A4.13 4.13 0 0 0 12 8.13c0 .32.04.64.1.94A11.7 11.7 0 0 1 3.1 4.6a4.13 4.13 0 0 0 1.28 5.5A4.07 4.07 0 0 1 2.8 9.1v.05a4.13 4.13 0 0 0 3.3 4.05c-.2.05-.4.08-.62.08-.15 0-.3-.01-.44-.04a4.13 4.13 0 0 0 3.85 2.86A8.3 8.3 0 0 1 2 19.54a11.7 11.7 0 0 0 6.29 1.84c7.55 0 11.68-6.26 11.68-11.68 0-.18-.01-.36-.02-.54A8.18 8.18 0 0 0 22 5.92z" fill="currentColor"/></svg>
-      </a>
-      <a
-        href="https://facebook.com/"
-        target="_blank"
-        rel="noopener noreferrer"
-        aria-label="Facebook"
-        style={{ color: COLORS.primary, opacity: 0.7 }}
-      >
-        <svg width="24" height="24" fill="none" viewBox="0 0 24 24"><path d="M22.675 0h-21.35C.595 0 0 .592 0 1.326v21.348C0 23.408.595 24 1.325 24h11.495v-9.294H9.692v-3.622h3.128V8.413c0-3.1 1.893-4.788 4.659-4.788 1.325 0 2.463.099 2.797.143v3.24l-1.918.001c-1.504 0-1.797.715-1.797 1.763v2.313h3.587l-.467 3.622h-3.12V24h6.116C23.406 24 24 23.408 24 22.674V1.326C24 .592 23.406 0 22.675 0" fill="currentColor"/></svg>
-      </a>
-      <a
-        href="https://linkedin.com/"
-        target="_blank"
-        rel="noopener noreferrer"
-        aria-label="LinkedIn"
-        style={{ color: COLORS.primary, opacity: 0.7 }}
-      >
-        <svg width="24" height="24" fill="none" viewBox="0 0 24 24"><path d="M20.447 20.452h-3.554v-5.569c0-1.327-.025-3.037-1.849-3.037-1.851 0-2.132 1.445-2.132 2.939v5.667H9.358V9h3.414v1.561h.049c.476-.899 1.637-1.849 3.37-1.849 3.602 0 4.267 2.369 4.267 5.455v6.285zM5.337 7.433a2.062 2.062 0 1 1 0-4.124 2.062 2.062 0 0 1 0 4.124zM7.119 20.452H3.554V9h3.565v11.452zM22.225 0H1.771C.792 0 0 .771 0 1.723v20.549C0 23.229.792 24 1.771 24h20.451C23.2 24 24 23.229 24 22.271V1.723C24 .771 23.2 0 22.225 0z" fill="currentColor"/></svg>
-      </a>
-    </div>
-    {/* Minimal Footer Navigation (optional) */}
-    <footer
-      style={{ fontFamily: FONT_FAMILY.poppins }}
-      className="mt-8 text-[1rem] text-[#b0b0b0] flex gap-6 justify-center z-[1]"
-    >
-      <a href="#" className="text-[#b0b0b0] no-underline transition-colors duration-200">Home</a>
-      <a href="#" className="text-[#b0b0b0] no-underline transition-colors duration-200">Features</a>
-      <a href="#" className="text-[#b0b0b0] no-underline transition-colors duration-200">Contact</a>
-    </footer>
-  </section>
-);
+      {/* Background Elements */}
+      <div className="absolute inset-0">
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-purple-900/30 via-slate-900/50 to-slate-900"></div>
+        
+        {/* Animated Particles */}
+        <div className="absolute inset-0">
+          {[...Array(20)].map((_, i) => {
+            // Use deterministic positions based on index to avoid hydration mismatch
+            const left = (i * 17 + 23) % 100; // Pseudo-random but deterministic
+            const top = (i * 31 + 47) % 100;  // Pseudo-random but deterministic
+            const duration = 3 + (i % 3); // Deterministic duration variation
+            const delay = (i % 4) * 0.5; // Deterministic delay variation
+            
+            return (
+              <motion.div
+                key={i}
+                className="absolute w-1 h-1 bg-white/20 rounded-full"
+                style={{
+                  left: `${left}%`,
+                  top: `${top}%`,
+                }}
+                animate={{
+                  y: [0, -100, 0],
+                  opacity: [0, 1, 0],
+                }}
+                transition={{
+                  duration: duration,
+                  repeat: Infinity,
+                  delay: delay,
+                  ease: "easeInOut"
+                }}
+              />
+            );
+          })}
+        </div>
+        
+        {/* Grid Pattern */}
+        <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,.02)_1px,transparent_1px)] bg-[size:100px_100px]"></div>
+      </div>
+
+      <div className="relative z-10">
+        {/* Main About Content */}
+        <div className="container mx-auto px-6 py-20 lg:py-32">
+          <div className="text-center max-w-4xl mx-auto">
+            {/* Logo and Badge */}
+            <motion.div
+              className="flex flex-col items-center mb-12"
+              initial={{ opacity: 0, y: 30 }}
+              animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
+              transition={{ duration: 0.8, ease: "easeOut" }}
+            >
+              <motion.div
+                className="inline-flex items-center px-4 py-2 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 text-white/90 text-sm font-medium mb-6"
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={isInView ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0.9 }}
+                transition={{ delay: 0.2, duration: 0.6 }}
+              >
+                <Sparkles className="w-4 h-4 mr-2 text-yellow-400" />
+                About IKnow
+              </motion.div>
+
+              {/* Logo */}
+              <motion.div
+                className="relative mb-8"
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={isInView ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0.8 }}
+                transition={{ delay: 0.3, duration: 0.8 }}
+                whileHover={{ scale: 1.05 }}
+              >
+                <div className="w-20 h-20 bg-gradient-to-br from-purple-500 to-blue-500 rounded-2xl flex items-center justify-center shadow-2xl">
+                  <BookOpen className="w-10 h-10 text-white" />
+                </div>
+                <div className="absolute inset-0 bg-gradient-to-br from-purple-500/30 to-blue-500/30 rounded-2xl blur-xl transform rotate-6 scale-110"></div>
+              </motion.div>
+            </motion.div>
+
+            {/* Mission Statement */}
+            <motion.div
+              className="mb-16"
+              initial={{ opacity: 0, y: 30 }}
+              animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
+              transition={{ delay: 0.4, duration: 0.8 }}
+            >
+              <motion.h2
+                className="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-8 leading-tight"
+                initial={{ opacity: 0, y: 20 }}
+                animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+                transition={{ delay: 0.5, duration: 0.8 }}
+              >
+                Empowering Students to
+                <span className="bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent"> Succeed</span>
+              </motion.h2>
+
+              <motion.p
+                className="text-lg md:text-xl text-gray-300 leading-relaxed max-w-3xl mx-auto mb-12"
+                initial={{ opacity: 0, y: 20 }}
+                animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+                transition={{ delay: 0.6, duration: 0.8 }}
+              >
+                At IKnow, we believe every student deserves access to the tools and connections they need to thrive in their academic journey and beyond. We're building the future of campus life, one connection at a time.
+              </motion.p>
+
+              {/* CTA Buttons */}
+              <motion.div
+                className="flex flex-col sm:flex-row gap-4 justify-center mb-16"
+                initial={{ opacity: 0, y: 20 }}
+                animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+                transition={{ delay: 0.7, duration: 0.8 }}
+              >
+                <Link href="/auth/login">
+                  <motion.button
+                    className="group relative px-8 py-4 bg-gradient-to-r from-purple-600 to-blue-600 text-white font-semibold rounded-xl shadow-2xl hover:shadow-purple-500/25 transition-all duration-300"
+                    whileHover={{ scale: 1.05, y: -2 }}
+                    whileTap={{ scale: 0.95 }}
+                  >
+                    <span className="relative z-10 flex items-center">
+                      Start Your Journey
+                      <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform duration-300" />
+                    </span>
+                    <div className="absolute inset-0 bg-gradient-to-r from-purple-600 via-purple-500 to-blue-500 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                  </motion.button>
+                </Link>
+
+                <motion.button
+                  className="group flex items-center px-8 py-4 text-white border border-white/30 rounded-xl backdrop-blur-sm hover:bg-white/10 transition-all duration-300"
+                  whileHover={{ scale: 1.05, y: -2 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  <Mail className="mr-2 w-5 h-5" />
+                  Contact Us
+                </motion.button>
+              </motion.div>
+            </motion.div>
+
+          </div>
+        </div>
+
+        {/* Footer */}
+        <footer className="border-t border-white/10 bg-black/20 backdrop-blur-sm">
+          <div className="container mx-auto px-6 py-16">
+            {/* Footer Links Grid */}
+            <motion.div
+              className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-12"
+              initial={{ opacity: 0, y: 30 }}
+              animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
+              transition={{ delay: 1.2, duration: 0.8 }}
+            >
+              {footerLinks.map((section, index) => (
+                <motion.div
+                  key={section.title}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+                  transition={{ delay: 1.3 + index * 0.1, duration: 0.6 }}
+                >
+                  <h3 className="text-white font-semibold mb-4">{section.title}</h3>
+                  <ul className="space-y-2">
+                    {section.links.map((link) => (
+                      <li key={link.name}>
+                        <a
+                          href={link.href}
+                          className="text-gray-400 hover:text-white transition-colors duration-300 text-sm"
+                        >
+                          {link.name}
+                        </a>
+                      </li>
+                    ))}
+                  </ul>
+                </motion.div>
+              ))}
+            </motion.div>
+
+            {/* Social Links */}
+            <motion.div
+              className="flex justify-center space-x-6 mb-8"
+              initial={{ opacity: 0, y: 20 }}
+              animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+              transition={{ delay: 1.4, duration: 0.6 }}
+            >
+              {socialLinks.map((social) => {
+                const Icon = social.icon;
+                return (
+                  <motion.a
+                    key={social.label}
+                    href={social.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={`w-10 h-10 bg-white/10 backdrop-blur-sm rounded-full flex items-center justify-center text-gray-400 ${social.color} transition-all duration-300 border border-white/20`}
+                    whileHover={{ scale: 1.1, y: -2 }}
+                    whileTap={{ scale: 0.95 }}
+                    aria-label={social.label}
+                  >
+                    <Icon className="w-5 h-5" />
+                  </motion.a>
+                );
+              })}
+            </motion.div>
+
+            {/* Contact Info */}
+            <motion.div
+              className="text-center mb-8"
+              initial={{ opacity: 0, y: 20 }}
+              animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+              transition={{ delay: 1.5, duration: 0.6 }}
+            >
+              <div className="flex flex-col sm:flex-row justify-center items-center space-y-4 sm:space-y-0 sm:space-x-8 text-gray-400 text-sm">
+                <div className="flex items-center">
+                  <Mail className="w-4 h-4 mr-2" />
+                  lazymesup@gmail.com
+                </div>
+                <div className="flex items-center">
+                  <Phone className="w-4 h-4 mr-2" />
+                  +251 96 859 0369
+                </div>
+                <div className="flex items-center">
+                  <MapPin className="w-4 h-4 mr-2" />
+                  Ethiopia, Adama
+                </div>
+              </div>
+            </motion.div>
+
+            {/* Bottom Bar */}
+            <motion.div
+              className="border-t border-white/10 pt-8 flex flex-col sm:flex-row justify-between items-center text-gray-400 text-sm"
+              initial={{ opacity: 0, y: 20 }}
+              animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+              transition={{ delay: 1.6, duration: 0.6 }}
+            >
+              <div className="flex items-center mb-4 sm:mb-0">
+                <span>© 2024 IKnow. All rights reserved.</span>
+              </div>
+              <div className="flex items-center">
+                <span>Made with</span>
+                <motion.div
+                  className="mx-1"
+                  animate={{ scale: [1, 1.2, 1] }}
+                  transition={{ duration: 1, repeat: Infinity }}
+                >
+                  <Heart className="w-4 h-4 text-red-500" />
+                </motion.div>
+                <span>for students worldwide</span>
+              </div>
+            </motion.div>
+          </div>
+        </footer>
+      </div>
+    </section>
+  );
+};
 
 export default AboutSection;
