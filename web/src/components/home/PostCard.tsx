@@ -56,6 +56,7 @@ const PostCard: React.FC<{ post: Post }> = ({ post }) => {
 
   // Navigation handler
   const handleUserClick = () => {
+    console.log('User clicked for post:', post.id, 'user:', post.user?.id);
     if (post.user?.id) {
       router.push(`/home/profile?id=${post.user.id}`);
     }
@@ -106,6 +107,7 @@ const PostCard: React.FC<{ post: Post }> = ({ post }) => {
   };
 
   const handleLikeToggle = async () => {
+    console.log('Like button clicked for post:', post.id);
     if (likeLoading) return;
     setLikeLoading(true);
     const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
@@ -144,23 +146,18 @@ const PostCard: React.FC<{ post: Post }> = ({ post }) => {
   };
 
   const handleCommentClick = () => {
-    if (typeof window !== 'undefined') {
-      window.location.href = `/home/posts/${post.id}`;
-    }
+    console.log('Comment button clicked for post:', post.id);
+    router.push(`/home/posts/${post.id}`);
   };
 
   return (
     <>
       <motion.div
-        className="group bg-white rounded-2xl border border-gray-200 p-6 shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden"
+        className="bg-white rounded-2xl border border-gray-200 p-6 shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden relative z-10"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
-        whileHover={{ y: -2 }}
       >
-        {/* Background Gradient on Hover */}
-        <div className="absolute inset-0 bg-gradient-to-br from-purple-500/5 to-blue-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-        
         <div className="relative">
           {/* Header: Avatar, Name, Academic Year, Time, Menu */}
           <motion.div
@@ -173,13 +170,11 @@ const PostCard: React.FC<{ post: Post }> = ({ post }) => {
               {/* Avatar - Clickable */}
               <motion.button
                 className="relative flex-shrink-0"
-                whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 transition={{ duration: 0.3 }}
                 onClick={handleUserClick}
               >
-                <div className="absolute inset-0 bg-gradient-to-br from-purple-500/20 to-blue-500/20 rounded-full blur-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                <div className="relative w-12 h-12 rounded-full overflow-hidden border-2 border-gray-200 group-hover:border-purple-300 transition-colors duration-300">
+                <div className="relative w-12 h-12 rounded-full overflow-hidden border-2 border-gray-200 transition-colors duration-300">
                   {post.user?.profile_image_url ? (
                     <Image
                       src={post.user.profile_image_url}
@@ -200,11 +195,10 @@ const PostCard: React.FC<{ post: Post }> = ({ post }) => {
               <motion.button
                 className="flex-1 min-w-0 text-left"
                 onClick={handleUserClick}
-                whileHover={{ x: 2 }}
                 transition={{ duration: 0.2 }}
               >
                 <div className="flex items-center gap-2 mb-1">
-                  <h4 className="font-semibold text-gray-900 text-sm truncate group-hover:text-purple-700 transition-colors duration-300 cursor-pointer">
+                  <h4 className="font-semibold text-gray-900 text-sm truncate transition-colors duration-300 cursor-pointer">
                     {post.user?.name || "Unknown"}
                   </h4>
                   {post.user?.acedemic_year && (
@@ -225,12 +219,11 @@ const PostCard: React.FC<{ post: Post }> = ({ post }) => {
             <div className="relative flex-shrink-0 ml-2">
               <motion.button
                 ref={menuButtonRef}
-                className="p-2 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-600 hover:text-gray-800 transition-colors duration-300 opacity-0 group-hover:opacity-100"
+                className="p-2 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-600 hover:text-gray-800 transition-colors duration-300"
                 onClick={(e) => {
                   e.stopPropagation();
                   setShowMenu((v) => !v);
                 }}
-                whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
               >
                 <MoreHorizontal className="w-4 h-4" />
@@ -252,7 +245,6 @@ const PostCard: React.FC<{ post: Post }> = ({ post }) => {
                         <motion.button
                           className="w-full text-left px-4 py-3 hover:bg-gray-50 flex items-center gap-2 text-gray-700 hover:text-blue-600 transition-colors duration-200"
                           onClick={handleEdit}
-                          whileHover={{ x: 2 }}
                         >
                           <Edit3 className="w-4 h-4" />
                           <span className="text-sm font-medium">Edit</span>
@@ -260,7 +252,6 @@ const PostCard: React.FC<{ post: Post }> = ({ post }) => {
                         <motion.button
                           className="w-full text-left px-4 py-3 hover:bg-red-50 flex items-center gap-2 text-gray-700 hover:text-red-600 transition-colors duration-200"
                           onClick={handleDelete}
-                          whileHover={{ x: 2 }}
                         >
                           <Trash2 className="w-4 h-4" />
                           <span className="text-sm font-medium">Delete</span>
@@ -270,7 +261,6 @@ const PostCard: React.FC<{ post: Post }> = ({ post }) => {
                       <motion.button
                         className="w-full text-left px-4 py-3 hover:bg-red-50 flex items-center gap-2 text-gray-700 hover:text-red-600 transition-colors duration-200"
                         onClick={handleReport}
-                        whileHover={{ x: 2 }}
                       >
                         <Flag className="w-4 h-4" />
                         <span className="text-sm font-medium">Report</span>
@@ -289,7 +279,6 @@ const PostCard: React.FC<{ post: Post }> = ({ post }) => {
             animate={{ opacity: 1 }}
             transition={{ delay: 0.2, duration: 0.6 }}
             onClick={() => setIsExpanded(!isExpanded)}
-            whileHover={{ scale: 1.01 }}
             whileTap={{ scale: 0.99 }}
           >
             <p className={`whitespace-pre-wrap overflow-hidden transition-all duration-300 ${
@@ -325,8 +314,7 @@ const PostCard: React.FC<{ post: Post }> = ({ post }) => {
                 {post.post_attachments.map((url, idx) => (
                   <motion.div
                     key={idx}
-                    className="relative group cursor-pointer overflow-hidden rounded-xl bg-gray-100 aspect-video border-2 border-gray-200 hover:border-purple-300 transition-colors duration-300"
-                    whileHover={{ scale: 1.02 }}
+                    className="relative cursor-pointer overflow-hidden rounded-xl bg-gray-100 aspect-video border-2 border-gray-200 hover:border-purple-300 transition-colors duration-300"
                     whileTap={{ scale: 0.98 }}
                     onClick={() => setOpenImg(url)}
                   >
@@ -336,10 +324,9 @@ const PostCard: React.FC<{ post: Post }> = ({ post }) => {
                       fill
                       className="object-cover"
                     />
-                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-all duration-300 flex items-center justify-center">
+                    <div className="absolute inset-0 bg-black/0 hover:bg-black/20 transition-all duration-300 flex items-center justify-center">
                       <motion.div
-                        className="w-10 h-10 bg-white/90 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-                        whileHover={{ scale: 1.1 }}
+                        className="w-10 h-10 bg-white/90 rounded-full flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity duration-300"
                       >
                         <Eye className="w-5 h-5 text-gray-700" />
                       </motion.div>
@@ -366,11 +353,10 @@ const PostCard: React.FC<{ post: Post }> = ({ post }) => {
                 liked 
                   ? 'bg-red-50 text-red-600 hover:bg-red-100' 
                   : 'bg-gray-50 text-gray-600 hover:bg-gray-100'
-              } ${likeLoading ? 'opacity-60 cursor-not-allowed' : 'hover:scale-105'}`}
+              } ${likeLoading ? 'opacity-60 cursor-not-allowed' : ''}`}
               disabled={likeLoading}
               onClick={handleLikeToggle}
-              whileHover={likeLoading ? {} : { scale: 1.05 }}
-              whileTap={likeLoading ? {} : { scale: 0.95 }}
+              whileTap={{ scale: 0.95 }}
             >
               {likeLoading ? (
                 <Loader2 className="w-5 h-5 animate-spin" />
@@ -382,13 +368,13 @@ const PostCard: React.FC<{ post: Post }> = ({ post }) => {
 
             {/* Comment Button */}
             <motion.button
-              className="flex items-center gap-2 px-3 py-2 rounded-xl bg-gray-50 text-gray-600 hover:bg-blue-50 hover:text-blue-600 transition-all duration-300"
+              className="flex items-center gap-2 px-3 py-2 rounded-xl bg-gray-50 text-gray-600 hover:bg-blue-50 hover:text-blue-600 hover:border-blue-200 border border-transparent transition-all duration-300 cursor-pointer"
               onClick={handleCommentClick}
-              whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
+              title="View comments"
             >
               <MessageCircle className="w-5 h-5" />
-              <span className="font-semibold text-sm">{post.comments}</span>
+              <span className="font-semibold text-sm">{post.comments || 0}</span>
             </motion.button>
           </motion.div>
         </div>
@@ -423,7 +409,6 @@ const PostCard: React.FC<{ post: Post }> = ({ post }) => {
               <motion.button
                 className="absolute top-4 right-4 w-10 h-10 bg-black/50 hover:bg-black/70 text-white rounded-full flex items-center justify-center transition-colors duration-300"
                 onClick={() => setOpenImg(null)}
-                whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.9 }}
               >
                 <X className="w-5 h-5" />
@@ -483,8 +468,7 @@ const PostCard: React.FC<{ post: Post }> = ({ post }) => {
                   }`}
                   disabled={reportLoading || !reportReason.trim()}
                   onClick={submitReport}
-                  whileHover={reportLoading || !reportReason.trim() ? {} : { scale: 1.02 }}
-                  whileTap={reportLoading || !reportReason.trim() ? {} : { scale: 0.98 }}
+                  whileTap={{ scale: 0.98 }}
                 >
                   {reportLoading ? (
                     <div className="flex items-center justify-center gap-2">
@@ -502,7 +486,6 @@ const PostCard: React.FC<{ post: Post }> = ({ post }) => {
                     setReportReason("");
                   }}
                   disabled={reportLoading}
-                  whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                 >
                   Cancel

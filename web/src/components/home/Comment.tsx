@@ -143,14 +143,14 @@ const Comment: React.FC<{
 
   return (
     <motion.div
-      className={`group ${isNested ? 'ml-8 mt-3' : 'mt-0'}`}
+      className={`group ${isNested ? 'ml-2 sm:ml-8 mt-3' : 'mt-0'}`}
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4 }}
     >
-      <div className={`${isNested ? 'bg-gray-50 rounded-xl p-4' : 'bg-white rounded-xl p-4 border border-gray-200'} transition-all duration-300 hover:shadow-md`}>
+      <div className={`${isNested ? 'bg-gray-50 rounded-xl p-3 sm:p-4' : 'bg-white rounded-xl p-4 border border-gray-200'} transition-all duration-300 hover:shadow-md`}>
         {/* Comment Header */}
-        <div className="flex items-start gap-3">
+        <div className="flex items-start gap-2 sm:gap-3">
           {/* Avatar */}
           <motion.div
             className="relative flex-shrink-0"
@@ -158,7 +158,7 @@ const Comment: React.FC<{
             transition={{ duration: 0.3 }}
           >
             <div className="absolute inset-0 bg-gradient-to-br from-purple-500/20 to-blue-500/20 rounded-full blur-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-            <div className={`relative ${isNested ? 'w-8 h-8' : 'w-10 h-10'} rounded-full overflow-hidden border-2 border-gray-200 group-hover:border-purple-300 transition-colors duration-300`}>
+            <div className={`relative ${isNested ? 'w-7 h-7 sm:w-8 sm:h-8' : 'w-8 h-8 sm:w-10 sm:h-10'} rounded-full overflow-hidden border-2 border-gray-200 group-hover:border-purple-300 transition-colors duration-300`}>
               {comment.user?.profile_image_url ? (
                 <Image
                   src={comment.user.profile_image_url}
@@ -169,7 +169,7 @@ const Comment: React.FC<{
                 />
               ) : (
                 <div className="w-full h-full bg-gradient-to-br from-purple-100 to-blue-100 flex items-center justify-center">
-                  <User className={`${isNested ? 'w-4 h-4' : 'w-5 h-5'} text-purple-600`} />
+                  <User className={`${isNested ? 'w-3 h-3 sm:w-4 sm:h-4' : 'w-4 h-4 sm:w-5 sm:h-5'} text-purple-600`} />
                 </div>
               )}
             </div>
@@ -179,42 +179,43 @@ const Comment: React.FC<{
           <div className="flex-1 min-w-0">
             {/* User Info and Time */}
             <div className="flex items-center justify-between mb-2">
-              <div className="flex items-center gap-2">
-                <h4 className={`font-semibold text-gray-900 ${isNested ? 'text-sm' : 'text-base'} group-hover:text-purple-700 transition-colors duration-300`}>
+              <div className="flex items-center gap-1 sm:gap-2">
+                <h4 className={`font-semibold text-gray-900 ${isNested ? 'text-xs sm:text-sm' : 'text-sm sm:text-base'} group-hover:text-purple-700 transition-colors duration-300 truncate`}>
                   {comment.user?.name || "Unknown"}
                 </h4>
                 {comment.user?.acedemic_year && (
-                  <span className="px-2 py-0.5 bg-purple-100 text-purple-700 text-xs font-medium rounded-full">
+                  <span className="px-1.5 sm:px-2 py-0.5 bg-purple-100 text-purple-700 text-xs font-medium rounded-full flex-shrink-0">
                     Year {comment.user.acedemic_year}
                   </span>
                 )}
               </div>
-              <div className="flex items-center gap-1 text-xs text-gray-500">
+              <div className="flex items-center gap-1 text-xs text-gray-500 flex-shrink-0">
                 <Clock className="w-3 h-3" />
-                <span>{formatDate(comment.created_at)}</span>
+                <span className="hidden xs:inline">{formatDate(comment.created_at)}</span>
+                <span className="xs:hidden">{formatDate(comment.created_at).replace(' ago', '')}</span>
               </div>
             </div>
 
             {/* Comment Text */}
             <motion.div
-              className={`text-gray-800 leading-relaxed mb-3 ${isNested ? 'text-sm' : 'text-base'}`}
+              className={`text-gray-800 leading-relaxed mb-3 ${isNested ? 'text-xs sm:text-sm' : 'text-sm sm:text-base'}`}
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.1, duration: 0.4 }}
             >
-              <p className="whitespace-pre-wrap">{comment.content}</p>
+              <p className="whitespace-pre-wrap break-words">{comment.content}</p>
             </motion.div>
 
             {/* Action Buttons */}
             <motion.div
-              className="flex items-center gap-4"
+              className="flex items-center gap-2 sm:gap-4 flex-wrap"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.2, duration: 0.4 }}
             >
               {/* Like Button */}
               <motion.button
-                className={`flex items-center gap-1.5 px-2 py-1 rounded-lg transition-all duration-300 ${
+                className={`flex items-center gap-1 sm:gap-1.5 px-2 py-1 rounded-lg transition-all duration-300 ${
                   liked 
                     ? 'bg-red-50 text-red-600 hover:bg-red-100' 
                     : 'bg-gray-50 text-gray-600 hover:bg-gray-100'
@@ -223,19 +224,19 @@ const Comment: React.FC<{
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
               >
-                <Heart className={`w-4 h-4 ${liked ? 'fill-current' : ''}`} />
+                <Heart className={`w-3 h-3 sm:w-4 sm:h-4 ${liked ? 'fill-current' : ''}`} />
                 <span className="font-semibold text-xs">{likes}</span>
               </motion.button>
 
               {/* Reply Count Button */}
               {replyCount > 0 && (
                 <motion.button
-                  className="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-gray-50 text-gray-600 hover:bg-blue-50 hover:text-blue-600 transition-all duration-300"
+                  className="flex items-center gap-1 sm:gap-1.5 px-2 py-1 rounded-lg bg-gray-50 text-gray-600 hover:bg-blue-50 hover:text-blue-600 transition-all duration-300"
                   onClick={handleToggleReplies}
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                 >
-                  <MessageCircle className="w-4 h-4" />
+                  <MessageCircle className="w-3 h-3 sm:w-4 sm:h-4" />
                   <span className="font-semibold text-xs">{replyCount}</span>
                   {showReplies ? (
                     <ChevronUp className="w-3 h-3" />
@@ -248,25 +249,27 @@ const Comment: React.FC<{
               {/* Reply Button */}
               {depth < maxDepth && (
                 <motion.button
-                  className="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-gray-50 text-gray-600 hover:bg-green-50 hover:text-green-600 transition-all duration-300"
+                  className="flex items-center gap-1 sm:gap-1.5 px-2 py-1 rounded-lg bg-gray-50 text-gray-600 hover:bg-green-50 hover:text-green-600 transition-all duration-300"
                   onClick={() => setShowReplyInput((v) => !v)}
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                 >
-                  <Reply className="w-4 h-4" />
-                  <span className="font-medium text-xs">Reply</span>
+                  <Reply className="w-3 h-3 sm:w-4 sm:h-4" />
+                  <span className="font-medium text-xs hidden xs:inline">Reply</span>
+                  <span className="font-medium text-xs xs:hidden">R</span>
                 </motion.button>
               )}
 
               {/* View Replies Button (when replies exist but aren't shown) */}
               {replyCount > 0 && !showReplies && (
                 <motion.button
-                  className="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-blue-50 text-blue-600 hover:bg-blue-100 transition-all duration-300"
+                  className="flex items-center gap-1 sm:gap-1.5 px-2 py-1 rounded-lg bg-blue-50 text-blue-600 hover:bg-blue-100 transition-all duration-300"
                   onClick={handleToggleReplies}
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                 >
-                  <span className="font-medium text-xs">View {replyCount} {replyCount === 1 ? 'reply' : 'replies'}</span>
+                  <span className="font-medium text-xs hidden sm:inline">View {replyCount} {replyCount === 1 ? 'reply' : 'replies'}</span>
+                  <span className="font-medium text-xs sm:hidden">{replyCount} replies</span>
                   <ChevronDown className="w-3 h-3" />
                 </motion.button>
               )}
