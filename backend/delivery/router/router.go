@@ -38,7 +38,7 @@ func SetupRoutes(
 	r := gin.New()
 	r.Use(gin.Logger(), gin.Recovery())
 	corsConfig := cors.Config{
-		AllowOrigins:     []string{"http://localhost:3000", "http://127.0.0.1:3000", "https://lazyme.vercel.app", "http://192.168.1.*:30007"},
+		AllowOrigins:     []string{os.Getenv("FRONT_BASE_URL")},
 		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
 		AllowHeaders:     []string{"Origin", "Content-Type", "Authorization"},
 		ExposeHeaders:    []string{"Content-Length"},
@@ -172,6 +172,7 @@ func SetupRoutes(
 	user := r.Group("/api/users")
 	{
 
+		user.GET("/:id", middleware.AuthUserMiddleware(RoleAll), userController.GetUserByID)
 		user.GET("/me", middleware.AuthUserMiddleware(RoleAll), userController.Me)
 		user.POST("/complete-account", middleware.AuthUserMiddleware(RoleAll), userController.CompleteUser)
 		user.GET("/analytics", middleware.AuthUserMiddleware(RoleAdmin), userController.UserAnalytics)

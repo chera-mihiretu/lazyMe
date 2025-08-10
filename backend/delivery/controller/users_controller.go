@@ -145,3 +145,24 @@ func (c *UserController) UserAnalytics(ctx *gin.Context) {
 	}
 	ctx.JSON(http.StatusOK, gin.H{"analytics": userAnalytics})
 }
+
+func (c *UserController) GetUserByID(ctx *gin.Context) {
+	userIDStr := ctx.Param("id")
+	if userIDStr == "" {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "User ID is required"})
+		return
+	}
+
+	userID, err := primitive.ObjectIDFromHex(userIDStr)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid User ID format"})
+		return
+	}
+
+	user, err := c.usecase.GetUserById(ctx, userID.Hex())
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch user details"})
+		return
+	}
+	ctx.JSON(http.StatusOK, gin.H{"user": user})
+}
