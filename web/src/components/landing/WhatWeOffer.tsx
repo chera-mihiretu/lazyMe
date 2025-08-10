@@ -39,7 +39,8 @@ const features = [
   },
 ];
 
-const FeatureCard = ({ feature, index }: { feature: typeof features[0], index: number }) => {
+const FeatureCard = ({ feature }: { feature: typeof features[0] }) => {
+  
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: "-100px" });
   const Icon = feature.icon;
@@ -174,8 +175,8 @@ const WhatWeOffer: React.FC = () => {
 
         {/* Features Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-          {features.map((feature, index) => (
-            <FeatureCard key={feature.title} feature={feature} index={index} />
+          {features.map((feature) => (
+            <FeatureCard key={feature.title} feature={feature} />
           ))}
         </div>
 

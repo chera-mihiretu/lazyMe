@@ -6,7 +6,6 @@ import {
   Edit3, 
   Trash2, 
   Flag, 
-  X, 
   AlertTriangle, 
   User, 
   Loader2, 
@@ -14,7 +13,6 @@ import {
   Clock,
   Building,
   GraduationCap,
-  Eye,
   Globe,
   Briefcase,
   Send
@@ -275,6 +273,7 @@ const JobCard: React.FC<{ job: JobPost }> = ({ job }) => {
         body,
       });
     } catch (e) {
+      console.error(e);
       // Revert on error
       if (liked) {
         setLikes(likes + 1);

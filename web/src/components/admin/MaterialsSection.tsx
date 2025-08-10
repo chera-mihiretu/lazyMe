@@ -242,7 +242,7 @@ const MaterialsSection: React.FC = () => {
               {/* Content */}
               <div className="mb-4">
                 <p className="text-gray-700 mb-3">
-                  Type <span className="font-semibold text-red-600">"delete material"</span> to confirm deletion.
+                  Type <span className="font-semibold text-red-600">&quot;delete material&quot;</span> to confirm deletion.
                 </p>
                 <input
                   type="text"

@@ -15,7 +15,7 @@ import {
 } from "chart.js";
 import { 
   Users, 
-  FileText, 
+   
   CheckCircle, 
   AlertCircle, 
   TrendingUp,

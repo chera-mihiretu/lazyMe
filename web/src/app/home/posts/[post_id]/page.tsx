@@ -9,7 +9,6 @@ import {
   AlertCircle,
   Users,
   Clock,
-  Sparkles
 } from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
 import PostCard from "@/components/home/PostCard";

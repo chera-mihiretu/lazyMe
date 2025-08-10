@@ -13,8 +13,8 @@ import {
   BookOpen, 
   FileText, 
   Users,
-  Search,
-  Bell,
+  
+  
   User as UserIcon,
   Settings,
   LogOut

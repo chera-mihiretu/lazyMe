@@ -10,8 +10,7 @@ import {
   ArrowRight, 
   Sparkles, 
   Shield,
-  Clock,
-  RefreshCw
+  
 } from 'lucide-react';
 
 const SignupSuccess: React.FC = () => {
@@ -205,7 +204,7 @@ const SignupSuccess: React.FC = () => {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.7, duration: 0.8 }}
                 >
-                  You have successfully created your account. We're excited to have you join our community of students!
+                  You have successfully created your account. We&apos;re excited to have you join our community of students!
                 </motion.p>
               </motion.div>
 
@@ -238,7 +237,7 @@ const SignupSuccess: React.FC = () => {
                 </h3>
                 
                 <p className="text-gray-300 text-sm leading-relaxed mb-4">
-                  We've sent a verification email to your inbox. Please check your email and click the verification link to activate your account.
+                  We&apos;ve sent a verification email to your inbox. Please check your email and click the verification link to activate your account.
                 </p>
 
                 <motion.div
@@ -250,7 +249,7 @@ const SignupSuccess: React.FC = () => {
                   <div className="flex items-start">
                     <Shield className="w-5 h-5 text-yellow-400 mr-3 mt-0.5 flex-shrink-0" />
                     <p className="text-yellow-200 text-sm">
-                      <strong>Can't find the email?</strong> Please check your spam or junk folder. 
+                      <strong>Can&apos;t find the email?</strong> Please check your spam or junk folder. 
                       Sometimes verification emails end up there.
                     </p>
                   </div>
@@ -292,7 +291,7 @@ const SignupSuccess: React.FC = () => {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 1.1, duration: 0.8 }}
               >
-                <h4 className="text-white font-semibold mb-4">What's Next?</h4>
+                <h4 className="text-white font-semibold mb-4">What&apos;s Next?</h4>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
                   <motion.div
                     className="flex items-center text-gray-300"

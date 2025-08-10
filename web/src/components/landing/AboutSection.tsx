@@ -2,7 +2,6 @@
 
 import React, { useRef } from 'react';
 import { motion, useInView } from 'framer-motion';
-import Image from 'next/image';
 import Link from 'next/link';
 import { 
   ArrowRight, 
@@ -15,18 +14,11 @@ import {
   Instagram,
   Heart,
   Sparkles,
-  Users,
   BookOpen,
-  Target,
-  Award
+
 } from 'lucide-react';
 
-const stats = [
-  { icon: Users, number: '10,000+', label: 'Students Empowered' },
-  { icon: BookOpen, number: '500+', label: 'Universities Connected' },
-  { icon: Target, number: '99.9%', label: 'Platform Uptime' },
-  { icon: Award, number: '4.9/5', label: 'User Satisfaction' },
-];
+
 
 const socialLinks = [
   { icon: Twitter, href: 'https://twitter.com/iknow', label: 'Twitter', color: 'hover:text-blue-400' },
@@ -177,7 +169,7 @@ const AboutSection: React.FC = () => {
                 animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
                 transition={{ delay: 0.6, duration: 0.8 }}
               >
-                At IKnow, we believe every student deserves access to the tools and connections they need to thrive in their academic journey and beyond. We're building the future of campus life, one connection at a time.
+                At IKnow, we believe every student deserves access to the tools and connections they need to thrive in their academic journey and beyond. We&apos;re building the future of campus life, one connection at a time.
               </motion.p>
 
               {/* CTA Buttons */}

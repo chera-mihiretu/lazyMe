@@ -48,7 +48,7 @@ const features = [
   },
 ];
 
-const FeatureCard = ({ feature, index }: { feature: typeof features[0], index: number }) => {
+const FeatureCard = ({ feature }: { feature: typeof features[0] }) => {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: "-100px" });
   const Icon = feature.icon;
@@ -212,14 +212,14 @@ const UpcomingFeaturesSection: React.FC = () => {
             animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
             transition={{ delay: 0.4, duration: 0.8 }}
           >
-            We're constantly innovating to bring you cutting-edge features that will transform your academic experience. Here's what's coming next.
+            We&apos;re constantly innovating to bring you cutting-edge features that will transform your academic experience. Here&apos;s what&apos;s coming next.
           </motion.p>
         </motion.div>
 
         {/* Features Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-16">
-          {features.map((feature, index) => (
-            <FeatureCard key={feature.title} feature={feature} index={index} />
+          {features.map((feature) => (
+            <FeatureCard key={feature.title} feature={feature} />
           ))}
         </div>
 

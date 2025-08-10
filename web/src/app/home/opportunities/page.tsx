@@ -9,7 +9,6 @@ import {
   AlertCircle, 
   Users,
   TrendingUp,
-  Sparkles,
   Filter
 } from 'lucide-react';
 import dynamic from 'next/dynamic';
@@ -246,7 +245,7 @@ const OpportunitiesPage = () => {
                       animate={{ opacity: 1 }}
                       transition={{ duration: 0.3 }}
                     >
-                      {filteredJobs.length} result{filteredJobs.length !== 1 ? 's' : ''} for "{search}"
+                      {filteredJobs.length} result{filteredJobs.length !== 1 ? 's' : ''} for &quot;{search}&quot;
                     </motion.p>
                   )}
                 </div>

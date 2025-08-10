@@ -17,7 +17,7 @@ import {
   Calendar,
   ArrowRight, 
   Sparkles, 
-  CheckCircle,
+  
   AlertCircle,
   Loader2,
   Shield,
@@ -60,7 +60,7 @@ const SignUpLayout: React.FC = () => {
   const [showError, setShowError] = useState(false);
   const [passwordStrength, setPasswordStrength] = useState(0);
   const [showPassword, setShowPassword] = useState(false);
-  const [currentStep, setCurrentStep] = useState(1);
+  
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const target = e.target as HTMLInputElement | HTMLSelectElement;

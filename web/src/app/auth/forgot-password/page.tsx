@@ -154,7 +154,7 @@ const ForgotPassword: React.FC = () => {
                 <span className="bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent"> Password?</span>
               </h2>
               <p className="text-xl text-gray-300 leading-relaxed">
-                No worries! Enter your email and we'll send you a secure link to reset your password and get back to your campus journey.
+                No worries! Enter your email and we&apos;ll send you a secure link to reset your password and get back to your campus journey.
               </p>
             </motion.div>
 

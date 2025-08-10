@@ -162,7 +162,7 @@ function ResetPasswordContent() {
                 <span className="bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent"> Password</span>
               </h2>
               <p className="text-xl text-gray-300 leading-relaxed">
-                You're almost there! Create a strong, secure password to protect your account and continue your campus journey.
+                You&apos;re almost there! Create a strong, secure password to protect your account and continue your campus journey.
               </p>
             </motion.div>
 

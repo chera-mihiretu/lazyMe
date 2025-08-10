@@ -12,7 +12,6 @@ import {
   Building, 
   Check,
   Camera,
-  Plus,
   BookOpen,
   Users,
   Sparkles,
@@ -171,12 +170,7 @@ const CreatePostPage: React.FC = () => {
     }
   };
 
-  const getSelectedDepartmentNames = () => {
-    return selectedDepartments.map(id => {
-      const dept = departments.find(d => d.id === id);
-      return dept?.name || "";
-    }).filter(name => name);
-  };
+
 
   return (
     <ProtectedRoute role="student">

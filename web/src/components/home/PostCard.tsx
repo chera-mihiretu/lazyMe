@@ -8,7 +8,7 @@ import {
   Trash2, 
   Flag, 
   X, 
-  AlertTriangle,
+  
   User,
   Loader2,
   GraduationCap,
@@ -19,12 +19,15 @@ import type { Post } from "@/types/post";
 import { formatTimeAgo } from "@/app/helpers/time_formatter";
 import { getUserID } from "@/utils/auth";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 
 const PostCard: React.FC<{ post: Post }> = ({ post }) => {
   const [openImg, setOpenImg] = useState<string | null>(null);
   const [likes, setLikes] = useState(post.likes || 0);
   const [liked, setLiked] = useState(post.liked || false);
   const [likeLoading, setLikeLoading] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(false);
+  const router = useRouter();
 
   // Menu logic
   const [showMenu, setShowMenu] = useState(false);
@@ -50,6 +53,13 @@ const PostCard: React.FC<{ post: Post }> = ({ post }) => {
   }, [showMenu]);
 
   const isCurrentUser = getUserID() === post.user?.id;
+
+  // Navigation handler
+  const handleUserClick = () => {
+    if (post.user?.id) {
+      router.push(`/home/profile?id=${post.user.id}`);
+    }
+  };
 
   // Menu handlers
   const handleEdit = () => {
@@ -160,11 +170,13 @@ const PostCard: React.FC<{ post: Post }> = ({ post }) => {
             transition={{ delay: 0.1, duration: 0.6 }}
           >
             <div className="flex items-center gap-3 flex-1 min-w-0">
-              {/* Avatar */}
-              <motion.div
+              {/* Avatar - Clickable */}
+              <motion.button
                 className="relative flex-shrink-0"
                 whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
                 transition={{ duration: 0.3 }}
+                onClick={handleUserClick}
               >
                 <div className="absolute inset-0 bg-gradient-to-br from-purple-500/20 to-blue-500/20 rounded-full blur-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                 <div className="relative w-12 h-12 rounded-full overflow-hidden border-2 border-gray-200 group-hover:border-purple-300 transition-colors duration-300">
@@ -182,12 +194,17 @@ const PostCard: React.FC<{ post: Post }> = ({ post }) => {
                     </div>
                   )}
                 </div>
-              </motion.div>
+              </motion.button>
 
-              {/* User Info */}
-              <div className="flex-1 min-w-0">
+              {/* User Info - Clickable */}
+              <motion.button
+                className="flex-1 min-w-0 text-left"
+                onClick={handleUserClick}
+                whileHover={{ x: 2 }}
+                transition={{ duration: 0.2 }}
+              >
                 <div className="flex items-center gap-2 mb-1">
-                  <h4 className="font-semibold text-gray-900 text-sm truncate group-hover:text-purple-700 transition-colors duration-300">
+                  <h4 className="font-semibold text-gray-900 text-sm truncate group-hover:text-purple-700 transition-colors duration-300 cursor-pointer">
                     {post.user?.name || "Unknown"}
                   </h4>
                   {post.user?.acedemic_year && (
@@ -201,7 +218,7 @@ const PostCard: React.FC<{ post: Post }> = ({ post }) => {
                   <Clock className="w-3 h-3" />
                   <span>{formatTimeAgo(post.created_at)}</span>
                 </div>
-              </div>
+              </motion.button>
             </div>
 
             {/* Menu Button */}
@@ -266,14 +283,31 @@ const PostCard: React.FC<{ post: Post }> = ({ post }) => {
           </motion.div>
 
           {/* Content */}
-          <motion.div
-            className="text-gray-800 leading-relaxed mb-4"
+          <motion.button
+            className="text-gray-800 leading-relaxed mb-4 text-left w-full hover:bg-gray-50/50 rounded-lg p-2 -ml-2 transition-colors duration-200"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.2, duration: 0.6 }}
+            onClick={() => setIsExpanded(!isExpanded)}
+            whileHover={{ scale: 1.01 }}
+            whileTap={{ scale: 0.99 }}
           >
-            <p className="whitespace-pre-wrap">{post.content}</p>
-          </motion.div>
+            <p className={`whitespace-pre-wrap overflow-hidden transition-all duration-300 ${
+              isExpanded ? '' : 'line-clamp-2'
+            }`}>
+              {post.content}
+            </p>
+            {!isExpanded && post.content.length > 100 && (
+              <div className="text-blue-600 text-sm font-medium mt-2 hover:text-blue-700 transition-colors duration-200">
+                Click to read more...
+              </div>
+            )}
+            {isExpanded && (
+              <div className="text-blue-600 text-sm font-medium mt-2 hover:text-blue-700 transition-colors duration-200">
+                Click to show less
+              </div>
+            )}
+          </motion.button>
 
           {/* Attachments */}
           {post.post_attachments && post.post_attachments.length > 0 && (

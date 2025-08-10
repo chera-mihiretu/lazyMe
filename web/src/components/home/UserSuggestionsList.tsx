@@ -2,7 +2,6 @@ import React, { useEffect, useState, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Users, Loader2, UserPlus, ChevronRight } from "lucide-react";
 import UserCard from "@/components/home/UserCard";
-import Image from "next/image";
 
 const baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
 

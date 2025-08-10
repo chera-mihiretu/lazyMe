@@ -1,12 +1,10 @@
 "use client";
 
 import React, { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import Link from "next/link";
-import Image from "next/image";
 import { 
   BarChart3, 
-  FileText, 
   CheckSquare, 
   Building, 
   GraduationCap, 
@@ -15,7 +13,6 @@ import {
   Mail,
   Plus,
   TrendingUp,
-  Users,
   Activity,
   Sparkles
 } from 'lucide-react';

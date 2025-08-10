@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import TreeNode from "./TreeNode";
 import { MaterialNode } from "./types";
 import { University } from "@/types/university";
@@ -13,6 +14,7 @@ const MaterialsTree: React.FC = () => {
   const [expanded, setExpanded] = useState<Record<string, boolean>>({});
   const [loading, setLoading] = useState<Record<string, boolean>>({});
   const [children, setChildren] = useState<Record<string, MaterialNode[]>>({});
+  const [isInitialLoading, setIsInitialLoading] = useState(true);
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -24,7 +26,9 @@ const MaterialsTree: React.FC = () => {
         if (Array.isArray(data.universities)) {
           setTree(data.universities.map((u: University) => ({ id: u.id, name: u.name, type: "university" })));
         }
-      });
+        setIsInitialLoading(false);
+      })
+      .catch(() => setIsInitialLoading(false));
   }, []);
 
   const handleExpand = async (node: MaterialNode) => {
@@ -96,8 +100,13 @@ const MaterialsTree: React.FC = () => {
   };
 
   const renderTree = (nodes: MaterialNode[], level = 0) =>
-    nodes.map((node) => (
-      <div key={node.id}>
+    nodes.map((node, index) => (
+      <motion.div
+        key={node.id}
+        initial={{ opacity: 0, x: -20 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{ delay: index * 0.1, duration: 0.4 }}
+      >
         <TreeNode
           node={node}
           level={level}
@@ -106,19 +115,120 @@ const MaterialsTree: React.FC = () => {
           loading={!!loading[node.id]}
           childrenNodes={children[node.id]}
         />
-        {expanded[node.id] && children[node.id] && renderTree(children[node.id], level + 1)}
-      </div>
+        <AnimatePresence>
+          {expanded[node.id] && children[node.id] && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+              exit={{ opacity: 0, height: 0 }}
+              transition={{ duration: 0.3, ease: "easeInOut" }}
+              className="overflow-hidden"
+            >
+              {renderTree(children[node.id], level + 1)}
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </motion.div>
     ));
 
+  if (isInitialLoading) {
+    return (
+      <motion.div
+        className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg border border-white/20 p-8"
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.5 }}
+      >
+        <div className="flex items-center justify-center space-x-3">
+          <motion.div
+            className="w-6 h-6 bg-gradient-to-r from-purple-500 to-blue-500 rounded-full"
+            animate={{ scale: [1, 1.2, 1], rotate: [0, 180, 360] }}
+            transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+          />
+          <motion.div
+            className="w-5 h-5 bg-gradient-to-r from-blue-500 to-indigo-500 rounded-full"
+            animate={{ scale: [1, 1.3, 1], rotate: [0, -180, -360] }}
+            transition={{ duration: 2, repeat: Infinity, ease: "easeInOut", delay: 0.2 }}
+          />
+          <motion.div
+            className="w-4 h-4 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full"
+            animate={{ scale: [1, 1.4, 1], rotate: [0, 180, 360] }}
+            transition={{ duration: 2, repeat: Infinity, ease: "easeInOut", delay: 0.4 }}
+          />
+        </div>
+        <motion.p
+          className="text-center text-gray-600 mt-4 text-base"
+          animate={{ opacity: [0.5, 1, 0.5] }}
+          transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+        >
+          Loading universities...
+        </motion.p>
+      </motion.div>
+    );
+  }
+
   return (
-    <div style={{ maxWidth: 1200, margin: "3rem auto", background: "#fff", borderRadius: 16, boxShadow: "0 2px 16px #4320d10a", padding: 32 }}>
-      <h2 style={{ fontWeight: 700, fontSize: 24, marginBottom: 24 }}>Materials</h2>
+    <motion.div
+      className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg border border-white/20 p-6"
+      initial={{ opacity: 0, scale: 0.95 }}
+      animate={{ opacity: 1, scale: 1 }}
+      transition={{ duration: 0.6 }}
+    >
+      {/* Header with gradient and icon */}
+      <motion.div
+        className="flex items-center gap-3 mb-6 pb-4 border-b border-gray-200/50"
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.2, duration: 0.5 }}
+      >
+        <motion.div
+          className="w-10 h-10 bg-gradient-to-br from-purple-500 to-blue-600 rounded-xl flex items-center justify-center shadow-md"
+          whileHover={{ scale: 1.05, rotate: 5 }}
+          transition={{ type: "spring", stiffness: 300 }}
+        >
+          <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+          </svg>
+        </motion.div>
+        <div>
+          <h2 className="text-xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
+            Course Materials
+          </h2>
+          <p className="text-gray-500 text-sm mt-0.5">Browse by university and department</p>
+        </div>
+      </motion.div>
+
+      {/* Tree Content */}
+      <motion.div
+        className="space-y-1.5"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.4, duration: 0.6 }}
+      >
       {tree.length === 0 ? (
-        <div style={{ color: "#888", textAlign: "center", marginTop: 40 }}>No universities found.</div>
+          <motion.div
+            className="text-center py-12"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3, duration: 0.5 }}
+          >
+            <motion.div
+              className="w-16 h-16 bg-gradient-to-br from-gray-200 to-gray-300 rounded-full mx-auto mb-4 flex items-center justify-center"
+              animate={{ rotate: [0, 10, -10, 0] }}
+              transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+            >
+              <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+            </motion.div>
+            <p className="text-gray-500 text-base">No universities found.</p>
+            <p className="text-gray-400 text-sm mt-1">Please check your connection and try again.</p>
+          </motion.div>
       ) : (
         renderTree(tree)
       )}
-    </div>
+      </motion.div>
+    </motion.div>
   );
 };
 

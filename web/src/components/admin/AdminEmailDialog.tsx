@@ -41,8 +41,9 @@ const AdminEmailDialog: React.FC<AdminEmailDialogProps> = ({ open, onClose }) =>
       console.log(data);
       if (data.improved_email.subject) setSubject(data.improved_email.subject);
       if (data.improved_email.body) setBody(data.improved_email.body);
-    } catch (e:any) {
-      setError('Error improving email ' + e.message);
+    } catch (e) {
+      console.error(e);
+      setError('Error improving email ');
     } finally {
       setImproving(false);
     }
@@ -75,8 +76,9 @@ const AdminEmailDialog: React.FC<AdminEmailDialogProps> = ({ open, onClose }) =>
         const errData = await res.json().catch(() => ({}));
         throw new Error(errData.message || 'Failed to send email');
       }
-    } catch (e:any) {
-      setError('Error sending email ' + e.message);
+    } catch (e) {
+      console.error(e);
+      setError('Error sending email ');
     } finally {
       setSending(false);
     }

@@ -4,7 +4,6 @@
 import React, { useRef } from 'react';
 import { motion, useInView } from 'framer-motion';
 import { Shield, Layers, Users, CheckCircle, Star, ArrowRight, Sparkles } from 'lucide-react';
-import Image from 'next/image';
 
 const benefits = [
   {
@@ -89,7 +88,7 @@ const WhyChooseIKnow: React.FC = () => {
                 animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
                 transition={{ delay: 0.4, duration: 0.8 }}
               >
-                IKnow is more than just a platform—it's your comprehensive companion for university life. Discover a smarter, more connected way to thrive in your academic journey.
+                IKnow is more than just a platform—it&apos;s your comprehensive companion for university life. Discover a smarter, more connected way to thrive in your academic journey.
               </motion.p>
             </div>
 

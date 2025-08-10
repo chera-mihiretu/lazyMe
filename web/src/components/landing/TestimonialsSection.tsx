@@ -2,7 +2,6 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import { motion, useInView, AnimatePresence } from 'framer-motion';
-import Image from 'next/image';
 import { ChevronLeft, ChevronRight, Star, Quote, Users, ArrowRight, Sparkles } from 'lucide-react';
 
 const testimonials = [
@@ -94,7 +93,7 @@ const TestimonialCard = ({ testimonial, isActive }: { testimonial: typeof testim
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.4, duration: 0.6 }}
         >
-          "{testimonial.text}"
+          &quot;{testimonial.text}&quot;
         </motion.p>
 
         {/* User Info */}

@@ -6,7 +6,6 @@ import {
   Briefcase, 
   FileText, 
   Link as LinkIcon, 
-  Building, 
   Send, 
   Loader2, 
   AlertCircle, 
@@ -257,7 +256,7 @@ const CreateJobPage: React.FC = () => {
                   </div>
                   <div>
                     <label className="text-lg font-semibold text-gray-900">Job Title</label>
-                    <p className="text-sm text-gray-600">What's the position called?</p>
+                    <p className="text-sm text-gray-600">What&apos;s the position called?</p>
                   </div>
                 </div>
                 <motion.input

@@ -12,7 +12,7 @@ import {
   BookOpen, 
   ArrowRight, 
   Sparkles, 
-  CheckCircle,
+  
   AlertCircle,
   Loader2,
   User,

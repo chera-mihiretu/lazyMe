@@ -9,7 +9,6 @@ import Link from 'next/link';
 import { 
   CheckCircle, 
   ArrowRight, 
-  Sparkles, 
   Shield,
   Clock,
   Zap

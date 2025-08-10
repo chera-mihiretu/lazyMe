@@ -32,3 +32,36 @@ export function useUserPosts(page: number = 1) {
 
   return { posts, loading, error };
 }
+
+export function useOtherUserPosts(page: number = 1, id: string) {
+  const [posts, setPosts] = useState<Post[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    async function fetchPosts() {
+      setLoading(true);
+      setError("");
+      try {
+        const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
+        const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/posts/user/?id=${id}&page=${page}`, {
+          headers: { Authorization: token ? `Bearer ${token}` : "" },
+        });
+        const data = await res.json();
+        if (res.ok && Array.isArray(data.posts)) {
+          setPosts(data.posts);
+          console.log(data, id, page);
+        } else {
+          setError("Failed to load posts.");
+        }
+      } catch (err) {
+        setError("Network error. Please try again." + err);
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchPosts();
+  }, [page, id]);
+
+  return { posts, loading, error };
+}
