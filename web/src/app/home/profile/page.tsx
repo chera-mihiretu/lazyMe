@@ -52,6 +52,7 @@ const ProfilePageContent: React.FC = () => {
   const isOwnProfile = !profileId || profileId === currentUserId;
 
   const [page, setPage] = useState(1);
+  setPage(1)
   const { user: currentUser } = useUserProfile();
   const { posts: ownPosts, loading: ownPostsLoading, error: ownPostsError } = useUserPosts(page);
   const { posts: otherPosts, loading: otherPostsLoading, error: otherPostsError } = useOtherUserPosts(page, profileId || '');
