@@ -15,64 +15,55 @@ func SendVerificationEmail(to, token string) error {
 	email_password := os.Getenv("EMAIL_PASSWORD")
 	base_url := os.Getenv("BASE_URL")
 
-	subject := "Email Verification"
+	subject := "Email Verification - IKnow"
 	body := fmt.Sprintf(`<!DOCTYPE html>
 <html lang="en">
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>Lazyme - Email Verification</title>
-	<style>
-		body {
-			font-family: Arial, sans-serif;
-			background: linear-gradient(135deg, #0088ff, #ffffff);
-			color: black;
-			text-align: center;
-			padding: 50px;
-		}
-		.container {
-			background-color: #ffffff;
-			border: 2px solid #0088ff;
-			border-radius: 12px;
-			padding: 30px;
-			display: inline-block;
-			box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-		}
-		h1 {
-			font-size: 2.5rem;
-			color: #0088ff;
-			margin-bottom: 10px;
-		}
-		p {
-			font-size: 1.2rem;
-			color: black;
-			margin-bottom: 20px;
-		}
-		.verify-btn {
-			background: #0088ff;
-			color: white;
-			font-size: 1rem;
-			padding: 15px 30px;
-			border: none;
-			border-radius: 8px;
-			cursor: pointer;
-			text-decoration: none;
-			transition: background 0.3s ease;
-		}
-		.verify-btn:hover {
-			background: #005fbb;
-		}
-	</style>
+	<title>IKnow - Email Verification</title>
 </head>
-<body>
-	<div class="container">
-		<h1>Lazyme</h1>
-		<p>To verify your email please click the button below</p>
-		<a href="%s/api/auth/email/verify-email?token=%s" class="verify-btn">Verify Your Account</a>
-	</div>
+<body style="margin: 0; padding: 0; font-family: Arial, sans-serif; background-color: #f4f4f4;">
+	<table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%%" style="background-color: #f4f4f4;">
+		<tr>
+			<td align="center" style="padding: 40px 20px;">
+				<table role="presentation" cellspacing="0" cellpadding="0" border="0" width="600" style="max-width: 600px; background-color: #ffffff; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); overflow: hidden;">
+					<!-- Header with gradient bar -->
+					<tr>
+						<td style="height: 6px; background: linear-gradient(90deg, #9333ea 0%%, #3b82f6 100%%);"></td>
+					</tr>
+					
+					<!-- Logo and title section -->
+					<tr>
+						<td style="padding: 40px 40px 20px 40px; text-align: center;">
+							<div style="width: 80px; height: 80px; background: linear-gradient(135deg, #9333ea 0%%, #3b82f6 100%%); border-radius: 20px; display: inline-block; margin-bottom: 24px; line-height: 80px; font-size: 32px; font-weight: bold; color: white; font-family: Arial, sans-serif;">
+								IK
+							</div>
+							<h1 style="margin: 0 0 16px 0; font-size: 32px; font-weight: 700; color: #1f2937; font-family: Arial, sans-serif;">Welcome to IKnow</h1>
+							<p style="margin: 0; font-size: 18px; color: #6b7280; line-height: 1.6; font-family: Arial, sans-serif;">To complete your account setup and start connecting with your campus community, please verify your email address.</p>
+						</td>
+					</tr>
+					
+					<!-- Button section -->
+					<tr>
+						<td style="padding: 0 40px 30px 40px; text-align: center;">
+							<a href="%s/api/auth/email/verify-email?token=%s" style="display: inline-block; background: linear-gradient(135deg, #9333ea 0%%, #3b82f6 100%%); color: white; font-size: 16px; font-weight: 600; padding: 16px 32px; text-decoration: none; border-radius: 12px; font-family: Arial, sans-serif;">Verify Your Account</a>
+						</td>
+					</tr>
+					
+					<!-- Footer section -->
+					<tr>
+						<td style="padding: 30px 40px 40px 40px; border-top: 1px solid #e5e7eb; text-align: center;">
+							<p style="margin: 0 0 8px 0; font-size: 14px; color: #9ca3af; line-height: 1.5; font-family: Arial, sans-serif;">If you didn't create an account with IKnow, you can safely ignore this email.</p>
+							<p style="margin: 0; font-size: 14px; color: #9ca3af; line-height: 1.5; font-family: Arial, sans-serif;">This link will expire in 24 hours for security reasons.</p>
+						</td>
+					</tr>
+				</table>
+			</td>
+		</tr>
+	</table>
 </body>
-</html>
-`, base_url, token)
+</html>`, base_url, token)
 
 	m := gomail.NewMessage()
 	m.SetHeader("From", from)
@@ -94,64 +85,55 @@ func SendPasswordResetEmail(to, token string) error {
 	email_password := os.Getenv("EMAIL_PASSWORD")
 	front_url := os.Getenv("FRONT_BASE_URL")
 
-	subject := "Password Reset Request"
+	subject := "Password Reset Request - IKnow"
 	body := fmt.Sprintf(`<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lazyme - Password Reset</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background: linear-gradient(135deg, #0088ff, #ffffff);
-            color: black;
-            text-align: center;
-            padding: 50px;
-        }
-        .container {
-            background-color: #ffffff;
-            border: 2px solid #0088ff;
-            border-radius: 12px;
-            padding: 30px;
-            display: inline-block;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-        }
-        h1 {
-            font-size: 2.5rem;
-            color: #0088ff;
-            margin-bottom: 10px;
-        }
-        p {
-            font-size: 1.2rem;
-            color: black;
-            margin-bottom: 20px;
-        }
-        .reset-btn {
-            background: #0088ff;
-            color: white;
-            font-size: 1rem;
-            padding: 15px 30px;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            text-decoration: none;
-            transition: background 0.3s ease;
-        }
-        .reset-btn:hover {
-            background: #005fbb;
-        }
-    </style>
+    <title>IKnow - Password Reset</title>
 </head>
-<body>
-    <div class="container">
-        <h1>Lazyme</h1>
-        <p>To reset your password, please click the button below</p>
-        <a href="%s/auth/reset-password?token=%s" class="reset-btn">Reset Your Password</a>
-    </div>
+<body style="margin: 0; padding: 0; font-family: Arial, sans-serif; background-color: #f4f4f4;">
+	<table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%%" style="background-color: #f4f4f4;">
+		<tr>
+			<td align="center" style="padding: 40px 20px;">
+				<table role="presentation" cellspacing="0" cellpadding="0" border="0" width="600" style="max-width: 600px; background-color: #ffffff; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); overflow: hidden;">
+					<!-- Header with gradient bar -->
+					<tr>
+						<td style="height: 6px; background: linear-gradient(90deg, #9333ea 0%%, #3b82f6 100%%);"></td>
+					</tr>
+					
+					<!-- Logo and title section -->
+					<tr>
+						<td style="padding: 40px 40px 20px 40px; text-align: center;">
+							<div style="width: 80px; height: 80px; background: linear-gradient(135deg, #9333ea 0%%, #3b82f6 100%%); border-radius: 20px; display: inline-block; margin-bottom: 24px; line-height: 80px; font-size: 32px; font-weight: bold; color: white; font-family: Arial, sans-serif;">
+								IK
+							</div>
+							<h1 style="margin: 0 0 16px 0; font-size: 32px; font-weight: 700; color: #1f2937; font-family: Arial, sans-serif;">Reset Your Password</h1>
+							<p style="margin: 0; font-size: 18px; color: #6b7280; line-height: 1.6; font-family: Arial, sans-serif;">We received a request to reset your password. Click the button below to create a new secure password for your IKnow account.</p>
+						</td>
+					</tr>
+					
+					<!-- Button section -->
+					<tr>
+						<td style="padding: 0 40px 30px 40px; text-align: center;">
+							<a href="%s/auth/reset-password?token=%s" style="display: inline-block; background: linear-gradient(135deg, #9333ea 0%%, #3b82f6 100%%); color: white; font-size: 16px; font-weight: 600; padding: 16px 32px; text-decoration: none; border-radius: 12px; font-family: Arial, sans-serif;">Reset Your Password</a>
+						</td>
+					</tr>
+					
+					<!-- Footer section -->
+					<tr>
+						<td style="padding: 30px 40px 40px 40px; border-top: 1px solid #e5e7eb; text-align: center;">
+							<p style="margin: 0 0 8px 0; font-size: 14px; color: #9ca3af; line-height: 1.5; font-family: Arial, sans-serif;">If you didn't request a password reset, you can safely ignore this email.</p>
+							<p style="margin: 0; font-size: 14px; color: #9ca3af; line-height: 1.5; font-family: Arial, sans-serif;">This link will expire in 1 hour for security reasons.</p>
+						</td>
+					</tr>
+				</table>
+			</td>
+		</tr>
+	</table>
 </body>
-</html>
-`, front_url, token)
+</html>`, front_url, token)
 
 	m := gomail.NewMessage()
 	m.SetHeader("From", from)
@@ -178,10 +160,10 @@ func SendEmailToUsers(to string, subject, content string) error {
 	email_password := os.Getenv("EMAIL_PASSWORD")
 	front_url := os.Getenv("FRONT_BASE_URL")
 	if subject == "" {
-		subject = "New Feature Just Landed"
+		subject = "New Feature Just Landed - IKnow"
 	}
 	if content == "" {
-		content = "We just launched something new to enhance your experience. Click below to explore it now."
+		content = "We just launched something new to enhance your campus experience. Click below to explore it now."
 	}
 
 	// Build body template once (content & button text injected)
@@ -190,30 +172,53 @@ func SendEmailToUsers(to string, subject, content string) error {
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Lazyme - New Feature</title>
-<style>
-  body {font-family: Arial, sans-serif; background: linear-gradient(135deg,#0088ff,#ffffff); color:#000; text-align:center; padding:50px; margin:0;}
-  .container {background:#ffffff; border:2px solid #0088ff; border-radius:12px; padding:30px; display:inline-block; max-width:560px; box-shadow:0 4px 10px rgba(0,0,0,0.1);}
-  h1 {font-size:2.2rem; color:#0088ff; margin:0 0 12px;}
-  p {font-size:1.05rem; line-height:1.5; margin:0 0 22px;}
-  .feature-btn {background:#0088ff; color:#fff; font-size:1rem; padding:15px 32px; border:none; border-radius:8px; cursor:pointer; text-decoration:none; font-weight:600; letter-spacing:.3px; transition:background .3s ease; display:inline-block;}
-  .feature-btn:hover {background:#005fbb;}
-  .link-fallback {margin-top:28px; font-size:0.75rem; color:#444; word-break:break-all;}
-</style>
+<title>IKnow - New Feature</title>
 </head>
-<body>
-  <div class="container">
-    <h1>New Feature Released</h1>
-    <p>%s</p>
-    <a href="%s" class="feature-btn" target="_blank" rel="noopener">%s</a>
-    <div class="link-fallback">If the button does not work, copy & paste this link:<br />%s</div>
-  </div>
+<body style="margin: 0; padding: 0; font-family: Arial, sans-serif; background-color: #f4f4f4;">
+	<table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%%" style="background-color: #f4f4f4;">
+		<tr>
+			<td align="center" style="padding: 40px 20px;">
+				<table role="presentation" cellspacing="0" cellpadding="0" border="0" width="600" style="max-width: 600px; background-color: #ffffff; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); overflow: hidden;">
+					<!-- Header with gradient bar -->
+					<tr>
+						<td style="height: 6px; background: linear-gradient(90deg, #9333ea 0%%, #3b82f6 100%%);"></td>
+					</tr>
+					
+					<!-- Logo and title section -->
+					<tr>
+						<td style="padding: 40px 40px 20px 40px; text-align: center;">
+							<div style="width: 80px; height: 80px; background: linear-gradient(135deg, #9333ea 0%%, #3b82f6 100%%); border-radius: 20px; display: inline-block; margin-bottom: 24px; line-height: 80px; font-size: 32px; font-weight: bold; color: white; font-family: Arial, sans-serif;">
+								IK
+							</div>
+							<h1 style="margin: 0 0 16px 0; font-size: 32px; font-weight: 700; color: #1f2937; font-family: Arial, sans-serif;">New Feature Released</h1>
+							<p style="margin: 0; font-size: 18px; color: #6b7280; line-height: 1.6; font-family: Arial, sans-serif;">%s</p>
+						</td>
+					</tr>
+					
+					<!-- Button section -->
+					<tr>
+						<td style="padding: 0 40px 30px 40px; text-align: center;">
+							<a href="%s" style="display: inline-block; background: linear-gradient(135deg, #9333ea 0%%, #3b82f6 100%%); color: white; font-size: 16px; font-weight: 600; padding: 16px 32px; text-decoration: none; border-radius: 12px; font-family: Arial, sans-serif;">Try It Now</a>
+						</td>
+					</tr>
+					
+					<!-- Footer section -->
+					<tr>
+						<td style="padding: 30px 40px 40px 40px; border-top: 1px solid #e5e7eb; text-align: center;">
+							<p style="margin: 0 0 8px 0; font-size: 14px; color: #9ca3af; line-height: 1.5; font-family: Arial, sans-serif;">Stay tuned for more exciting updates from IKnow!</p>
+							<p style="margin: 0; font-size: 14px; color: #9ca3af; line-height: 1.5; font-family: Arial, sans-serif;">If the button doesn't work, copy & paste this link: %s</p>
+						</td>
+					</tr>
+				</table>
+			</td>
+		</tr>
+	</table>
 </body>
 </html>`
 
 	d := gomail.NewDialer("smtp.gmail.com", 587, from, email_password)
 
-	body := fmt.Sprintf(bodyTemplate, content, front_url, "Try It", front_url)
+	body := fmt.Sprintf(bodyTemplate, content, front_url, front_url)
 	m := gomail.NewMessage()
 	m.SetHeader("From", from)
 	m.SetHeader("To", to)
