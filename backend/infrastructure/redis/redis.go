@@ -1,6 +1,7 @@
 package redis
 
 import (
+	"log"
 	"os"
 	"strconv"
 
@@ -28,6 +29,8 @@ func RedisClient() *asynq.Client {
 			db = v
 		}
 	}
+
+	log.Println("Connecting to Redis at", addr, "with DB", db, "and password", password)
 
 	client := asynq.NewClient(asynq.RedisClientOpt{
 		Addr:     addr,

@@ -2,6 +2,7 @@ package redis
 
 import (
 	"context"
+	"crypto/tls"
 	"encoding/json"
 	"log"
 	"os"
@@ -14,10 +15,20 @@ import (
 )
 
 func RateLimiter() {
-	redisAdress := os.Getenv("REDIS_ADDRESS")
+	redisAddress := os.Getenv("REDIS_ADDR")      // e.g., redis-11889.c239.us-east-1-2.ec2.redns.redis-cloud.com:11889
+	redisUsername := os.Getenv("REDIS_USERNAME") // e.g., default
+	redisPassword := os.Getenv("REDIS_PASSWORD") // From Redis Cloud dashboard
+	redisDB := 0                                 // Default DB, adjust if needed (convert to int if stored as string)
+
 	server := asynq.NewServer(
 		asynq.RedisClientOpt{
-			Addr: redisAdress,
+			Addr:     redisAddress,
+			Username: redisUsername,
+			Password: redisPassword,
+			DB:       redisDB,
+			TLSConfig: &tls.Config{
+				InsecureSkipVerify: true, // Use true for testing; false in production with proper CA cert
+			},
 		},
 		asynq.Config{
 			Concurrency: 10,
@@ -28,7 +39,6 @@ func RateLimiter() {
 	)
 
 	mux := asynq.NewServeMux()
-
 	limiter := rate.NewLimiter(rate.Limit(5), 5)
 
 	mux.HandleFunc(constants.TypeSendEmail, func(ctx context.Context, t *asynq.Task) error {
@@ -36,7 +46,6 @@ func RateLimiter() {
 		if err := json.Unmarshal(t.Payload(), &p); err != nil {
 			return err
 		}
-
 		if err := limiter.Wait(ctx); err != nil {
 			return err
 		}
@@ -45,15 +54,11 @@ func RateLimiter() {
 		}
 		log.Printf("Email sent to %s with subject: %s", p.To, p.Subject)
 		return nil
-
 	})
 
 	if err := server.Start(mux); err != nil {
-
-		log.Printf("could not start server: %v", err)
 		log.Fatalf("could not start server: %v", err)
 	}
 
 	log.Println("✅✅✅✅ Rate limiter started successfully ")
-
 }

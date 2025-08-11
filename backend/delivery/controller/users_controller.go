@@ -120,9 +120,42 @@ func (c *UserController) CompleteUser(ctx *gin.Context) {
 		})
 		return
 	}
+	files := form.File["files"]
+	if len(files) > 3 {
+		fmt.Println("You can only upload a maximum of 3 files")
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"error": "No files uploaded",
+		})
+		return
+	}
+	if len(files) != 0 {
+		// Validate that all uploaded files are images
+		for _, file := range files {
+			contentType := file.Header.Get("Content-Type")
+			if contentType != "image/jpeg" && contentType != "image/png" && contentType != "image/gif" {
+				fmt.Println("Only image files are allowed. Got:", contentType)
+				ctx.JSON(http.StatusBadRequest, gin.H{
+					"error": "Only image files are allowed",
+				})
+				return
+			}
+		}
+		// TODO : Implement the data storage
+		urls, err := c.storage.UploadFile(files)
+		if err != nil {
+			fmt.Println("Failed to upload files:", err)
+			ctx.JSON(http.StatusInternalServerError, gin.H{
+				"error":   "Failed to upload files",
+				"details": err.Error(),
+			})
+			return
+		}
+		user.ProfileImageURL = urls[0] // Assuming the first file is the profile image
+	}
 
 	uploadedUser, err := c.usecase.CompleteUser(ctx, user)
 	if err != nil {
+		c.storage.DeleteFile([]string{user.ProfileImageURL}) // Clean up if user creation fails
 		fmt.Println("Failed to complete user:", err)
 		ctx.JSON(http.StatusInternalServerError, gin.H{
 			"error":   "Failed to complete user",

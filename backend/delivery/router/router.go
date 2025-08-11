@@ -38,7 +38,7 @@ func SetupRoutes(
 	r := gin.New()
 	r.Use(gin.Logger(), gin.Recovery())
 	corsConfig := cors.Config{
-		AllowOrigins:     []string{os.Getenv("FRONT_BASE_URL")},
+		AllowOrigins:     []string{"*"}, //[]string{os.Getenv("FRONT_BASE_URL")},
 		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
 		AllowHeaders:     []string{"Origin", "Content-Type", "Authorization"},
 		ExposeHeaders:    []string{"Content-Length"},
@@ -189,6 +189,9 @@ func SetupRoutes(
 		c.JSON(200, gin.H{
 			"message": "Server is running",
 		})
+	})
+	r.GET("/", func(c *gin.Context) {
+		c.JSON(200, gin.H{"message": "Server is running"})
 	})
 
 	return r
