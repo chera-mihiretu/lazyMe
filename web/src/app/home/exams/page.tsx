@@ -83,15 +83,15 @@ const ExamsPage = () => {
         <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-8">
           {/* Header Section - Similar to Materials/Opportunity Page */}
           <motion.div
-            className="mb-8"
+            className="mb-6 sm:mb-8"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
           >
             {/* Page Title */}
-            <div className="flex items-center gap-4 mb-6">
+            <div className="flex items-center gap-3 sm:gap-4 mb-4 sm:mb-6">
               <motion.div
-                className="w-12 h-12 rounded-2xl bg-gradient-to-br from-indigo-500 to-indigo-600 p-3 shadow-lg"
+                className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-gradient-to-br from-indigo-500 to-indigo-600 p-2.5 sm:p-3 shadow-lg"
                 initial={{ scale: 0 }}
                 animate={{ scale: 1 }}
                 transition={{ delay: 0.2, duration: 0.3 }}
@@ -99,16 +99,16 @@ const ExamsPage = () => {
                 <FileText className="w-full h-full text-white" />
               </motion.div>
               <div>
-                <h1 className="text-3xl font-bold text-gray-900">Past Exams</h1>
-                <p className="text-gray-600 mt-1">Access past exams, practice questions, and exam resources</p>
+                <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Past Exams</h1>
+                <p className="text-gray-600 mt-0.5 sm:mt-1 text-sm sm:text-base">Access past exams, practice questions, and exam resources</p>
               </div>
               <motion.div
-                className="ml-auto inline-flex items-center px-3 py-1.5 rounded-full bg-indigo-100 border border-indigo-200 text-indigo-700 text-sm font-medium"
+                className="ml-auto inline-flex items-center px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full bg-indigo-100 border border-indigo-200 text-indigo-700 text-xs sm:text-sm font-medium"
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ delay: 0.4, duration: 0.6 }}
               >
-                <TrendingUp className="w-4 h-4 mr-2" />
+                <TrendingUp className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1.5 sm:mr-2" />
                 Exams Available
               </motion.div>
             </div>
