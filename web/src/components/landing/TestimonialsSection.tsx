@@ -6,47 +6,38 @@ import { ChevronLeft, ChevronRight, Star, Quote, Users, ArrowRight, Sparkles } f
 
 const testimonials = [
 	{
-    text: 'IKnow completely transformed my university experience. The platform made it so easy to connect with peers, find study resources, and stay updated with campus events. My academic performance has improved significantly!',
+    text: 'IKnow is a thoughtfully designed and efficiently developed system that saves you significant time by eliminating the need to search across various social media platforms for a single resource. Its well-organized structure makes it nearly impossible to lose track of what you need!',
 		name: 'Chera Mihiretu',
     affiliation: 'Software Engineering Student, ASTU',
 		photo: '/my.png',
     rating: 5,
-    course: 'Computer Science',
-    year: '3rd Year',
+    course: 'Software Engineering',
+    year: '5th Year',
   },
   {
-    text: 'The networking features are incredible! I found my current study group through IKnow, and we\'ve been collaborating on projects ever since. It\'s like having a personal academic assistant.',
-    name: 'Sarah Johnson',
-    affiliation: 'Business Administration, Stanford University',
-    photo: '/testimonials/sarah.jpg',
+    text: 'I\'ve always wanted to share opportunities with students globally, and now I can do so effortlessly, ensuring the right students receive them. Additionally, connecting and sharing ideas with fellow students is one of the most rewarding experiences.',
+    name: 'Tamirat Kebede',
+    affiliation: 'Software Engineering Student, ASTU',
+    photo: '/testimonials/tamirat.jpg',
     rating: 5,
-    course: 'Business',
-    year: '2nd Year',
+    course: 'Software Engineering',
+    year: '5th Year',
   },
   {
-    text: 'As an international student, IKnow helped me integrate into campus life seamlessly. The announcements feature kept me informed, and I discovered amazing opportunities I wouldn\'t have known about otherwise.',
-    name: 'Ahmed Hassan',
-    affiliation: 'Engineering Student, MIT',
-    photo: '/testimonials/ahmed.jpg',
+    text: 'Connecting with others who share your life and career interests is always exciting, as it simplifies finding what people in your field are discovering. IKnow makes this seamless by helping you connect with like-minded individuals in your industry.',
+    name: 'Abenezer Terefe',
+    affiliation: 'Civil Engineering Student, ASTU',
+    photo: '/testimonials/abenezer.jpg',
     rating: 5,
-    course: 'Engineering',
+    course: 'Civil Engineering',
     year: '4th Year',
-  },
-  {
-    text: 'The study resources section is a game-changer. I can access notes, guides, and materials shared by other students in my field. It saved me countless hours of research and preparation.',
-    name: 'Maria Rodriguez',
-    affiliation: 'Pre-Med Student, Harvard University',
-    photo: '/testimonials/maria.jpg',
-    rating: 5,
-    course: 'Pre-Medicine',
-    year: '1st Year',
   },
 ];
 
 const TestimonialCard = ({ testimonial, isActive }: { testimonial: typeof testimonials[0], isActive: boolean }) => {
   return (
     <motion.div
-      className={`relative bg-white rounded-3xl p-8 lg:p-12 shadow-2xl border border-gray-100 overflow-hidden ${
+      className={`relative bg-white rounded-2xl sm:rounded-3xl p-4 sm:p-6 lg:p-8 xl:p-12 shadow-2xl border border-gray-100 overflow-hidden ${
         isActive ? 'scale-100 opacity-100' : 'scale-95 opacity-70'
       } transition-all duration-500`}
       whileHover={{ y: -5 }}
@@ -57,18 +48,18 @@ const TestimonialCard = ({ testimonial, isActive }: { testimonial: typeof testim
       
       {/* Quote Icon */}
       <motion.div
-        className="absolute top-6 left-8 text-purple-200"
+        className="absolute top-3 sm:top-4 lg:top-6 left-4 sm:left-6 lg:left-8 text-purple-200"
         initial={{ scale: 0, rotate: -180 }}
         animate={{ scale: 1, rotate: 0 }}
         transition={{ delay: 0.2, duration: 0.6 }}
       >
-        <Quote className="w-12 h-12" />
+        <Quote className="w-8 h-8 sm:w-10 sm:h-10 lg:w-12 lg:h-12" />
       </motion.div>
 
       <div className="relative z-10">
         {/* Rating Stars */}
         <motion.div
-          className="flex items-center mb-6"
+          className="flex items-center mb-4 sm:mb-6"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3, duration: 0.6 }}
@@ -80,15 +71,15 @@ const TestimonialCard = ({ testimonial, isActive }: { testimonial: typeof testim
               animate={{ opacity: 1, scale: 1 }}
               transition={{ delay: 0.4 + i * 0.1, duration: 0.3 }}
             >
-              <Star className="w-5 h-5 text-yellow-400 fill-current" />
+              <Star className="w-4 h-4 sm:w-5 sm:h-5 text-yellow-400 fill-current" />
             </motion.div>
           ))}
-          <span className="ml-2 text-sm text-gray-600 font-medium">5.0</span>
+          <span className="ml-2 text-xs sm:text-sm text-gray-600 font-medium">5.0</span>
         </motion.div>
 
         {/* Testimonial Text */}
         <motion.p
-          className="text-lg lg:text-xl text-gray-700 leading-relaxed mb-8 font-medium italic"
+          className="text-sm sm:text-base lg:text-lg xl:text-xl text-gray-700 leading-relaxed mb-6 sm:mb-8 font-medium italic"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.4, duration: 0.6 }}
@@ -104,27 +95,27 @@ const TestimonialCard = ({ testimonial, isActive }: { testimonial: typeof testim
           transition={{ delay: 0.5, duration: 0.6 }}
         >
           <div className="relative">
-            <div className="w-16 h-16 rounded-full overflow-hidden border-4 border-white shadow-lg">
+            <div className="w-12 h-12 sm:w-14 sm:h-14 lg:w-16 lg:h-16 rounded-full overflow-hidden border-2 sm:border-3 lg:border-4 border-white shadow-lg">
               <div className="w-full h-full bg-gradient-to-br from-purple-400 to-blue-400 flex items-center justify-center">
-                <span className="text-white font-bold text-lg">
+                <span className="text-white font-bold text-sm sm:text-base lg:text-lg">
                   {testimonial.name.split(' ').map(n => n[0]).join('')}
 		</span>
               </div>
             </div>
             <motion.div
-              className="absolute -bottom-1 -right-1 w-6 h-6 bg-green-500 rounded-full border-2 border-white flex items-center justify-center"
+              className="absolute -bottom-1 -right-1 w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6 bg-green-500 rounded-full border-2 border-white flex items-center justify-center"
               animate={{ scale: [1, 1.2, 1] }}
               transition={{ duration: 2, repeat: Infinity }}
             >
-              <div className="w-2 h-2 bg-white rounded-full"></div>
+              <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-white rounded-full"></div>
             </motion.div>
 			</div>
 
-          <div className="ml-4">
-            <h4 className="font-bold text-gray-900 text-lg">{testimonial.name}</h4>
-            <p className="text-purple-600 font-medium text-sm">{testimonial.affiliation}</p>
-            <div className="flex items-center mt-1">
-              <span className="text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded-full mr-2">
+          <div className="ml-3 sm:ml-4">
+            <h4 className="font-bold text-gray-900 text-sm sm:text-base lg:text-lg">{testimonial.name}</h4>
+            <p className="text-purple-600 font-medium text-xs sm:text-sm">{testimonial.affiliation}</p>
+            <div className="flex items-center mt-1 gap-1 sm:gap-2">
+              <span className="text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded-full">
                 {testimonial.course}
               </span>
               <span className="text-xs bg-purple-100 text-purple-700 px-2 py-1 rounded-full">
@@ -136,8 +127,8 @@ const TestimonialCard = ({ testimonial, isActive }: { testimonial: typeof testim
       </div>
 
       {/* Decorative Elements */}
-      <div className="absolute top-4 right-4 w-20 h-20 bg-gradient-to-br from-purple-200/20 to-blue-200/20 rounded-full blur-xl"></div>
-      <div className="absolute bottom-4 left-4 w-16 h-16 bg-gradient-to-br from-blue-200/20 to-purple-200/20 rounded-full blur-xl"></div>
+      <div className="absolute top-2 sm:top-4 right-2 sm:right-4 w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-br from-purple-200/20 to-blue-200/20 rounded-full blur-xl"></div>
+      <div className="absolute bottom-2 sm:bottom-4 left-2 sm:left-4 w-12 h-12 sm:w-16 sm:h-16 bg-gradient-to-br from-blue-200/20 to-purple-200/20 rounded-full blur-xl"></div>
     </motion.div>
   );
 };
@@ -178,16 +169,16 @@ const TestimonialsSection: React.FC = () => {
 		<section
       id="testimonials"
       ref={ref}
-      className="relative py-20 lg:py-32 bg-gradient-to-br from-gray-50 to-white overflow-hidden"
+      className="relative py-12 sm:py-16 lg:py-20 xl:py-32 bg-gradient-to-br from-gray-50 to-white overflow-hidden"
     >
       {/* Background Elements */}
       <div className="absolute inset-0">
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-purple-200/20 rounded-full blur-3xl"></div>
-        <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-blue-200/20 rounded-full blur-3xl"></div>
+        <div className="absolute top-1/4 left-1/4 w-48 h-48 sm:w-64 sm:h-64 lg:w-96 lg:h-96 bg-purple-200/20 rounded-full blur-3xl"></div>
+        <div className="absolute bottom-1/4 right-1/4 w-40 h-40 sm:w-56 sm:h-56 lg:w-80 lg:h-80 bg-blue-200/20 rounded-full blur-3xl"></div>
         
-        {/* Floating Testimonial Bubbles */}
+        {/* Floating Testimonial Bubbles - Hidden on mobile */}
         <motion.div
-          className="absolute top-20 right-20 bg-white/60 backdrop-blur-sm rounded-xl p-4 shadow-lg border border-gray-200"
+          className="hidden sm:block absolute top-20 right-20 bg-white/60 backdrop-blur-sm rounded-xl p-4 shadow-lg border border-gray-200"
           animate={{ y: [0, -20, 0] }}
           transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
         >
@@ -198,7 +189,7 @@ const TestimonialsSection: React.FC = () => {
         </motion.div>
 
         <motion.div
-          className="absolute bottom-20 left-20 bg-white/60 backdrop-blur-sm rounded-xl p-4 shadow-lg border border-gray-200"
+          className="hidden sm:block absolute bottom-20 left-20 bg-white/60 backdrop-blur-sm rounded-xl p-4 shadow-lg border border-gray-200"
           animate={{ y: [0, 20, 0] }}
           transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
         >
@@ -209,26 +200,26 @@ const TestimonialsSection: React.FC = () => {
         </motion.div>
       </div>
 
-      <div className="relative z-10 container mx-auto px-6">
+      <div className="relative z-10 container mx-auto px-4 sm:px-6">
         {/* Header */}
         <motion.div
-          className="text-center mb-16"
+          className="text-center mb-12 sm:mb-16"
           initial={{ opacity: 0, y: 30 }}
           animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
           transition={{ duration: 0.8, ease: "easeOut" }}
         >
           <motion.div
-            className="inline-flex items-center px-4 py-2 rounded-full bg-gradient-to-r from-purple-100 to-blue-100 text-purple-800 text-sm font-medium mb-4"
+            className="inline-flex items-center px-3 sm:px-4 py-1.5 sm:py-2 rounded-full bg-gradient-to-r from-purple-100 to-blue-100 text-purple-800 text-xs sm:text-sm font-medium mb-4"
             initial={{ opacity: 0, scale: 0.9 }}
             animate={isInView ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0.9 }}
             transition={{ delay: 0.2, duration: 0.6 }}
           >
-            <Sparkles className="w-4 h-4 mr-2" />
+            <Sparkles className="w-3 h-3 sm:w-4 sm:h-4 mr-1.5 sm:mr-2" />
             Student Success Stories
           </motion.div>
 
           <motion.h2
-            className="text-4xl md:text-5xl font-bold text-gray-900 mb-6 leading-tight"
+            className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 mb-4 sm:mb-6 leading-tight px-2"
             initial={{ opacity: 0, y: 20 }}
             animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
             transition={{ delay: 0.3, duration: 0.8 }}
@@ -238,7 +229,7 @@ const TestimonialsSection: React.FC = () => {
           </motion.h2>
 
           <motion.p
-            className="text-lg md:text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed"
+            className="text-sm sm:text-base md:text-lg lg:text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed px-2"
             initial={{ opacity: 0, y: 20 }}
             animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
             transition={{ delay: 0.4, duration: 0.8 }}
@@ -257,22 +248,22 @@ const TestimonialsSection: React.FC = () => {
           {/* Navigation Buttons */}
 				<button
             onClick={prevTestimonial}
-            className="absolute left-4 top-1/2 -translate-y-1/2 z-20 w-12 h-12 bg-white/90 backdrop-blur-sm rounded-full shadow-lg border border-gray-200 flex items-center justify-center text-gray-600 hover:text-purple-600 hover:bg-white transition-all duration-300 group"
+            className="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 z-20 w-8 h-8 sm:w-10 sm:h-10 lg:w-12 lg:h-12 bg-white/90 backdrop-blur-sm rounded-full shadow-lg border border-gray-200 flex items-center justify-center text-gray-600 hover:text-purple-600 hover:bg-white transition-all duration-300 group"
 					aria-label="Previous testimonial"
 				>
-            <ChevronLeft className="w-6 h-6 group-hover:-translate-x-0.5 transition-transform duration-300" />
+            <ChevronLeft className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6 group-hover:-translate-x-0.5 transition-transform duration-300" />
 				</button>
 
 				<button
             onClick={nextTestimonial}
-            className="absolute right-4 top-1/2 -translate-y-1/2 z-20 w-12 h-12 bg-white/90 backdrop-blur-sm rounded-full shadow-lg border border-gray-200 flex items-center justify-center text-gray-600 hover:text-purple-600 hover:bg-white transition-all duration-300 group"
+            className="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 z-20 w-8 h-8 sm:w-10 sm:h-10 lg:w-12 lg:h-12 bg-white/90 backdrop-blur-sm rounded-full shadow-lg border border-gray-200 flex items-center justify-center text-gray-600 hover:text-purple-600 hover:bg-white transition-all duration-300 group"
 					aria-label="Next testimonial"
 				>
-            <ChevronRight className="w-6 h-6 group-hover:translate-x-0.5 transition-transform duration-300" />
+            <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6 group-hover:translate-x-0.5 transition-transform duration-300" />
 				</button>
 
           {/* Testimonial Cards */}
-          <div className="px-16">
+          <div className="px-8 sm:px-12 lg:px-16">
             <AnimatePresence mode="wait">
               <motion.div
                 key={currentIndex}
@@ -287,12 +278,12 @@ const TestimonialsSection: React.FC = () => {
 			</div>
 
           {/* Dots Indicator */}
-          <div className="flex justify-center mt-8 space-x-3">
+          <div className="flex justify-center mt-6 sm:mt-8 space-x-2 sm:space-x-3">
             {testimonials.map((_, index) => (
               <button
                 key={index}
                 onClick={() => goToTestimonial(index)}
-                className={`w-3 h-3 rounded-full transition-all duration-300 ${
+                className={`w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full transition-all duration-300 ${
                   index === currentIndex
                     ? 'bg-purple-600 scale-125'
                     : 'bg-gray-300 hover:bg-gray-400'
@@ -303,10 +294,10 @@ const TestimonialsSection: React.FC = () => {
           </div>
 
           {/* Auto-play indicator */}
-          <div className="flex justify-center mt-4">
+          <div className="flex justify-center mt-3 sm:mt-4">
             <button
               onClick={() => setIsAutoPlaying(!isAutoPlaying)}
-              className={`text-sm px-3 py-1 rounded-full transition-all duration-300 ${
+              className={`text-xs sm:text-sm px-2 sm:px-3 py-1 sm:py-1.5 rounded-full transition-all duration-300 ${
                 isAutoPlaying
                   ? 'bg-purple-100 text-purple-700'
                   : 'bg-gray-100 text-gray-600'
@@ -321,20 +312,20 @@ const TestimonialsSection: React.FC = () => {
 
         {/* CTA Button */}
         <motion.div
-          className="text-center mt-12"
+          className="text-center mt-8 sm:mt-12"
           initial={{ opacity: 0, y: 20 }}
           animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
           transition={{ delay: 1.1, duration: 0.6 }}
         >
           <motion.button
-            className="group relative px-8 py-4 bg-gradient-to-r from-purple-600 to-blue-600 text-white font-semibold rounded-xl shadow-xl hover:shadow-2xl transition-all duration-300"
+            className="group relative px-6 sm:px-8 py-3 sm:py-4 bg-gradient-to-r from-purple-600 to-blue-600 text-white font-semibold rounded-xl shadow-xl hover:shadow-2xl transition-all duration-300 text-sm sm:text-base"
             whileHover={{ scale: 1.05, y: -2 }}
             whileTap={{ scale: 0.95 }}
             onClick={() => document.getElementById('about')?.scrollIntoView({ behavior: 'smooth' })}
           >
             <span className="relative z-10 flex items-center">
               Join Thousands of Students
-              <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform duration-300" />
+              <ArrowRight className="ml-2 w-4 h-4 sm:w-5 sm:h-5 group-hover:translate-x-1 transition-transform duration-300" />
             </span>
             <div className="absolute inset-0 bg-gradient-to-r from-purple-600 via-purple-500 to-blue-500 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
           </motion.button>
