@@ -1,11 +1,41 @@
-import React from "react";
-import { motion } from "framer-motion";
+import React, { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import UserAvatar from "@/components/home/UserAvatar";
 import Image from "next/image";
-import { Shield, Settings } from 'lucide-react';
+import { Shield, Settings, User as UserIcon, LogOut } from 'lucide-react';
+import { User } from "@/types/post";
+
+const baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
 
 const Navbar: React.FC = () => {
+  const [user, setUser] = useState<User | null>(null);
+  const [showAvatarMenu, setShowAvatarMenu] = useState(false);
+
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (!token) return;
+    fetch(`${baseUrl}/users/me`, {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+      .then(res => res.json())
+      .then(data => setUser(data))
+      .catch(() => setUser(null));
+  }, []);
+
+  const handleProfileClick = () => {
+    if (user && user.id && typeof window !== 'undefined') {
+      window.location.href = `/home/profile`;
+    }
+    setShowAvatarMenu(false);
+  };
+  
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    window.location.href = '/auth/login';
+    setShowAvatarMenu(false);
+  };
+
   return (
     <motion.nav
       className="w-full h-16 bg-white/95 backdrop-blur-xl border-b border-gray-200 shadow-lg sticky top-0 z-50"
@@ -76,18 +106,60 @@ const Navbar: React.FC = () => {
             <span className="text-sm font-medium text-gray-800">Admin Panel</span>
           </motion.div>
 
-          {/* User Avatar */}
-          <motion.div
-            className="relative"
-            whileHover={{ scale: 1.05 }}
-            transition={{ duration: 0.3 }}
-          >
-            <div className="p-1 bg-gradient-to-r from-purple-100 to-blue-100 border border-gray-200 rounded-full">
+          {/* User Avatar with Dropdown */}
+          <div className="relative">
+            <motion.button
+              onClick={() => setShowAvatarMenu(!showAvatarMenu)}
+              className="p-1 bg-gradient-to-r from-purple-100 to-blue-100 border border-gray-200 rounded-full hover:from-purple-200 hover:to-blue-200 transition-all duration-300"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
               <UserAvatar />
-            </div>
-          </motion.div>
+            </motion.button>
+
+            {/* Avatar Dropdown */}
+            <AnimatePresence>
+              {showAvatarMenu && (
+                <motion.div
+                  className="absolute right-0 top-full mt-2 w-56 bg-white rounded-2xl border border-gray-200 shadow-2xl z-50"
+                  initial={{ opacity: 0, scale: 0.95, y: -10 }}
+                  animate={{ opacity: 1, scale: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.95, y: -10 }}
+                  transition={{ duration: 0.2 }}
+                >
+                  <div className="p-2">
+                    <motion.button
+                      className="w-full flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-purple-50 hover:text-purple-600 rounded-xl transition-all duration-300"
+                      onClick={handleProfileClick}
+                      whileHover={{ x: 4 }}
+                    >
+                      <UserIcon className="w-4 h-4" />
+                      <span>Profile</span>
+                    </motion.button>
+                    <hr className="my-2 border-gray-100" />
+                    <motion.button
+                      className="w-full flex items-center gap-3 px-4 py-3 text-red-600 hover:bg-red-50 rounded-xl transition-all duration-300"
+                      onClick={handleLogout}
+                      whileHover={{ x: 4 }}
+                    >
+                      <LogOut className="w-4 h-4" />
+                      <span>Logout</span>
+                    </motion.button>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
         </motion.div>
       </div>
+
+      {/* Click outside to close avatar menu */}
+      {showAvatarMenu && (
+        <div 
+          className="fixed inset-0 z-40" 
+          onClick={() => setShowAvatarMenu(false)}
+        />
+      )}
     </motion.nav>
   );
 };
