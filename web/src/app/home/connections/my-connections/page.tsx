@@ -3,19 +3,21 @@
 import React, { useEffect, useState } from "react";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
-import { Users, TrendingUp, UserPlus, Check, Loader2 } from 'lucide-react';
-import { User } from "../../../types/post";
-import HomeNavBar from "../../../components/home/HomeNavBar";
+import { Users, TrendingUp, UserMinus, Loader2, ArrowLeft } from 'lucide-react';
+import { User } from "../../../../types/post";
+import HomeNavBar from "../../../../components/home/HomeNavBar";
 import ProtectedRoute from "@/app/ProtectedRoute";
 import { useRouter } from "next/navigation";
 
 const baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
 
-const ConnectionsPage: React.FC = () => {
-  const [requests, setRequests] = useState<User[]>([]);
+const MyConnectionsPage: React.FC = () => {
+  const [connections, setConnections] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [accepting, setAccepting] = useState<string | null>(null);
+  const [removing, setRemoving] = useState<string | null>(null);
+  const [page, setPage] = useState(1);
+  const [hasNext, setHasNext] = useState(false);
   const router = useRouter();
 
   // Navigation handler for user profiles
@@ -24,19 +26,24 @@ const ConnectionsPage: React.FC = () => {
   };
 
   useEffect(() => {
-    const fetchRequests = async () => {
+    const fetchConnections = async () => {
       setLoading(true);
       setError("");
       try {
         const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
-        const res = await fetch(`${baseUrl}/connections/requests/?page=1`, {
+        const res = await fetch(`${baseUrl}/connections/?page=${page}`, {
           headers: { Authorization: token ? `Bearer ${token}` : "" },
         });
         const data = await res.json();
         if (res.ok && Array.isArray(data.connections)) {
-          setRequests(data.connections);
+          if (page === 1) {
+            setConnections(data.connections);
+          } else {
+            setConnections(prev => [...prev, ...data.connections]);
+          }
+          setHasNext(data.next || false);
         } else {
-          setError("Failed to load connection requests.");
+          setError("Failed to load connections.");
         }
       } catch (err) {
         setError("Network error. Please try again." + err);
@@ -45,31 +52,37 @@ const ConnectionsPage: React.FC = () => {
       }
     };
 
-    fetchRequests();
-  }, []);
+    fetchConnections();
+  }, [page]);
 
-  const handleAccept = async (userId: string) => {
-    setAccepting(userId);
+  const handleRemoveConnection = async (userId: string) => {
+    setRemoving(userId);
     setError("");
     try {
       const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
-      const res = await fetch(`${baseUrl}/connections/accept`, {
+      const res = await fetch(`${baseUrl}/connections/remove`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           Authorization: token ? `Bearer ${token}` : "",
         },
-        body: JSON.stringify({ connector_id: userId }),
+        body: JSON.stringify({ connection_id: userId }),
       });
       if (res.ok) {
-        setRequests((prev) => prev.filter((u) => u.id !== userId));
+        setConnections((prev) => prev.filter((u) => u.id !== userId));
       } else {
-        setError("Failed to accept connection request.");
+        setError("Failed to remove connection.");
       }
     } catch (err) {
       setError("Network error. Please try again." + err);
     } finally {
-      setAccepting(null);
+      setRemoving(null);
+    }
+  };
+
+  const loadMore = () => {
+    if (hasNext && !loading) {
+      setPage(prev => prev + 1);
     }
   };
 
@@ -103,7 +116,7 @@ const ConnectionsPage: React.FC = () => {
         animate={{ opacity: [0.5, 1, 0.5] }}
         transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
       >
-        Loading connection requests...
+        Loading connections...
       </motion.p>
     </motion.div>
   );
@@ -143,15 +156,15 @@ const ConnectionsPage: React.FC = () => {
         animate={{ rotate: [0, 5, -5, 0] }}
         transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
       >
-        <UserPlus className="w-10 h-10 text-emerald-600" />
+        <Users className="w-10 h-10 text-emerald-600" />
       </motion.div>
-      <h3 className="text-xl font-bold text-gray-800 mb-3">No Connection Requests</h3>
-      <p className="text-gray-600 text-base">You&apos;re all caught up! Check back later for new requests.</p>
+      <h3 className="text-xl font-bold text-gray-800 mb-3">No Connections Yet</h3>
+      <p className="text-gray-600 text-base">Start building your network by connecting with other students and teachers.</p>
     </motion.div>
   );
 
   return (
-      <ProtectedRoute role="student">
+    <ProtectedRoute role="student">
       <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50/30 to-purple-50/30">
         {/* Background Elements */}
         <div className="absolute inset-0 overflow-hidden">
@@ -232,6 +245,14 @@ const ConnectionsPage: React.FC = () => {
           >
             {/* Page Title */}
             <div className="flex items-center gap-3 sm:gap-4 mb-4 sm:mb-6">
+              <motion.button
+                onClick={() => router.back()}
+                className="p-1.5 sm:p-2 rounded-lg sm:rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-600 hover:text-gray-800 transition-colors duration-300"
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                <ArrowLeft className="w-3 h-3 sm:w-4 sm:h-4" />
+              </motion.button>
               <motion.div
                 className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-gradient-to-br from-emerald-500 to-emerald-600 p-2.5 sm:p-3 shadow-lg"
                 initial={{ scale: 0 }}
@@ -241,8 +262,8 @@ const ConnectionsPage: React.FC = () => {
                 <Users className="w-full h-full text-white" />
               </motion.div>
               <div>
-                <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Connection Requests</h1>
-                <p className="text-gray-600 mt-0.5 sm:mt-1 text-sm sm:text-base">Manage your incoming connection requests</p>
+                <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">My Connections</h1>
+                <p className="text-gray-600 mt-0.5 sm:mt-1 text-sm sm:text-base">Manage your network of connections</p>
               </div>
               <motion.div
                 className="ml-auto inline-flex items-center px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full bg-emerald-100 border border-emerald-200 text-emerald-700 text-xs sm:text-sm font-medium"
@@ -251,7 +272,7 @@ const ConnectionsPage: React.FC = () => {
                 transition={{ delay: 0.4, duration: 0.6 }}
               >
                 <TrendingUp className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1.5 sm:mr-2" />
-                {requests.length} Pending
+                {connections.length} Connected
               </motion.div>
             </div>
           </motion.div>
@@ -262,11 +283,11 @@ const ConnectionsPage: React.FC = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.5, duration: 0.7 }}
           >
-            {loading ? (
+            {loading && connections.length === 0 ? (
               <LoadingComponent />
             ) : error ? (
               <ErrorComponent />
-            ) : requests.length === 0 ? (
+            ) : connections.length === 0 ? (
               <EmptyStateComponent />
             ) : (
               <div className="bg-white/80 backdrop-blur-sm rounded-xl sm:rounded-2xl shadow-lg border border-white/20 p-4 sm:p-6">
@@ -286,16 +307,16 @@ const ConnectionsPage: React.FC = () => {
                   </motion.div>
                   <div>
                     <h2 className="text-lg sm:text-xl font-bold bg-gradient-to-r from-emerald-600 to-blue-600 bg-clip-text text-transparent">
-                      Pending Requests
+                      Your Network
                     </h2>
-                    <p className="text-gray-500 text-xs sm:text-sm mt-0.5">{requests.length} people want to connect with you</p>
+                    <p className="text-gray-500 text-xs sm:text-sm mt-0.5">{connections.length} people in your network</p>
                   </div>
                 </motion.div>
 
-                {/* Requests List */}
+                {/* Connections List */}
                 <div className="space-y-3 sm:space-y-4">
                   <AnimatePresence>
-                    {requests.map((user, index) => (
+                    {connections.map((user, index) => (
                       <motion.div
                         key={user.id}
                         className="flex items-center justify-between bg-white/60 backdrop-blur-sm border border-gray-200/50 rounded-lg sm:rounded-xl p-3 sm:p-4 hover:bg-white/80 hover:shadow-md transition-all duration-300"
@@ -337,27 +358,27 @@ const ConnectionsPage: React.FC = () => {
                         </div>
                         
                         <motion.button
-                          onClick={() => handleAccept(user.id)}
-                          disabled={accepting === user.id}
-                          className={`inline-flex items-center gap-1.5 sm:gap-2 px-4 sm:px-6 py-2 sm:py-2.5 rounded-lg sm:rounded-xl font-semibold text-xs sm:text-sm transition-all duration-300 shadow-md hover:shadow-lg ${
-                            accepting === user.id
+                          onClick={() => handleRemoveConnection(user.id)}
+                          disabled={removing === user.id}
+                          className={`inline-flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 rounded-lg sm:rounded-xl font-semibold text-xs sm:text-sm transition-all duration-300 shadow-md hover:shadow-lg ${
+                            removing === user.id
                               ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                              : 'bg-gradient-to-r from-emerald-500 to-blue-600 text-white hover:from-emerald-600 hover:to-blue-700'
+                              : 'bg-gradient-to-r from-red-500 to-pink-600 text-white hover:from-red-600 hover:to-pink-700'
                           }`}
-                          whileHover={accepting === user.id ? {} : { scale: 1.05, y: -2 }}
-                          whileTap={accepting === user.id ? {} : { scale: 0.95 }}
+                          whileHover={removing === user.id ? {} : { scale: 1.05, y: -2 }}
+                          whileTap={removing === user.id ? {} : { scale: 0.95 }}
                         >
-                          {accepting === user.id ? (
+                          {removing === user.id ? (
                             <>
                               <Loader2 className="w-3 h-3 sm:w-4 sm:h-4 animate-spin" />
-                              <span className="hidden xs:inline">Accepting...</span>
-                              <span className="xs:inline">Accepting</span>
+                              <span className="hidden xs:inline">Removing...</span>
+                              <span className="xs:inline">Removing</span>
                             </>
                           ) : (
                             <>
-                              <Check className="w-3 h-3 sm:w-4 sm:h-4" />
-                              <span className="hidden xs:inline">Accept</span>
-                              <span className="xs:inline">Accept</span>
+                              <UserMinus className="w-3 h-3 sm:w-4 sm:h-4" />
+                              <span className="hidden xs:inline">Remove</span>
+                              <span className="xs:inline">Remove</span>
                             </>
                           )}
                         </motion.button>
@@ -365,6 +386,42 @@ const ConnectionsPage: React.FC = () => {
                     ))}
                   </AnimatePresence>
                 </div>
+
+                {/* Load More Button */}
+                {hasNext && (
+                  <motion.div
+                    className="text-center mt-4 sm:mt-6"
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.8, duration: 0.5 }}
+                  >
+                    <motion.button
+                      onClick={loadMore}
+                      disabled={loading}
+                      className={`inline-flex items-center gap-2 px-4 sm:px-6 py-2.5 sm:py-3 rounded-lg sm:rounded-xl font-semibold text-xs sm:text-sm transition-all duration-300 shadow-md hover:shadow-lg ${
+                        loading
+                          ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                          : 'bg-gradient-to-r from-emerald-500 to-blue-600 text-white hover:from-emerald-600 hover:to-blue-700'
+                      }`}
+                      whileHover={loading ? {} : { scale: 1.05, y: -2 }}
+                      whileTap={loading ? {} : { scale: 0.95 }}
+                    >
+                      {loading ? (
+                        <>
+                          <Loader2 className="w-3 h-3 sm:w-4 sm:h-4 animate-spin" />
+                          <span className="hidden xs:inline">Loading...</span>
+                          <span className="xs:inline">Loading</span>
+                        </>
+                      ) : (
+                        <>
+                          <Users className="w-3 h-3 sm:w-4 sm:h-4" />
+                          <span className="hidden xs:inline">Load More</span>
+                          <span className="xs:inline">Load More</span>
+                        </>
+                      )}
+                    </motion.button>
+                  </motion.div>
+                )}
               </div>
             )}
           </motion.div>
@@ -379,9 +436,9 @@ const ConnectionsPage: React.FC = () => {
         >
           © 2025 IKnow. Connecting campus communities.
         </motion.footer>
-        </div>
-      </ProtectedRoute>
+      </div>
+    </ProtectedRoute>
   );
 };
 
-export default ConnectionsPage;
+export default MyConnectionsPage; 

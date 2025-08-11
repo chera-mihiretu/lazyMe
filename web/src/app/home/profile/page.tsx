@@ -52,15 +52,15 @@ const ProfilePageContent: React.FC = () => {
   const isOwnProfile = !profileId || profileId === currentUserId;
 
   const [page, setPage] = useState(1);
-  setPage(1)
   const { user: currentUser } = useUserProfile();
-  const { posts: ownPosts, loading: ownPostsLoading, error: ownPostsError } = useUserPosts(page);
-  const { posts: otherPosts, loading: otherPostsLoading, error: otherPostsError } = useOtherUserPosts(page, profileId || '');
+  const { posts: ownPosts, loading: ownPostsLoading, error: ownPostsError, hasNext: ownPostsHasNext } = useUserPosts(page);
+  const { posts: otherPosts, loading: otherPostsLoading, error: otherPostsError, hasNext: otherPostsHasNext } = useOtherUserPosts(page, profileId || '');
   
   // Determine which posts data to use
   const posts = isOwnProfile ? ownPosts : otherPosts;
   const postsLoading = isOwnProfile ? ownPostsLoading : otherPostsLoading;
   const postsError = isOwnProfile ? ownPostsError : otherPostsError;
+  const postsHasNext = isOwnProfile ? ownPostsHasNext : otherPostsHasNext;
   
   const router = useRouter();
   const [isClient, setIsClient] = useState(false);
@@ -425,18 +425,34 @@ const ProfilePageContent: React.FC = () => {
                   
                   {/* Edit Button - Only show for own profile */}
                   {isOwnProfile && (
-                    <motion.button
-                      className="inline-flex items-center gap-2 px-4 sm:px-6 py-2 sm:py-3 bg-gradient-to-r from-purple-600 to-blue-600 text-white font-semibold rounded-lg sm:rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 text-sm sm:text-base"
-                      initial={{ opacity: 0, scale: 0.8 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      transition={{ delay: 0.9, duration: 0.5 }}
-                      whileHover={{ scale: 1.05, y: -2 }}
-                      whileTap={{ scale: 0.95 }}
-                    >
-                      <Edit3 className="w-3 h-3 sm:w-4 sm:h-4" />
-                      <span className="hidden xs:inline">Edit Profile</span>
-                      <span className="xs:hidden">Edit</span>
-                    </motion.button>
+                    <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
+                      <motion.button
+                        className="inline-flex items-center gap-2 px-4 sm:px-6 py-2 sm:py-3 bg-gradient-to-r from-purple-600 to-blue-600 text-white font-semibold rounded-lg sm:rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 text-sm sm:text-base"
+                        initial={{ opacity: 0, scale: 0.8 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        transition={{ delay: 0.9, duration: 0.5 }}
+                        whileHover={{ scale: 1.05, y: -2 }}
+                        whileTap={{ scale: 0.95 }}
+                      >
+                        <Edit3 className="w-3 h-3 sm:w-4 sm:h-4" />
+                        <span className="hidden xs:inline">Edit Profile</span>
+                        <span className="xs:hidden">Edit</span>
+                      </motion.button>
+                      
+                      <motion.button
+                        onClick={() => router.push('/home/connections/my-connections')}
+                        className="inline-flex items-center gap-2 px-4 sm:px-6 py-2 sm:py-3 bg-gradient-to-r from-emerald-600 to-blue-600 text-white font-semibold rounded-lg sm:rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 text-sm sm:text-base"
+                        initial={{ opacity: 0, scale: 0.8 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        transition={{ delay: 1.0, duration: 0.5 }}
+                        whileHover={{ scale: 1.05, y: -2 }}
+                        whileTap={{ scale: 0.95 }}
+                      >
+                        <Users className="w-3 h-3 sm:w-4 sm:h-4" />
+                        <span className="hidden xs:inline">See Connections</span>
+                        <span className="xs:hidden">Connections</span>
+                      </motion.button>
+                    </div>
                   )}
                 </div>
 
@@ -445,7 +461,7 @@ const ProfilePageContent: React.FC = () => {
                   className="flex flex-wrap gap-2 sm:gap-3 mb-4 sm:mb-6"
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 1.0, duration: 0.5 }}
+                  transition={{ delay: 1.1, duration: 0.5 }}
                 >
                   {user?.school && (
                     <motion.span
@@ -481,7 +497,7 @@ const ProfilePageContent: React.FC = () => {
                   className="grid grid-cols-3 gap-2 sm:gap-3 lg:gap-4"
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 1.1, duration: 0.5 }}
+                  transition={{ delay: 1.2, duration: 0.5 }}
                 >
                   <motion.div
                     className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-lg sm:rounded-xl p-3 sm:p-4 text-center border border-purple-200/50"
@@ -532,14 +548,14 @@ const ProfilePageContent: React.FC = () => {
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 1.2, duration: 0.6 }}
+            transition={{ delay: 1.3, duration: 0.6 }}
           >
             {/* Posts Header - Responsive layout */}
             <motion.div
               className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 mb-4 sm:mb-6"
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 1.3, duration: 0.5 }}
+              transition={{ delay: 1.4, duration: 0.5 }}
             >
               <div className="flex items-center gap-3">
                 <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-gradient-to-br from-purple-500 to-blue-600 p-2 sm:p-2.5 shadow-lg">
@@ -558,7 +574,7 @@ const ProfilePageContent: React.FC = () => {
                 className="inline-flex items-center px-3 py-1.5 rounded-full bg-purple-100 border border-purple-200 text-purple-700 text-xs sm:text-sm font-medium ml-auto"
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: 1.4, duration: 0.6 }}
+                transition={{ delay: 1.5, duration: 0.6 }}
               >
                 <Sparkles className="w-3 h-3 sm:w-4 sm:h-4 mr-1.5 sm:mr-2" />
                 {posts.length} Posts
@@ -582,23 +598,61 @@ const ProfilePageContent: React.FC = () => {
         ) : posts.length === 0 ? (
                 <EmptyStateComponent />
               ) : (
-                <motion.div
-                  className="space-y-4 sm:space-y-6"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ duration: 0.6 }}
-                >
-                  {posts.map((post, index) => (
+                <>
+                  <motion.div
+                    className="space-y-4 sm:space-y-6"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ duration: 0.6 }}
+                  >
+                    {posts.map((post, index) => (
+                      <motion.div
+                        key={post.id}
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: index * 0.1, duration: 0.5 }}
+                      >
+                        <PostCard post={post} />
+                      </motion.div>
+                    ))}
+                  </motion.div>
+
+                  {/* Load More Button - Show when there are more posts to load */}
+                  {(postsHasNext || posts.length > 0) && (
                     <motion.div
-                      key={post.id}
+                      className="text-center mt-6 sm:mt-8"
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: index * 0.1, duration: 0.5 }}
+                      transition={{ delay: 1.6, duration: 0.5 }}
                     >
-                      <PostCard post={post} />
+                      <motion.button
+                        onClick={() => setPage(prev => prev + 1)}
+                        disabled={postsLoading}
+                        className={`inline-flex items-center gap-2 px-6 sm:px-8 py-3 sm:py-4 rounded-lg sm:rounded-xl font-semibold text-sm sm:text-base transition-all duration-300 shadow-md hover:shadow-lg ${
+                          postsLoading
+                            ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                            : 'bg-gradient-to-r from-purple-500 to-blue-600 text-white hover:from-purple-600 hover:to-blue-700'
+                        }`}
+                        whileHover={postsLoading ? {} : { scale: 1.05, y: -2 }}
+                        whileTap={postsLoading ? {} : { scale: 0.95 }}
+                      >
+                        {postsLoading ? (
+                          <>
+                            <motion.div
+                              className="w-4 h-4 sm:w-5 sm:h-5 border-2 border-white border-t-transparent rounded-full animate-spin"
+                            />
+                            <span>Loading...</span>
+                          </>
+                        ) : (
+                          <>
+                            <FileText className="w-4 h-4 sm:w-5 sm:h-5" />
+                            <span>Load More Posts</span>
+                          </>
+                        )}
+                      </motion.button>
                     </motion.div>
-                  ))}
-                </motion.div>
+                  )}
+                </>
               )}
             </AnimatePresence>
           </motion.div>

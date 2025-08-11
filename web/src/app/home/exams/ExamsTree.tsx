@@ -200,7 +200,7 @@ const ExamsTree: React.FC = () => {
       >
         <div className="overflow-x-auto -mx-4 sm:mx-0 px-4 sm:px-0">
           <div className="min-w-max sm:min-w-0">
-            {tree.length === 0 ? (
+      {tree.length === 0 ? (
               <motion.div
                 className="text-center py-12"
                 initial={{ opacity: 0, y: 20 }}
@@ -219,10 +219,10 @@ const ExamsTree: React.FC = () => {
                 <p className="text-gray-500 text-base">No universities found.</p>
                 <p className="text-gray-400 text-sm mt-1">Please check your connection and try again.</p>
               </motion.div>
-            ) : (
-              renderTree(tree)
-            )}
-          </div>
+      ) : (
+        renderTree(tree)
+      )}
+    </div>
         </div>
       </motion.div>
     </motion.div>

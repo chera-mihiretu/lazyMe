@@ -375,24 +375,24 @@ const PostDetailPage = () => {
                         </motion.div>
                       ) : (
                         <div className="overflow-x-auto -mx-4 sm:mx-0 px-4 sm:px-0">
-                          <motion.div
+                        <motion.div
                             className="space-y-4 min-w-max sm:min-w-0 sm:space-y-4"
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            transition={{ duration: 0.6 }}
-                          >
-                            {comments.map((comment: CommentType, index) => (
-                              <motion.div
-                                key={comment.id}
-                                initial={{ opacity: 0, y: 20 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                transition={{ delay: index * 0.1, duration: 0.4 }}
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          transition={{ duration: 0.6 }}
+                        >
+                          {comments.map((comment: CommentType, index) => (
+                            <motion.div
+                              key={comment.id}
+                              initial={{ opacity: 0, y: 20 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              transition={{ delay: index * 0.1, duration: 0.4 }}
                                 className="w-full sm:w-auto"
-                              >
-                                <Comment comment={comment} post_id={post_id as string} />
-                              </motion.div>
-                            ))}
-                          </motion.div>
+                            >
+                              <Comment comment={comment} post_id={post_id as string} />
+                            </motion.div>
+                          ))}
+                        </motion.div>
                         </div>
                       )}
                     </AnimatePresence>
