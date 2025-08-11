@@ -45,7 +45,7 @@ const TreeNode: React.FC<TreeNodeProps> = ({ node, level, onExpand, expanded, lo
 
   return (
     <motion.div
-      className={`flex items-center rounded-xl p-3 mb-2 transition-all duration-300 ${styles.container}`}
+      className={`flex items-center rounded-xl p-2 sm:p-3 mb-2 transition-all duration-300 ${styles.container}`}
       style={{ marginLeft: level * 20 }}
       whileHover={{ scale: 1.01, x: 3 }}
       initial={{ opacity: 0, y: 8 }}
@@ -94,7 +94,7 @@ const TreeNode: React.FC<TreeNodeProps> = ({ node, level, onExpand, expanded, lo
       {/* Node Content */}
       <div className="flex-1 flex flex-col justify-center min-w-0">
         <motion.span
-          className={`block overflow-hidden text-ellipsis whitespace-nowrap text-base ${styles.text}`}
+          className={`block overflow-hidden text-ellipsis whitespace-nowrap text-sm sm:text-base ${styles.text}`}
           initial={{ opacity: 0, x: -10 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ delay: 0.1, duration: 0.3 }}
@@ -105,7 +105,7 @@ const TreeNode: React.FC<TreeNodeProps> = ({ node, level, onExpand, expanded, lo
         {/* Description for school and department */}
         {(node.type === "school" || node.type === "department") && node.description && (
           <motion.span
-            className="block text-xs text-gray-500 mt-0.5 font-normal overflow-hidden text-ellipsis whitespace-nowrap"
+            className="block text-xs sm:text-sm text-gray-500 mt-0.5 font-normal overflow-hidden text-ellipsis whitespace-nowrap"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.2, duration: 0.3 }}
@@ -135,7 +135,7 @@ const TreeNode: React.FC<TreeNodeProps> = ({ node, level, onExpand, expanded, lo
       {/* Material Action Buttons */}
       {isMaterial && !loading && (
         <motion.div
-          className="flex gap-2 ml-4"
+          className="flex gap-1 sm:gap-2 ml-2 sm:ml-4"
           initial={{ opacity: 0, x: 20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ delay: 0.3, duration: 0.4 }}
@@ -143,7 +143,7 @@ const TreeNode: React.FC<TreeNodeProps> = ({ node, level, onExpand, expanded, lo
           <motion.a
               href={node.url}
               download
-            className="group inline-flex items-center gap-1.5 bg-gradient-to-r from-blue-500 to-indigo-600 text-white border-none rounded-lg px-3 py-2 font-semibold text-xs cursor-pointer no-underline shadow-md hover:shadow-lg transition-all duration-300"
+            className="group inline-flex items-center gap-1 sm:gap-1.5 bg-gradient-to-r from-blue-500 to-indigo-600 text-white border-none rounded-lg px-2 sm:px-3 py-1.5 sm:py-2 font-semibold text-xs cursor-pointer no-underline shadow-md hover:shadow-lg transition-all duration-300"
             whileHover={{ scale: 1.05, y: -1 }}
             whileTap={{ scale: 0.95 }}
           >
@@ -153,14 +153,15 @@ const TreeNode: React.FC<TreeNodeProps> = ({ node, level, onExpand, expanded, lo
             >
               <Image src="/icons/download.png" alt="Download" width={14} height={14} className="filter brightness-0 invert" />
             </motion.div>
-            Download
+            <span className="hidden xs:inline">Download</span>
+            <span className="xs:hidden">DL</span>
           </motion.a>
           
           <motion.a
               href={node.url}
               target="_blank"
               rel="noopener noreferrer"
-            className="group inline-flex items-center gap-1.5 bg-gradient-to-r from-orange-400 to-red-500 text-white border-none rounded-lg px-3 py-2 font-semibold text-xs cursor-pointer no-underline shadow-md hover:shadow-lg transition-all duration-300"
+            className="group inline-flex items-center gap-1 sm:gap-1.5 bg-gradient-to-r from-orange-400 to-red-500 text-white border-none rounded-lg px-2 sm:px-3 py-1.5 sm:py-2 font-semibold text-xs cursor-pointer no-underline shadow-md hover:shadow-lg transition-all duration-300"
             whileHover={{ scale: 1.05, y: -1 }}
             whileTap={{ scale: 0.95 }}
           >
@@ -170,7 +171,8 @@ const TreeNode: React.FC<TreeNodeProps> = ({ node, level, onExpand, expanded, lo
             >
               <Image src="/icons/read.png" alt="Read" width={14} height={14} className="filter brightness-0 invert" />
             </motion.div>
-            Read
+            <span className="hidden xs:inline">Read</span>
+            <span className="xs:hidden">R</span>
           </motion.a>
         </motion.div>
       )}

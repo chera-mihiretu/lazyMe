@@ -7,6 +7,7 @@ import { Users, TrendingUp, UserPlus, Check, Loader2 } from 'lucide-react';
 import { User } from "../../../types/post";
 import HomeNavBar from "../../../components/home/HomeNavBar";
 import ProtectedRoute from "@/app/ProtectedRoute";
+import { useRouter } from "next/navigation";
 
 const baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
 
@@ -15,6 +16,12 @@ const ConnectionsPage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [accepting, setAccepting] = useState<string | null>(null);
+  const router = useRouter();
+
+  // Navigation handler for user profiles
+  const handleUserClick = (userId: string) => {
+    router.push(`/home/profile?id=${userId}`);
+  };
 
   useEffect(() => {
     const fetchRequests = async () => {
@@ -299,10 +306,11 @@ const ConnectionsPage: React.FC = () => {
                         whileHover={{ scale: 1.01, x: 4 }}
                       >
                         <div className="flex items-center gap-4">
-                          <motion.div
+                          <motion.button
                             className="relative"
                             whileHover={{ scale: 1.1 }}
                             transition={{ type: "spring", stiffness: 300 }}
+                            onClick={() => handleUserClick(user.id)}
                           >
                     <Image
                       src={user.profile_image_url || "/icons/avatar.png"}
@@ -316,11 +324,16 @@ const ConnectionsPage: React.FC = () => {
                               animate={{ scale: [1, 1.2, 1] }}
                               transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
                     />
-                          </motion.div>
-                    <div>
-                            <h3 className="font-semibold text-gray-900 text-lg">{user.name}</h3>
+                          </motion.button>
+                    <motion.button
+                      className="text-left"
+                      onClick={() => handleUserClick(user.id)}
+                      whileHover={{ x: 2 }}
+                      transition={{ duration: 0.2 }}
+                    >
+                            <h3 className="font-semibold text-gray-900 text-lg hover:text-emerald-700 transition-colors duration-300">{user.name}</h3>
                             <p className="text-gray-500 text-sm">{user.email}</p>
-                    </div>
+                    </motion.button>
                   </div>
                         
                         <motion.button

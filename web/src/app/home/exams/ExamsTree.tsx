@@ -98,6 +98,7 @@ const ExamsTree: React.FC = () => {
         initial={{ opacity: 0, x: -20 }}
         animate={{ opacity: 1, x: 0 }}
         transition={{ delay: index * 0.1, duration: 0.4 }}
+        className="w-full sm:w-auto"
       >
         <TreeNode
           node={node}
@@ -197,28 +198,32 @@ const ExamsTree: React.FC = () => {
         animate={{ opacity: 1 }}
         transition={{ delay: 0.4, duration: 0.6 }}
       >
-      {tree.length === 0 ? (
-          <motion.div
-            className="text-center py-12"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3, duration: 0.5 }}
-          >
-            <motion.div
-              className="w-16 h-16 bg-gradient-to-br from-gray-200 to-gray-300 rounded-full mx-auto mb-4 flex items-center justify-center"
-              animate={{ rotate: [0, 10, -10, 0] }}
-              transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-            >
-              <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-              </svg>
-            </motion.div>
-            <p className="text-gray-500 text-base">No universities found.</p>
-            <p className="text-gray-400 text-sm mt-1">Please check your connection and try again.</p>
-          </motion.div>
-      ) : (
-        renderTree(tree)
-      )}
+        <div className="overflow-x-auto -mx-4 sm:mx-0 px-4 sm:px-0">
+          <div className="min-w-max sm:min-w-0">
+            {tree.length === 0 ? (
+              <motion.div
+                className="text-center py-12"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3, duration: 0.5 }}
+              >
+                <motion.div
+                  className="w-16 h-16 bg-gradient-to-br from-gray-200 to-gray-300 rounded-full mx-auto mb-4 flex items-center justify-center"
+                  animate={{ rotate: [0, 10, -10, 0] }}
+                  transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+                >
+                  <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  </svg>
+                </motion.div>
+                <p className="text-gray-500 text-base">No universities found.</p>
+                <p className="text-gray-400 text-sm mt-1">Please check your connection and try again.</p>
+              </motion.div>
+            ) : (
+              renderTree(tree)
+            )}
+          </div>
+        </div>
       </motion.div>
     </motion.div>
   );

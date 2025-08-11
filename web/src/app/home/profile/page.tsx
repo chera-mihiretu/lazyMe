@@ -52,7 +52,6 @@ const ProfilePageContent: React.FC = () => {
   const isOwnProfile = !profileId || profileId === currentUserId;
 
   const [page, setPage] = useState(1);
-  setPage(1)
   const { user: currentUser } = useUserProfile();
   const { posts: ownPosts, loading: ownPostsLoading, error: ownPostsError } = useUserPosts(page);
   const { posts: otherPosts, loading: otherPostsLoading, error: otherPostsError } = useOtherUserPosts(page, profileId || '');
@@ -364,9 +363,9 @@ const ProfilePageContent: React.FC = () => {
                       }}
                     />
                   ))}
-                </div>
-              )}
-            </div>
+          </div>
+            )}
+          </div>
 
             {/* Profile Content */}
             <div className="relative px-4 sm:px-6 lg:px-8 pb-6 sm:pb-8">
@@ -507,7 +506,7 @@ const ProfilePageContent: React.FC = () => {
                   >
                     <div className="w-6 h-6 sm:w-8 sm:h-8 bg-blue-500 rounded-md sm:rounded-lg mx-auto mb-1 sm:mb-2 flex items-center justify-center">
                       <Users className="w-3 h-3 sm:w-4 sm:h-4 text-white" />
-                    </div>
+              </div>
                     <p className="text-sm sm:text-lg font-bold text-blue-700">{user?.follow_count ?? 0}</p>
                     <p className="text-xs sm:text-sm text-blue-600 font-medium">Followers</p>
                   </motion.div>
@@ -519,7 +518,7 @@ const ProfilePageContent: React.FC = () => {
                   >
                     <div className="w-6 h-6 sm:w-8 sm:h-8 bg-indigo-500 rounded-md sm:rounded-lg mx-auto mb-1 sm:mb-2 flex items-center justify-center">
                       <Calendar className="w-3 h-3 sm:w-4 sm:h-4 text-white" />
-                    </div>
+              </div>
                     <p className="text-sm sm:text-lg font-bold text-indigo-700">{user?.acedemic_year ?? '-'}</p>
                     <p className="text-xs sm:text-sm text-indigo-600 font-medium">Academic Year</p>
                   </motion.div>
@@ -552,8 +551,8 @@ const ProfilePageContent: React.FC = () => {
                   <p className="text-gray-600 text-xs sm:text-sm">
                     {isOwnProfile ? 'Your recent posts and activities' : 'Recent posts and activities'}
                   </p>
-                </div>
-              </div>
+          </div>
+        </div>
               <motion.div
                 className="inline-flex items-center px-3 py-1.5 rounded-full bg-purple-100 border border-purple-200 text-purple-700 text-xs sm:text-sm font-medium ml-auto"
                 initial={{ opacity: 0, scale: 0.9 }}
@@ -567,9 +566,9 @@ const ProfilePageContent: React.FC = () => {
 
             {/* Posts Content - Responsive grid */}
             <AnimatePresence mode="wait">
-              {postsLoading ? (
+        {postsLoading ? (
                 <LoadingComponent />
-              ) : postsError ? (
+        ) : postsError ? (
                 <motion.div
                   className="bg-red-50/80 backdrop-blur-sm rounded-xl sm:rounded-2xl border border-red-200/50 p-6 sm:p-8 text-center"
                   initial={{ opacity: 0, scale: 0.95 }}
@@ -579,11 +578,11 @@ const ProfilePageContent: React.FC = () => {
                   <p className="text-red-700 font-semibold text-base sm:text-lg mb-2">Error Loading Posts</p>
                   <p className="text-red-600 text-sm sm:text-base">{postsError}</p>
                 </motion.div>
-              ) : posts.length === 0 ? (
+        ) : posts.length === 0 ? (
                 <EmptyStateComponent />
               ) : (
                 <motion.div
-                  className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6"
+                  className="space-y-4 sm:space-y-6"
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   transition={{ duration: 0.6 }}
@@ -602,7 +601,7 @@ const ProfilePageContent: React.FC = () => {
               )}
             </AnimatePresence>
           </motion.div>
-        </div>
+          </div>
 
         {/* Footer - Responsive spacing */}
         <motion.footer

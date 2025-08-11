@@ -20,6 +20,7 @@ import {
 import { formatTimeAgo } from '@/app/helpers/time_formatter';
 import Image from "next/image";
 import type { User as UserType } from '../../../types/post';
+import { useRouter } from 'next/navigation';
 
 export interface JobPost {
   id: string;
@@ -40,6 +41,14 @@ const JobCard: React.FC<{ job: JobPost }> = ({ job }) => {
   const [liked, setLiked] = useState(job.liked || false);
   const [error, setError] = useState<string | null>(null);
   const [likeLoading, setLikeLoading] = useState(false);
+  const router = useRouter();
+
+  // Navigation handler for user profiles
+  const handleUserClick = () => {
+    if (job.user?.id) {
+      router.push(`/home/profile?id=${job.user.id}`);
+    }
+  };
 
   // Menu logic
   const [showMenu, setShowMenu] = useState(false);
@@ -308,10 +317,11 @@ const JobCard: React.FC<{ job: JobPost }> = ({ job }) => {
         >
           <div className="flex items-center gap-3">
             {/* Avatar */}
-            <motion.div
+            <motion.button
               className="relative flex-shrink-0"
               whileHover={{ scale: 1.05 }}
               transition={{ duration: 0.3 }}
+              onClick={handleUserClick}
             >
               <div className="absolute inset-0 bg-gradient-to-br from-blue-500/20 to-purple-500/20 rounded-full blur-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
               <div className="relative w-12 h-12 rounded-full overflow-hidden border-2 border-gray-200 group-hover:border-blue-300 transition-colors duration-300">
@@ -329,11 +339,16 @@ const JobCard: React.FC<{ job: JobPost }> = ({ job }) => {
                   </div>
                 )}
               </div>
-            </motion.div>
+            </motion.button>
 
             {/* User Info */}
-            <div>
-              <h4 className="font-semibold text-gray-900 group-hover:text-blue-700 transition-colors duration-300">
+            <motion.button
+              className="text-left"
+              onClick={handleUserClick}
+              whileHover={{ x: 2 }}
+              transition={{ duration: 0.2 }}
+            >
+              <h4 className="font-semibold text-gray-900 group-hover:text-blue-700 transition-colors duration-300 hover:text-blue-700 cursor-pointer">
                 {job.user?.name || 'Unknown User'}
               </h4>
               <div className="flex items-center gap-2 text-sm text-gray-600">
@@ -350,7 +365,7 @@ const JobCard: React.FC<{ job: JobPost }> = ({ job }) => {
                   </span>
                 )}
               </div>
-            </div>
+            </motion.button>
           </div>
 
           <div className="flex items-center gap-3">

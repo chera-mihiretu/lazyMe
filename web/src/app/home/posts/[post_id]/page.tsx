@@ -275,35 +275,35 @@ const PostDetailPage = () => {
 
                 {/* Comment Input */}
                 <motion.div
-                  className="bg-white rounded-2xl border border-gray-200 shadow-lg p-6"
+                  className="bg-white rounded-2xl border border-gray-200 shadow-lg p-4 sm:p-6"
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.2, duration: 0.6 }}
                 >
                   <div className="flex items-center gap-3 mb-4">
-                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-green-500 to-green-600 p-2.5 shadow-lg">
+                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-green-500 to-green-600 p-2.5 shadow-lg flex-shrink-0">
                       <MessageCircle className="w-full h-full text-white" />
                     </div>
-                    <div>
+                    <div className="min-w-0 flex-1">
                       <h3 className="text-lg font-semibold text-gray-900">Add Comment</h3>
                       <p className="text-sm text-gray-600">Share your thoughts</p>
                     </div>
                   </div>
 
-                  <form onSubmit={handleCommentSubmit} className="flex gap-3">
+                  <form onSubmit={handleCommentSubmit} className="flex flex-col sm:flex-row gap-3">
                     <motion.input
                       type="text"
                       value={commentText}
                       onChange={(e) => setCommentText(e.target.value)}
                       placeholder="Write a comment..."
-                      className="flex-1 px-4 py-3 rounded-xl border border-gray-300 text-gray-900 placeholder-gray-500 focus:ring-2 focus:ring-green-500/20 focus:border-green-500 transition-all duration-300"
+                      className="flex-1 px-4 py-3 rounded-xl border border-gray-300 text-gray-900 placeholder-gray-500 focus:ring-2 focus:ring-green-500/20 focus:border-green-500 transition-all duration-300 text-sm sm:text-base"
                       whileFocus={{ scale: 1.01 }}
                       transition={{ duration: 0.2 }}
                     />
                     <motion.button
                       type="submit"
                       disabled={!commentText.trim()}
-                      className={`px-6 py-3 rounded-xl font-semibold transition-all duration-300 flex items-center gap-2 ${
+                      className={`px-4 sm:px-6 py-3 rounded-xl font-semibold transition-all duration-300 flex items-center justify-center gap-2 flex-shrink-0 ${
                         commentText.trim()
                           ? 'bg-gradient-to-r from-green-600 to-green-700 text-white shadow-lg hover:shadow-xl'
                           : 'bg-gray-200 text-gray-400 cursor-not-allowed'
@@ -312,7 +312,7 @@ const PostDetailPage = () => {
                       whileTap={commentText.trim() ? { scale: 0.95 } : {}}
                     >
                       <Send className="w-4 h-4" />
-                      <span>Comment</span>
+                      <span className="text-sm sm:text-base">Comment</span>
                     </motion.button>
                   </form>
                 </motion.div>
@@ -325,12 +325,12 @@ const PostDetailPage = () => {
                   transition={{ delay: 0.3, duration: 0.6 }}
                 >
                   {/* Comments Header */}
-                  <div className="p-6 border-b border-gray-200">
+                  <div className="p-4 sm:p-6 border-b border-gray-200">
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 p-2.5 shadow-lg">
+                      <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 p-2.5 shadow-lg flex-shrink-0">
                         <Users className="w-full h-full text-white" />
                       </div>
-                      <div>
+                      <div className="min-w-0 flex-1">
                         <h3 className="text-lg font-semibold text-gray-900">Comments</h3>
                         <p className="text-sm text-gray-600">
                           {comments.length} {comments.length === 1 ? 'comment' : 'comments'}
@@ -408,7 +408,7 @@ const PostDetailPage = () => {
                         <motion.button
                           onClick={() => fetchComments(page + 1)}
                           disabled={commentLoading}
-                          className={`flex items-center gap-2 px-6 py-3 rounded-xl font-medium transition-all duration-300 ${
+                          className={`flex items-center gap-2 px-4 sm:px-6 py-3 rounded-xl font-medium transition-all duration-300 ${
                             commentLoading
                               ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
                               : 'bg-blue-50 text-blue-600 hover:bg-blue-100 hover:text-blue-700'
@@ -419,12 +419,12 @@ const PostDetailPage = () => {
                           {commentLoading ? (
                             <>
                               <Loader2 className="w-4 h-4 animate-spin" />
-                              <span>Loading...</span>
+                              <span className="text-sm sm:text-base">Loading...</span>
                             </>
                           ) : (
                             <>
                               <Clock className="w-4 h-4" />
-                              <span>Load more comments</span>
+                              <span className="text-sm sm:text-base">Load more comments</span>
                             </>
                           )}
                         </motion.button>
