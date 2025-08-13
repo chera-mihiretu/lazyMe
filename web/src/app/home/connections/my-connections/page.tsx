@@ -60,13 +60,13 @@ const MyConnectionsPage: React.FC = () => {
     setError("");
     try {
       const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
-      const res = await fetch(`${baseUrl}/connections/remove`, {
-        method: "POST",
+      const res = await fetch(`${baseUrl}/connections/`, {
+        method: "DELETE",
         headers: {
           "Content-Type": "application/json",
           Authorization: token ? `Bearer ${token}` : "",
         },
-        body: JSON.stringify({ connection_id: userId }),
+        body: JSON.stringify({ connectee_id: userId }),
       });
       if (res.ok) {
         setConnections((prev) => prev.filter((u) => u.id !== userId));

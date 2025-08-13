@@ -13,6 +13,7 @@ import {
   
 } from "lucide-react";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 
 interface UserType {
   id: string;
@@ -31,7 +32,6 @@ interface CommentType {
 }
 
 const baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
-
 const Comment: React.FC<{
   comment: CommentType;
   depth?: number;
@@ -48,6 +48,13 @@ const Comment: React.FC<{
   const [liked, setLiked] = useState(false);
   const [likes, setLikes] = useState(comment.likes || 0);
   const [replyCount, setReplyCount] = useState(comment.reply_count || 0);
+  const router = useRouter();
+
+  const handleUserClick = () => {
+    if (comment.user?.id) {
+      router.push(`/home/profile?id=${comment.user.id}`);
+    }
+  };
 
   const fetchReplies = async (pageNum = 1) => {
     setRepliesLoading(true);
@@ -152,10 +159,11 @@ const Comment: React.FC<{
         {/* Comment Header */}
         <div className="flex items-start gap-2 sm:gap-3">
           {/* Avatar */}
-          <motion.div
+          <motion.button
             className="relative flex-shrink-0"
             whileHover={{ scale: 1.05 }}
             transition={{ duration: 0.3 }}
+            onClick={handleUserClick}
           >
             <div className="absolute inset-0 bg-gradient-to-br from-purple-500/20 to-blue-500/20 rounded-full blur-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
             <div className={`relative ${isNested ? 'w-7 h-7 sm:w-8 sm:h-8' : 'w-8 h-8 sm:w-10 sm:h-10'} rounded-full overflow-hidden border-2 border-gray-200 group-hover:border-purple-300 transition-colors duration-300`}>
@@ -173,16 +181,16 @@ const Comment: React.FC<{
                 </div>
               )}
             </div>
-          </motion.div>
+          </motion.button>
 
           {/* Comment Content */}
           <div className="flex-1 min-w-0">
             {/* User Info and Time */}
             <div className="flex items-center justify-between mb-2">
               <div className="flex items-center gap-1 sm:gap-2">
-                <h4 className={`font-semibold text-gray-900 ${isNested ? 'text-xs sm:text-sm' : 'text-sm sm:text-base'} group-hover:text-purple-700 transition-colors duration-300 truncate`}>
+                <button onClick={handleUserClick} className={`font-semibold text-gray-900 ${isNested ? 'text-xs sm:text-sm' : 'text-sm sm:text-base'} group-hover:text-purple-700 transition-colors duration-300 truncate hover:underline text-left`}>
                   {comment.user?.name || "Unknown"}
-                </h4>
+                </button>
                 {comment.user?.acedemic_year && (
                   <span className="px-1.5 sm:px-2 py-0.5 bg-purple-100 text-purple-700 text-xs font-medium rounded-full flex-shrink-0">
                     Year {comment.user.acedemic_year}

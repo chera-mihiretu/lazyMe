@@ -117,14 +117,20 @@ const JobCard: React.FC<{ job: JobPost }> = ({ job }) => {
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
-          reported_job: job.id,
+          reported_post_id: job.id,
           reason: reportReason,
         }),
       });
       
       if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData?.message || `HTTP ${response.status}: ${response.statusText}`);
+        const errorData: unknown = await response.json().catch(() => ({}));
+        const errField = (errorData as { error?: unknown; message?: unknown })?.error;
+        const derivedError =
+          typeof errField === 'string' ? errField :
+          Array.isArray(errField) ? errField.join(', ') :
+          (errField && typeof errField === 'object' && 'message' in (errField as Record<string, unknown>)) ? String((errField as Record<string, unknown>).message) :
+          (errorData as { message?: unknown })?.message as string || `HTTP ${response.status}: ${response.statusText}`;
+        throw new Error(derivedError);
       }
       
       // Success - close dialog and reset

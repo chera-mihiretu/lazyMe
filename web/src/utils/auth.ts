@@ -25,6 +25,9 @@ export function getUserRole(): string | null {
   try {
     const payload = token.split('.')[1];
     const decoded = JSON.parse(atob(payload));
+    if (decoded.role === 'super_admin') {
+      return 'admin';
+    }
     return decoded.role || null;
   } catch {
     return null;

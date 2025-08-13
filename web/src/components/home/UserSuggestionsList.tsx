@@ -36,7 +36,25 @@ const UserSuggestionsList: React.FC<UserSuggestionsListProps> = ({ page = 1 }) =
       .then(async (res) => {
         if (!res.ok) throw new Error("Failed to fetch user suggestions");
         const data = await res.json();
-        setUsers(data.suggestions || []);
+        type ApiSuggestion = {
+          id?: string;
+          name?: string;
+          email?: string;
+          acedemic_year?: unknown;
+          academic_year?: unknown;
+          academicYear?: unknown;
+          follow_count?: unknown;
+          followers?: unknown;
+          profile_image_url?: string;
+        };
+        const normalized = (Array.isArray(data.suggestions) ? data.suggestions : []).map((u: ApiSuggestion) => ({
+          ...u,
+          acedemic_year: Number(
+            u?.acedemic_year ?? u?.academic_year ?? u?.academicYear ?? 0
+          ),
+          follow_count: Number(u?.follow_count ?? u?.followers ?? 0),
+        }));
+        setUsers(normalized);
         setLoading(false);
       })
       .catch((e) => {

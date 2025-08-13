@@ -13,7 +13,8 @@ import {
   Loader2,
   GraduationCap,
   Clock,
-  Eye
+  Eye,
+  AlertTriangle
 } from "lucide-react";
 import type { Post } from "@/types/post";
 import { formatTimeAgo } from "@/app/helpers/time_formatter";
@@ -76,18 +77,21 @@ const PostCard: React.FC<{ post: Post }> = ({ post }) => {
   const [showReportDialog, setShowReportDialog] = useState(false);
   const [reportReason, setReportReason] = useState("");
   const [reportLoading, setReportLoading] = useState(false);
+  const [reportError, setReportError] = useState("");
 
   const handleReport = () => {
     setShowMenu(false);
     setShowReportDialog(true);
+    setReportError("");
   };
 
   const submitReport = async () => {
     if (!reportReason.trim()) return;
     setReportLoading(true);
+    setReportError("");
     try {
       const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
-      await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/reports/post`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/reports/post`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -98,10 +102,21 @@ const PostCard: React.FC<{ post: Post }> = ({ post }) => {
           reason: reportReason,
         }),
       });
+      if (!res.ok) {
+        const data: unknown = await res.json().catch(() => ({}));
+        const errField = (data as { error?: unknown; message?: unknown })?.error;
+        const derivedError =
+          typeof errField === 'string' ? errField :
+          Array.isArray(errField) ? errField.join(', ') :
+          (errField && typeof errField === 'object' && 'message' in (errField as Record<string, unknown>)) ? String((errField as Record<string, unknown>).message) :
+          (data as { message?: unknown })?.message as string || `HTTP ${res.status}: ${res.statusText}`;
+        throw new Error(derivedError);
+      }
       setShowReportDialog(false);
       setReportReason("");
-    } catch {
-      // handle error
+    } catch (err) {
+      console.error("Report post error:", err);
+      setReportError(err instanceof Error ? err.message : "Failed to submit report. Please try again.");
     }
     setReportLoading(false);
   };
@@ -459,6 +474,22 @@ const PostCard: React.FC<{ post: Post }> = ({ post }) => {
                 />
               </div>
 
+              {/* Error message */}
+              <AnimatePresence>
+                {reportError && (
+                  <motion.div
+                    className="flex items-center gap-2 p-3 mb-4 rounded-xl bg-red-50 border border-red-200"
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: 'auto' }}
+                    exit={{ opacity: 0, height: 0 }}
+                    transition={{ duration: 0.2 }}
+                  >
+                    <AlertTriangle className="w-4 h-4 text-red-500" />
+                    <p className="text-sm text-red-700">{reportError}</p>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
               <div className="flex gap-3">
                 <motion.button
                   className={`flex-1 py-3 px-4 rounded-xl font-semibold text-white transition-all duration-300 ${
@@ -484,6 +515,7 @@ const PostCard: React.FC<{ post: Post }> = ({ post }) => {
                   onClick={() => {
                     setShowReportDialog(false);
                     setReportReason("");
+                    setReportError("");
                   }}
                   disabled={reportLoading}
                   whileTap={{ scale: 0.98 }}
