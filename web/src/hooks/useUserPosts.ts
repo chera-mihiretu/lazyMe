@@ -20,7 +20,7 @@ export function useUserPosts(page: number = 1) {
         console.log('useUserPosts response:', data, 'page:', page);
         if (res.ok && Array.isArray(data.posts)) {
           if (page === 1) {
-            setPosts(data.posts);
+          setPosts(data.posts);
           } else {
             setPosts(prev => [...prev, ...data.posts]);
           }
@@ -60,7 +60,7 @@ export function useOtherUserPosts(page: number = 1, id: string) {
         console.log('useOtherUserPosts response:', data, 'id:', id, 'page:', page);
         if (res.ok && Array.isArray(data.posts)) {
           if (page === 1) {
-            setPosts(data.posts);
+          setPosts(data.posts);
           } else {
             setPosts(prev => [...prev, ...data.posts]);
           }
@@ -77,6 +77,6 @@ export function useOtherUserPosts(page: number = 1, id: string) {
     }
     fetchPosts();
   }, [page, id]);
-
+  
   return { posts, loading, error, hasNext };
 }

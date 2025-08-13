@@ -8,7 +8,7 @@ import {
   Mail, 
   Phone, 
   MapPin, 
-  Twitter, 
+  X, 
   Facebook, 
   Linkedin, 
   Instagram,
@@ -21,7 +21,7 @@ import {
 
 
 const socialLinks = [
-  { icon: Twitter, href: 'https://twitter.com/iknow', label: 'Twitter', color: 'hover:text-blue-400' },
+  { icon: X, href: 'https://x.com/lazymetweet', label: 'X', color: 'hover:text-blue-400' },
   { icon: Facebook, href: 'https://facebook.com/iknow', label: 'Facebook', color: 'hover:text-blue-600' },
   { icon: Linkedin, href: 'https://linkedin.com/company/iknow', label: 'LinkedIn', color: 'hover:text-blue-700' },
   { icon: Instagram, href: 'https://instagram.com/iknow', label: 'Instagram', color: 'hover:text-pink-600' },

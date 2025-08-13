@@ -76,6 +76,7 @@ const JobCard: React.FC<{ job: JobPost }> = ({ job }) => {
   const [showReportDialog, setShowReportDialog] = useState(false);
   const [reportReason, setReportReason] = useState("");
   const [reportLoading, setReportLoading] = useState(false);
+  const [reportError, setReportError] = useState("");
   
   const getUserID = () => (typeof window !== 'undefined' ? localStorage.getItem('user_id') : null);
   const isCurrentUser = getUserID() === job.user?.id;
@@ -93,30 +94,50 @@ const JobCard: React.FC<{ job: JobPost }> = ({ job }) => {
   const handleReport = () => {
     setShowMenu(false);
     setShowReportDialog(true);
+    setReportError("");
   };
   
   const submitReport = async () => {
     if (!reportReason.trim()) return;
     setReportLoading(true);
+    setReportError("");
+    
     try {
       const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
-      await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/reports/joba`, {
+      if (!token) {
+        throw new Error("Authentication required");
+      }
+
+      console.log(`${process.env.NEXT_PUBLIC_BASE_URL}/reports/job`)
+      
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/reports/job`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: token ? `Bearer ${token}` : "",
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
-          reported_post_id: job.id,
+          reported_job: job.id,
           reason: reportReason,
         }),
       });
+      
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData?.message || `HTTP ${response.status}: ${response.statusText}`);
+      }
+      
+      // Success - close dialog and reset
       setShowReportDialog(false);
       setReportReason("");
-    } catch {
-      // handle error
+      // You could show a success message here if needed
+      
+    } catch (error) {
+      console.error('Report submission error:', error);
+      setReportError(error instanceof Error ? error.message : 'Failed to submit report. Please try again.');
+    } finally {
+      setReportLoading(false);
     }
-    setReportLoading(false);
   };
 
   // Microlink.io Link Preview
@@ -368,7 +389,7 @@ const JobCard: React.FC<{ job: JobPost }> = ({ job }) => {
             </motion.button>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 relative">
             <div className="flex items-center gap-1 text-sm text-gray-500">
               <Clock className="w-4 h-4" />
               <span>{formatTimeAgo(job.created_at)}</span>
@@ -393,7 +414,7 @@ const JobCard: React.FC<{ job: JobPost }> = ({ job }) => {
               {showMenu && (
                 <motion.div
                   ref={menuRef}
-                  className="absolute top-full right-0 mt-2 w-48 bg-white border border-gray-200 rounded-xl shadow-2xl z-50 overflow-hidden"
+                  className="absolute top-12 right-0 mt-2 w-48 bg-white border border-gray-200 rounded-xl shadow-2xl z-50 overflow-hidden"
                   initial={{ opacity: 0, scale: 0.95, y: -10 }}
                   animate={{ opacity: 1, scale: 1, y: 0 }}
                   exit={{ opacity: 0, scale: 0.95, y: -10 }}
@@ -534,11 +555,11 @@ const JobCard: React.FC<{ job: JobPost }> = ({ job }) => {
         </motion.div>
       </div>
 
-      {/* Report Dialog */}
+      {/* Report Dialog - Fixed positioning and backdrop */}
       <AnimatePresence>
         {showReportDialog && (
           <motion.div
-            className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+            className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[9999] p-4"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -574,11 +595,27 @@ const JobCard: React.FC<{ job: JobPost }> = ({ job }) => {
                   disabled={reportLoading}
                 />
               </div>
+
+              {/* Error Message */}
+              <AnimatePresence>
+                {reportError && (
+                  <motion.div
+                    className="flex items-center gap-3 p-3 bg-red-50 border border-red-200 rounded-xl mb-4"
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: 'auto' }}
+                    exit={{ opacity: 0, height: 0 }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    <AlertTriangle className="w-4 h-4 text-red-500 flex-shrink-0" />
+                    <p className="text-red-700 text-sm">{reportError}</p>
+                  </motion.div>
+                )}
+              </AnimatePresence>
               
               <div className="flex gap-3">
                 <motion.button
                   className="flex-1 px-4 py-3 bg-gray-100 text-gray-700 rounded-xl font-semibold hover:bg-gray-200 transition-colors duration-300"
-                  onClick={() => { setShowReportDialog(false); setReportReason(''); }}
+                  onClick={() => { setShowReportDialog(false); setReportReason(''); setReportError(''); }}
                   disabled={reportLoading}
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}

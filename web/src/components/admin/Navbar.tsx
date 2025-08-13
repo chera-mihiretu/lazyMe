@@ -111,9 +111,9 @@ const Navbar: React.FC = () => {
             <motion.button
               onClick={() => setShowAvatarMenu(!showAvatarMenu)}
               className="p-1 bg-gradient-to-r from-purple-100 to-blue-100 border border-gray-200 rounded-full hover:from-purple-200 hover:to-blue-200 transition-all duration-300"
-              whileHover={{ scale: 1.05 }}
+            whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
-            >
+          >
               <UserAvatar />
             </motion.button>
 
@@ -145,8 +145,8 @@ const Navbar: React.FC = () => {
                       <LogOut className="w-4 h-4" />
                       <span>Logout</span>
                     </motion.button>
-                  </div>
-                </motion.div>
+            </div>
+          </motion.div>
               )}
             </AnimatePresence>
           </div>

@@ -427,6 +427,7 @@ const ProfilePageContent: React.FC = () => {
                   {isOwnProfile && (
                     <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
                       <motion.button
+                        onClick={() => router.push('/home/profile/edit')}
                         className="inline-flex items-center gap-2 px-4 sm:px-6 py-2 sm:py-3 bg-gradient-to-r from-purple-600 to-blue-600 text-white font-semibold rounded-lg sm:rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 text-sm sm:text-base"
                         initial={{ opacity: 0, scale: 0.8 }}
                         animate={{ opacity: 1, scale: 1 }}

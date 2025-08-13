@@ -17,7 +17,7 @@ const ConnectionsPage: React.FC = () => {
   const [error, setError] = useState("");
   const [accepting, setAccepting] = useState<string | null>(null);
   const router = useRouter();
-
+ 
   // Navigation handler for user profiles
   const handleUserClick = (userId: string) => {
     router.push(`/home/profile?id=${userId}`);
@@ -281,7 +281,7 @@ const ConnectionsPage: React.FC = () => {
                     className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br from-emerald-500 to-blue-600 rounded-lg sm:rounded-xl flex items-center justify-center shadow-md"
                     whileHover={{ scale: 1.05, rotate: 5 }}
                     transition={{ type: "spring", stiffness: 300 }}
-                  >
+                >
                     <Users className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
                   </motion.div>
                   <div>
@@ -312,9 +312,9 @@ const ConnectionsPage: React.FC = () => {
                             transition={{ type: "spring", stiffness: 300 }}
                             onClick={() => handleUserClick(user.id)}
                           >
-                            <Image
-                              src={user.profile_image_url || "/icons/avatar.png"}
-                              alt={user.name}
+                    <Image
+                      src={user.profile_image_url || "/icons/avatar.png"}
+                      alt={user.name}
                               width={40}
                               height={40}
                               className="w-10 h-10 sm:w-12 sm:h-12 rounded-full object-cover border-2 border-emerald-200/50 shadow-sm"
@@ -323,7 +323,7 @@ const ConnectionsPage: React.FC = () => {
                               className="absolute -top-1 -right-1 w-3 h-3 sm:w-4 sm:h-4 bg-gradient-to-br from-emerald-400 to-blue-500 rounded-full border-2 border-white"
                               animate={{ scale: [1, 1.2, 1] }}
                               transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-                            />
+                    />
                           </motion.button>
                           <motion.button
                             className="text-left"
@@ -334,11 +334,11 @@ const ConnectionsPage: React.FC = () => {
                             <h3 className="font-semibold text-gray-900 text-base sm:text-lg hover:text-emerald-700 transition-colors duration-300">{user.name}</h3>
                             <p className="text-gray-500 text-xs sm:text-sm">{user.email}</p>
                           </motion.button>
-                        </div>
+                    </div>
                         
                         <motion.button
-                          onClick={() => handleAccept(user.id)}
-                          disabled={accepting === user.id}
+                    onClick={() => handleAccept(user.id)}
+                    disabled={accepting === user.id}
                           className={`inline-flex items-center gap-1.5 sm:gap-2 px-4 sm:px-6 py-2 sm:py-2.5 rounded-lg sm:rounded-xl font-semibold text-xs sm:text-sm transition-all duration-300 shadow-md hover:shadow-lg ${
                             accepting === user.id
                               ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
@@ -346,7 +346,7 @@ const ConnectionsPage: React.FC = () => {
                           }`}
                           whileHover={accepting === user.id ? {} : { scale: 1.05, y: -2 }}
                           whileTap={accepting === user.id ? {} : { scale: 0.95 }}
-                        >
+                  >
                           {accepting === user.id ? (
                             <>
                               <Loader2 className="w-3 h-3 sm:w-4 sm:h-4 animate-spin" />

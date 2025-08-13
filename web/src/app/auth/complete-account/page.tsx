@@ -102,6 +102,7 @@ const CompleteAccountPage: React.FC = () => {
       const formData = new FormData();
       formData.append("university_id", selectedUniversity);
       formData.append("school_id", selectedSchool);
+      
       if (selectedDepartment) {
         formData.append("department_id", selectedDepartment);
       }
