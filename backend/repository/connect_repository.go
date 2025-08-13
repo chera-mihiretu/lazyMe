@@ -198,7 +198,7 @@ func (c *connectRepository) GetConnectRequests(ctx context.Context, userID strin
 	}
 
 	skip := (page - 1) * ConnectPageSize
-	limit := ConnectPageSize
+	limit := ConnectPageSize + 1
 
 	findOptions := options.Find().SetSkip(int64(skip)).SetLimit(int64(limit))
 
@@ -280,7 +280,7 @@ func (c *connectRepository) GetConnections(ctx context.Context, userID string, p
 		},
 	}
 	skip := (page - 1) * ConnectPageSize
-	limit := ConnectPageSize
+	limit := ConnectPageSize + 1
 
 	findOptions := options.Find().SetSkip(int64(skip)).SetLimit(int64(limit))
 	cursor, err := c.connects.Find(ctx, filter, findOptions)

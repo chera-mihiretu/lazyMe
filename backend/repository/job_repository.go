@@ -18,6 +18,7 @@ type JobRepository interface {
 	GetJobByID(ctx context.Context, id primitive.ObjectID) (models.Opportunities, error)
 	UpdateJob(ctx context.Context, job models.Opportunities) (models.Opportunities, error)
 	DeleteJob(ctx context.Context, id primitive.ObjectID) error
+	GetJobsWithListOfId(ctx context.Context, jobIDs []primitive.ObjectID) ([]models.Opportunities, error)
 	GetRecommendedJobs(ctx context.Context, userDepartmentID primitive.ObjectID, userSchoolID primitive.ObjectID, page int) ([]models.Opportunities, error)
 }
 
@@ -35,6 +36,29 @@ func NewJobRepository(db *mongo.Database,
 		departmentRepo:   departmentRepo,
 		geminiRepository: geminiRepository,
 	}
+}
+
+func (r *jobRepository) GetJobsWithListOfId(ctx context.Context, jobIDs []primitive.ObjectID) ([]models.Opportunities, error) {
+	var jobs []models.Opportunities
+	cursor, err := r.jobs.Find(ctx, bson.M{
+		"_id": bson.M{"$in": jobIDs},
+	})
+	if err != nil {
+		return nil, err
+	}
+	defer cursor.Close(ctx)
+	for cursor.Next(ctx) {
+
+		var job models.Opportunities
+		if err := cursor.Decode(&job); err != nil {
+			return nil, err
+		}
+		jobs = append(jobs, job)
+	}
+	if err := cursor.Err(); err != nil {
+		return nil, err
+	}
+	return jobs, nil
 }
 
 func (r *jobRepository) CreateJob(ctx context.Context, job models.Opportunities) (models.Opportunities, error) {

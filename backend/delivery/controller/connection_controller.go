@@ -102,6 +102,12 @@ func (c *ConnectionController) GetConnections(ctx *gin.Context) {
 		return
 	}
 
+	next := false
+	if len(connections) > 10 {
+		next = true
+		connections = connections[:10]
+	}
+
 	listOfConnection := []primitive.ObjectID{}
 
 	fmt.Println(connections)
@@ -126,9 +132,9 @@ func (c *ConnectionController) GetConnections(ctx *gin.Context) {
 	}
 
 	ctx.JSON(200, gin.H{
-		"user":        userIDStr,
 		"connections": users,
 		"page":        page,
+		"next":        next,
 	})
 
 }
@@ -158,6 +164,12 @@ func (c *ConnectionController) GetConnectRequests(ctx *gin.Context) {
 		return
 	}
 
+	next := false
+	if len(connectRequests) > 10 {
+		next = true
+		connectRequests = connectRequests[:10]
+	}
+
 	listOfConnection := []primitive.ObjectID{}
 
 	for _, con := range connectRequests {
@@ -182,6 +194,7 @@ func (c *ConnectionController) GetConnectRequests(ctx *gin.Context) {
 	ctx.JSON(200, gin.H{
 		"connections": users,
 		"page":        page,
+		"next":        next,
 	})
 }
 

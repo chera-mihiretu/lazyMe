@@ -2,6 +2,7 @@ package controller
 
 import (
 	"fmt"
+	"log"
 	"net/http"
 	"strconv"
 
@@ -126,20 +127,21 @@ func (p *PostController) GetPosts(ctx *gin.Context) {
 	}
 	userID, exist := ctx.Get("user_id")
 	if !exist {
-		fmt.Println("Error: User ID not found in context")
+		log.Println("Error: User ID not found in context")
 		ctx.JSON(400, gin.H{"error": "User ID not found in context"})
 		return
 	}
 	userIDStr, ok := userID.(string)
 	if !ok {
-		fmt.Println("Error: Invalid user ID type:", userID)
+		log.Println("Error: Invalid user ID type:", userID)
 		ctx.JSON(400, gin.H{"error": "Invalid user ID type"})
 		return
 	}
 
 	post, err := p.postUseCase.GetPosts(ctx, userIDStr, pageInt)
 	if err != nil {
-		fmt.Println("Error fetching posts:", err)
+		log.Println("Error fetching posts:", err)
+
 		ctx.JSON(500,
 			gin.H{
 				"message": "There is problem fetching posts" + err.Error(),
@@ -151,7 +153,7 @@ func (p *PostController) GetPosts(ctx *gin.Context) {
 	userViewPost, err := p.GetPostWithUsers(ctx, post[:min(len(post), repository.Pagesize)])
 
 	if err != nil {
-		fmt.Println("Error converting post into json:", err)
+		log.Println("Error converting post into json:", err)
 		ctx.JSON(500,
 			gin.H{
 				"message": "There is problem converting post into json" + err.Error(),
@@ -305,6 +307,57 @@ func (p *PostController) CreatePost(ctx *gin.Context) {
 		"post":    uploadedPost,
 	})
 
+}
+
+func (p *PostController) VerifyPost(ctx *gin.Context) {
+	postID := ctx.Query("id")
+	if postID == "" {
+		fmt.Println("Error: Post ID is required")
+		ctx.JSON(400, gin.H{"error": "Post ID is required"})
+		return
+	}
+
+	postIDPrimitive, err := primitive.ObjectIDFromHex(postID)
+	if err != nil {
+		fmt.Println("Error: Invalid Post ID format:", err)
+		ctx.JSON(400, gin.H{"error": "Invalid Post ID format"})
+		return
+	}
+
+	err = p.postUseCase.VerifyPosts(ctx, postIDPrimitive)
+	if err != nil {
+		fmt.Println("Error: Failed to verify post:", err)
+		ctx.JSON(500, gin.H{"error": "Failed to verify post " + err.Error()})
+		return
+	}
+
+	ctx.JSON(200, gin.H{"message": "Post verified successfully"})
+}
+
+func (p *PostController) RemoveUnverifiedPost(ctx *gin.Context) {
+	postID := ctx.Query("id")
+	if postID == "" {
+		fmt.Println("Error: Post ID is required")
+		ctx.JSON(400, gin.H{"error": "Post ID is required"})
+		return
+	}
+
+	postIDPrimitive, err := primitive.ObjectIDFromHex(postID)
+	if err != nil {
+		fmt.Println("Error: Invalid Post ID format:", err)
+		ctx.JSON(400, gin.H{"error": "Invalid Post ID format"})
+		return
+	}
+
+	err = p.postUseCase.RemoveUnverifiedPost(ctx, postIDPrimitive)
+
+	if err != nil {
+		fmt.Println("Error: Failed to delete post:", err)
+		ctx.JSON(500, gin.H{"error": "Failed to delete post " + err.Error()})
+		return
+	}
+
+	ctx.JSON(200, gin.H{"message": "Post removed successfully"})
 }
 
 func (p *PostController) UpdatePost(ctx *gin.Context) {
@@ -496,6 +549,37 @@ func (p *PostController) GetPostsByUserID(ctx *gin.Context) {
 	ctx.JSON(200, gin.H{
 		"posts": postViews,
 		"page":  page,
+		"next":  nextPage,
+	})
+}
+
+func (p *PostController) GetUnverifiedPosts(ctx *gin.Context) {
+	pageStr := ctx.Query("page")
+	page, err := strconv.Atoi(pageStr)
+	if err != nil || page < 1 {
+		fmt.Println("Error: Invalid page number:", err)
+		ctx.JSON(400, gin.H{"error": "Invalid page number"})
+		return
+	}
+
+	posts, err := p.postUseCase.GetUnverifiedPosts(ctx, page)
+	if err != nil {
+		fmt.Println("Error: Failed to get unverified posts:", err)
+		ctx.JSON(500, gin.H{"error": "Failed to get unverified posts " + err.Error()})
+		return
+	}
+
+	nextPage := len(posts) > repository.Pagesize
+
+	postViews, err := p.GetPostWithUsers(ctx, posts[:min(len(posts), repository.Pagesize)])
+	if err != nil {
+		fmt.Println("Error: Failed to get unverified posts (user view):", err)
+		ctx.JSON(500, gin.H{"error": "Failed to get unverified posts " + err.Error()})
+		return
+	}
+
+	ctx.JSON(200, gin.H{
+		"posts": postViews,
 		"next":  nextPage,
 	})
 }

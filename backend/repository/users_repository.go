@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"log"
 	"sort"
 	"time"
 
@@ -22,17 +23,104 @@ type UserRepository interface {
 	CompleteUser(ctx context.Context, user models.User) (models.UserView, error)
 	UserAnalytics(ctx context.Context) (models.UserAnalytics, error)
 	GetAllUsers(ctx context.Context) ([]models.UserView, error)
+	UpdateMe(ctx context.Context, user models.User) (models.UserView, error)
 }
 
 type userRepository struct {
-	users *mongo.Collection
+	users                *mongo.Collection
+	departmentCollection *mongo.Collection
+	schoolCollection     *mongo.Collection
+	universityCollection *mongo.Collection
 }
 
 func NewUserRepository(db *mongo.Database) *userRepository {
 
 	return &userRepository{
-		users: db.Collection("users"),
+		users:                db.Collection("users"),
+		departmentCollection: db.Collection("departments"),
+		schoolCollection:     db.Collection("schools"),
+		universityCollection: db.Collection("universities"),
 	}
+}
+
+func (c *userRepository) UpdateMe(ctx context.Context, user models.User) (models.UserView, error) {
+
+	beforeUser, err := c.GetUserById(ctx, user.ID.Hex())
+	if err != nil {
+		return models.UserView{}, err
+	}
+
+	update := bson.M{}
+
+	if user.Name != "" {
+		update["name"] = user.Name
+	}
+	if user.ProfileImageURL != "" {
+		update["profile_image_url"] = user.ProfileImageURL
+	}
+	log.Println("we are here")
+	if user.UniversityID != nil && *user.UniversityID != primitive.NilObjectID {
+		count, err := c.universityCollection.CountDocuments(ctx, bson.M{"_id": *user.UniversityID})
+		if err != nil {
+			return models.UserView{}, fmt.Errorf("university with ID %s does not exist", user.UniversityID.Hex())
+		}
+		if count == 0 {
+			return models.UserView{}, fmt.Errorf("university with ID %s does not exist", user.UniversityID.Hex())
+		}
+		update["university_id"] = *user.UniversityID
+		update["school_id"] = nil
+		update["department_id"] = nil
+
+	}
+	log.Println("We are here at school")
+	if user.SchoolID != nil && *user.SchoolID != primitive.NilObjectID {
+		if _, hasUniversity := update["university_id"]; hasUniversity {
+			count, err := c.schoolCollection.CountDocuments(ctx, bson.M{"_id": *user.SchoolID})
+			if err != nil {
+				return models.UserView{}, fmt.Errorf("school with ID %s does not exist", user.SchoolID.Hex())
+			}
+			if count != 0 {
+				update["school_id"] = *user.SchoolID
+				update["department_id"] = nil
+			}
+		}
+	}
+	log.Println("We are here at department")
+	if user.DepartmentID != nil && *user.DepartmentID != primitive.NilObjectID {
+		if _, hasSchool := update["school_id"]; hasSchool {
+			count, err := c.departmentCollection.CountDocuments(ctx, bson.M{"_id": *user.DepartmentID})
+			if err != nil {
+				return models.UserView{}, fmt.Errorf("department with ID %s does not exist", user.DepartmentID.Hex())
+			}
+			if count != 0 {
+				update["department_id"] = *user.DepartmentID
+			}
+		}
+	}
+	log.Println("We are here at acedemic year")
+	if user.AcedemicYear != 0 {
+		update["acedemic_year"] = user.AcedemicYear
+	}
+
+	var res *mongo.UpdateResult
+	if len(update) > 0 {
+		res, err = c.users.UpdateOne(ctx, bson.M{"_id": user.ID}, bson.M{"$set": update})
+	} else {
+		res = &mongo.UpdateResult{MatchedCount: 1}
+	}
+
+	if err != nil {
+		return models.UserView{}, err
+	}
+	if res.MatchedCount == 0 {
+		return models.UserView{}, mongo.ErrNoDocuments
+	}
+	var updatedUser models.UserView
+	updatedUser.ID = user.ID
+	updatedUser.Name = user.Name
+	updatedUser.ProfileImageURL = user.ProfileImageURL
+	updatedUser.AcedemicYear = user.AcedemicYear
+	return beforeUser, nil
 }
 
 func (c *userRepository) GetUserById(ctx context.Context, userID string) (models.UserView, error) {

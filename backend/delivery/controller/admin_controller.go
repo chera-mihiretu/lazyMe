@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"log"
 	"net/http"
 
 	"github.com/chera-mihiretu/IKnow/domain/models"
@@ -32,6 +33,7 @@ func (ac *AdminController) SendEmailToUsers(c *gin.Context) {
 	}
 
 	if err := ac.adminUsecase.SendEmailToUsers(c.Request.Context(), email); err != nil {
+		log.Println("Error sending email:", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to send email: " + err.Error()})
 		return
 	}

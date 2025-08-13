@@ -26,6 +26,9 @@ type PostRepository interface {
 	DeletePost(ctx context.Context, userID string, postID string) error
 	SearchPosts(ctx context.Context, query string, page int) ([]models.Posts, error)
 	GetPostsWithListOfId(ctx context.Context, postIDs []primitive.ObjectID) ([]models.Posts, error)
+	GetUnverifiedPosts(ctx context.Context, page int) ([]models.Posts, error)
+	VerifyPosts(ctx context.Context, postID primitive.ObjectID) error
+	RemoveUnverifiedPost(ctx context.Context, postID primitive.ObjectID) error
 }
 
 type postRepository struct {
@@ -46,6 +49,49 @@ func NewPostRepository(db *mongo.Database,
 		userRepository:    &userRepo,
 		geminiRepository:  geminiRepo,
 	}
+}
+
+func (r *postRepository) RemoveUnverifiedPost(ctx context.Context, postID primitive.ObjectID) error {
+	filter := bson.M{"_id": postID}
+	_, err := r.postsDB.DeleteOne(ctx, filter)
+	if err != nil {
+		return fmt.Errorf("failed to remove unverified post: %v", err)
+	}
+	return nil
+}
+
+func (r *postRepository) VerifyPosts(ctx context.Context, postID primitive.ObjectID) error {
+
+	filter := bson.M{"_id": postID}
+	update := bson.M{"$set": bson.M{"is_validated": true, "updated_at": time.Now()}}
+	_, err := r.postsDB.UpdateOne(ctx, filter, update)
+	if err != nil {
+		return fmt.Errorf("failed to verify post: %v", err)
+	}
+	return nil
+}
+
+func (p *postRepository) GetUnverifiedPosts(ctx context.Context, page int) ([]models.Posts, error) {
+	filter := bson.M{"is_validated": false}
+	pageSize := Pagesize
+	findOptions := options.Find().SetSkip(int64((page - 1) * pageSize)).SetLimit(int64(pageSize + 1))
+	cursor, err := p.postsDB.Find(ctx, filter, findOptions)
+	if err != nil {
+		return nil, err
+	}
+	defer cursor.Close(ctx)
+	var posts []models.Posts
+	for cursor.Next(ctx) {
+		var post models.Posts
+		if err := cursor.Decode(&post); err != nil {
+			return nil, err
+		}
+		posts = append(posts, post)
+	}
+	if err := cursor.Err(); err != nil {
+		return nil, err
+	}
+	return posts, nil
 }
 
 func (p *postRepository) GetPostsWithListOfId(ctx context.Context, postIDs []primitive.ObjectID) ([]models.Posts, error) {
@@ -81,7 +127,14 @@ func (p *postRepository) GetRecomendedPosts(ctx context.Context, userID string, 
 	if err != nil {
 		return nil, err
 	}
-	userDepartments := []string{user.Department} // wrap single department in a slice
+
+	var userDepartments []string
+	if user.DepartmentID == nil {
+		userDepartments = []string{primitive.NewObjectID().Hex()} // wrap single department in a slice
+	} else {
+		userDepartments = []string{user.DepartmentID.Hex()}
+	}
+	// wrap single department in a slice
 
 	// Get the user's connections
 	following, err := p.connectRepository.GetConnects(ctx, userID)

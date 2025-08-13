@@ -2,7 +2,9 @@ package controller
 
 import (
 	"fmt"
+	"log"
 	"net/http"
+	"strconv"
 
 	"github.com/chera-mihiretu/IKnow/domain/models"
 	"github.com/chera-mihiretu/IKnow/usecases"
@@ -17,6 +19,153 @@ type UserController struct {
 
 func NewUserController(usecase usecases.UserUseCase, storage usecases.StorageUseCase) *UserController {
 	return &UserController{usecase: usecase, storage: storage}
+}
+
+func (c *UserController) UpdateMe(ctx *gin.Context) {
+	userID, exist := ctx.Get("user_id")
+	if !exist {
+		ctx.JSON(400, gin.H{"error": "User ID not found in context"})
+		return
+	}
+	userIDStr, ok := userID.(string)
+	if !ok {
+		ctx.JSON(400, gin.H{"error": "Invalid user ID type"})
+		return
+	}
+
+	obId, err := primitive.ObjectIDFromHex(userIDStr)
+	if err != nil {
+		ctx.JSON(400, gin.H{"error": "Invalid user ID format"})
+		return
+	}
+
+	var user models.User
+	user.ID = obId
+	ctx.Request.Body = http.MaxBytesReader(ctx.Writer, ctx.Request.Body, 20<<20) // 10 MB limit
+	form, err := ctx.MultipartForm()
+	if err != nil {
+		fmt.Println("Error parsing multipart form:", err)
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"error":   "Failed to parse multipart form",
+			"details": err.Error(),
+		})
+		return
+	}
+
+	// Grab school_id, university_id, and department_id from the form, with length checks
+	universityIDSlice := form.Value["university_id"]
+	if len(universityIDSlice) != 0 {
+		universityID := universityIDSlice[0]
+		universityIDPrim, err := primitive.ObjectIDFromHex(universityID)
+		if err != nil {
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid school_id: " + err.Error()})
+			return
+		}
+
+		user.UniversityID = &universityIDPrim
+	}
+	schoolIDSlice := form.Value["school_id"]
+	if len(schoolIDSlice) != 0 {
+		if user.UniversityID != nil && *user.UniversityID != primitive.NilObjectID {
+
+			schoolID := schoolIDSlice[0]
+			schoolIDPrim, err := primitive.ObjectIDFromHex(schoolID)
+			if err != nil {
+				ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid school_id: " + err.Error()})
+				return
+			}
+			user.SchoolID = &schoolIDPrim
+		} else {
+			ctx.JSON(http.StatusBadRequest, gin.H{
+				"error": "University ID must be provided before school ID",
+			})
+			return
+		}
+
+	}
+	departmentIDSlice := form.Value["department_id"]
+	if len(departmentIDSlice) != 0 {
+
+		if user.SchoolID != nil && *user.SchoolID != primitive.NilObjectID {
+
+			departmentID := departmentIDSlice[0]
+			departmentIDPrim, err := primitive.ObjectIDFromHex(departmentID)
+			if err != nil {
+				ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid department_id: " + err.Error()})
+				return
+			}
+			user.DepartmentID = &departmentIDPrim
+		} else {
+			ctx.JSON(http.StatusBadRequest, gin.H{
+				"error": "School ID must be provided before department ID",
+			})
+			return
+		}
+
+	}
+
+	name := form.Value["name"]
+	year := form.Value["acedemic_year"]
+	if len(name) == 1 {
+
+		user.Name = name[0]
+	}
+
+	if len(year) == 1 {
+		user.AcedemicYear, err = strconv.Atoi(year[0])
+	}
+
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid academic year format"})
+		return
+	}
+
+	files := form.File["file"]
+	if len(files) > 1 {
+		fmt.Println("You can only upload a maximum of 1 file")
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"error": "No files uploaded",
+		})
+		return
+	}
+	if len(files) != 0 {
+		// Validate that all uploaded files are images
+		for _, file := range files {
+			contentType := file.Header.Get("Content-Type")
+			if contentType != "image/jpeg" && contentType != "image/png" && contentType != "image/gif" {
+				fmt.Println("Only image files are allowed. Got:", contentType)
+				ctx.JSON(http.StatusBadRequest, gin.H{
+					"error": "Only image files are allowed",
+				})
+				return
+			}
+		}
+
+		urls, err := c.storage.UploadFile(files)
+
+		if err != nil {
+			fmt.Println("Failed to upload files:", err)
+			ctx.JSON(http.StatusInternalServerError, gin.H{
+				"error":   "Failed to upload files",
+				"details": err.Error(),
+			})
+			return
+		}
+		user.ProfileImageURL = urls[0] // Assuming the first file is the profile image
+	}
+
+	log.Println("Up here all is good ")
+
+	prevUser, err := c.usecase.UpdateMe(ctx, user)
+	if err != nil {
+		fmt.Println("Failed to update user:", err)
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update user"})
+		return
+	}
+
+	c.storage.DeleteFile([]string{prevUser.ProfileImageURL}) // Clean up previous profile image if it exists
+
+	ctx.JSON(http.StatusOK, gin.H{"message": "User updated successfully", "user": user})
 }
 
 func (c *UserController) Me(ctx *gin.Context) {
@@ -120,9 +269,9 @@ func (c *UserController) CompleteUser(ctx *gin.Context) {
 		})
 		return
 	}
-	files := form.File["files"]
-	if len(files) > 3 {
-		fmt.Println("You can only upload a maximum of 3 files")
+	files := form.File["file"]
+	if len(files) > 1 {
+		fmt.Println("You can only upload a maximum of 1 file")
 		ctx.JSON(http.StatusBadRequest, gin.H{
 			"error": "No files uploaded",
 		})
@@ -140,8 +289,9 @@ func (c *UserController) CompleteUser(ctx *gin.Context) {
 				return
 			}
 		}
-		// TODO : Implement the data storage
+
 		urls, err := c.storage.UploadFile(files)
+
 		if err != nil {
 			fmt.Println("Failed to upload files:", err)
 			ctx.JSON(http.StatusInternalServerError, gin.H{
@@ -154,6 +304,7 @@ func (c *UserController) CompleteUser(ctx *gin.Context) {
 	}
 
 	uploadedUser, err := c.usecase.CompleteUser(ctx, user)
+
 	if err != nil {
 		c.storage.DeleteFile([]string{user.ProfileImageURL}) // Clean up if user creation fails
 		fmt.Println("Failed to complete user:", err)

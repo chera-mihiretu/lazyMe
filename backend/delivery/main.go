@@ -28,7 +28,7 @@ func main() {
 		log.Fatal("Failed to connect to MongoDB:", err)
 	}
 
-	redis.RateLimiter()
+	// redis.RateLimiter()
 
 	myDatabase := client.Database("lazyme")
 	// posts storage dependencies
@@ -93,14 +93,14 @@ func main() {
 	authRepository := repository.NewAuthRepository(myDatabase, universityRepository)
 	authUseCase := usecases.NewAuthUseCase(authRepository)
 	AuthController := controller.NewAuthController(authUseCase)
-	// report dependencies
-	reportRepository := repository.NewReportRepository(myDatabase)
-	reportUseCase := usecases.NewReportUseCase(reportRepository)
-	reportController := controller.NewReportController(reportUseCase, userUseCase, postUseCase)
 	// job dependencies
 	jobRepository := repository.NewJobRepository(myDatabase, departmentRepository, geminiRepository)
 	jobUsecase := usecases.NewJobUsecase(jobRepository)
 	jobController := controller.NewJobController(jobUsecase, userUseCase, jobLikeUsecase)
+	// report dependencies
+	reportRepository := repository.NewReportRepository(myDatabase)
+	reportUseCase := usecases.NewReportUseCase(reportRepository)
+	reportController := controller.NewReportController(reportUseCase, userUseCase, postUseCase, jobUsecase)
 	// admin dependencies
 	redisClient := redis.RedisClient()
 	if redisClient == nil {

@@ -16,6 +16,7 @@ type UserUseCase interface {
 	GetListOfUsers(ctx context.Context, ids []primitive.ObjectID) ([]models.UserView, error)
 	CompleteUser(ctx context.Context, user models.User) (models.UserView, error)
 	UserAnalytics(ctx context.Context) (models.UserAnalytics, error)
+	UpdateMe(ctx context.Context, user models.User) (models.UserView, error)
 }
 
 type userUseCase struct {
@@ -49,6 +50,10 @@ func (u *userUseCase) GetUserByIdNoneView(ctx context.Context, userID string) (m
 
 func (u *userUseCase) UserAnalytics(ctx context.Context) (models.UserAnalytics, error) {
 	return u.userRepository.UserAnalytics(ctx)
+}
+
+func (u *userUseCase) UpdateMe(ctx context.Context, user models.User) (models.UserView, error) {
+	return u.userRepository.UpdateMe(ctx, user)
 }
 
 func NewUserUseCase(repository repository.UserRepository) UserUseCase {

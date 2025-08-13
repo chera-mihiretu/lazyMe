@@ -79,6 +79,10 @@ func SetupRoutes(
 		postsInfo.PUT("/:id", postController.UpdatePost)
 		postsInfo.DELETE("/", postController.DeletePost)
 		postsInfo.GET("/search", postController.SearchPosts)
+		postsInfo.GET("/unverified", middleware.AuthUserMiddleware(RoleAdmin), postController.GetUnverifiedPosts)
+		postsInfo.POST("/verify", middleware.AuthUserMiddleware(RoleAdmin), postController.VerifyPost)
+		postsInfo.DELETE("/remove-unverified", middleware.AuthUserMiddleware(RoleAdmin), postController.RemoveUnverifiedPost)
+
 		// likes
 		postsInfo.POST("/like", postLikeController.AddLike)
 		postsInfo.POST("/dislike", postLikeController.RemoveLike)
@@ -99,7 +103,9 @@ func SetupRoutes(
 		reports.POST("/post", middleware.AuthUserMiddleware(RoleStudent), reportController.ReportPost)
 		reports.POST("/job", middleware.AuthUserMiddleware(RoleStudent), reportController.ReportJob)
 		reports.GET("/post", middleware.AuthUserMiddleware(RoleAdmin), reportController.GetReportedPosts)
+		reports.GET("/job", middleware.AuthUserMiddleware(RoleAdmin), reportController.GetReportedJobs)
 		reports.GET("/analytics", middleware.AuthUserMiddleware(RoleAdmin), reportController.GetReportAnalytics)
+		reports.POST("/take-action", middleware.AuthUserMiddleware(RoleAdmin), reportController.TakeActionOnReport)
 	}
 
 	connection := r.Group("/api/connections")
@@ -174,6 +180,7 @@ func SetupRoutes(
 
 		user.GET("/:id", middleware.AuthUserMiddleware(RoleAll), userController.GetUserByID)
 		user.GET("/me", middleware.AuthUserMiddleware(RoleAll), userController.Me)
+		user.PUT("/me", middleware.AuthUserMiddleware(RoleAll), userController.UpdateMe)
 		user.POST("/complete-account", middleware.AuthUserMiddleware(RoleAll), userController.CompleteUser)
 		user.GET("/analytics", middleware.AuthUserMiddleware(RoleAdmin), userController.UserAnalytics)
 	}
