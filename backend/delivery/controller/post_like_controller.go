@@ -1,9 +1,12 @@
 package controller
 
 import (
+	"context"
 	"fmt"
 	"net/http"
+	"time"
 
+	"github.com/chera-mihiretu/IKnow/domain/constants"
 	"github.com/chera-mihiretu/IKnow/domain/models"
 	"github.com/chera-mihiretu/IKnow/usecases"
 	"github.com/gin-gonic/gin"
@@ -11,11 +14,13 @@ import (
 )
 
 type PostLikeController struct {
-	usecase usecases.PostLikeUsecase
+	usecase             usecases.PostLikeUsecase
+	notificationUsecase usecases.NotificationUsecase
+	postUsecase         usecases.PostUseCase
 }
 
-func NewPostLikeController(usecase usecases.PostLikeUsecase) *PostLikeController {
-	return &PostLikeController{usecase: usecase}
+func NewPostLikeController(usecase usecases.PostLikeUsecase, notificationUsecase usecases.NotificationUsecase, postUsecase usecases.PostUseCase) *PostLikeController {
+	return &PostLikeController{usecase: usecase, notificationUsecase: notificationUsecase, postUsecase: postUsecase}
 }
 
 // CheckLike checks if a user liked a post
@@ -26,6 +31,7 @@ func (c *PostLikeController) CheckLike(ctx *gin.Context) {
 		return
 	}
 	liked, err := c.usecase.CheckLike(ctx, postID, userID)
+
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -45,6 +51,25 @@ func (c *PostLikeController) AddLike(ctx *gin.Context) {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
+
+	post, err := c.postUsecase.GetPostByID(ctx, postID.Hex())
+
+	notification := &models.Notifications{
+		ID:        primitive.NewObjectID(),
+		To:        post.UserID,
+		Type:      string(constants.LikedYourJobPost),
+		UserID:    userID,
+		Content:   constants.LikedYourJobPostMessage,
+		ContentID: &post.ID,
+		IsRead:    false,
+		CreatedAt: time.Now(),
+	}
+	if err == nil {
+		go func() {
+			c.notificationUsecase.SendNotification(context.Background(), notification)
+		}()
+	}
+
 	ctx.JSON(http.StatusOK, gin.H{"message": "Like added"})
 }
 

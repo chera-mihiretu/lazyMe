@@ -1,17 +1,29 @@
 package models
 
 import (
-	"encoding/json"
+	"time"
 
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 // Notifications defines the database model for notifications table
 type Notifications struct {
+	ID        primitive.ObjectID  `bson:"_id,omitempty" json:"id"`
+	UserID    primitive.ObjectID  `bson:"user_id" json:"user_id"`
+	To        primitive.ObjectID  `bson:"to" json:"to"`
+	Type      string              `bson:"type" json:"type"`
+	Content   string              `bson:"content" json:"content"`
+	IsRead    bool                `bson:"is_read" json:"is_read"`
+	ContentID *primitive.ObjectID `bson:"content_id" json:"content_id"` // for example, post id, comment id, etc.
+	CreatedAt time.Time           `bson:"created_at" json:"created_at"`
+}
+
+type NotificationView struct {
 	ID        primitive.ObjectID `bson:"_id,omitempty" json:"id"`
-	UserID    primitive.ObjectID `bson:"user_id" json:"user_id"`
+	User      UserView           `bson:"user" json:"user"`
+	To        UserView           `bson:"to" json:"to"`
 	Type      string             `bson:"type" json:"type"`
-	Payload   json.RawMessage    `bson:"payload" json:"payload"`
+	Content   string             `bson:"content" json:"content"`
 	IsRead    bool               `bson:"is_read" json:"is_read"`
-	CreatedAt primitive.DateTime `bson:"created_at" json:"created_at"`
+	CreatedAt time.Time          `bson:"created_at" json:"created_at"`
 }

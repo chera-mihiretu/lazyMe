@@ -14,6 +14,7 @@ import (
 
 type CommentRepository interface {
 	GetComments(ctx context.Context, postID primitive.ObjectID, page int) ([]models.Comments, error)
+	GetCommentByID(ctx context.Context, commentID primitive.ObjectID) (models.Comments, error)
 	GetReply(ctx context.Context, commentID primitive.ObjectID, page int) ([]models.Comments, error)
 	AddComment(ctx context.Context, comment models.Comments) (models.Comments, error)
 	DeleteComment(ctx context.Context, commentID, userID primitive.ObjectID) error
@@ -33,12 +34,22 @@ func NewCommentRepository(db *mongo.Database) CommentRepository {
 	}
 }
 
+func (r *commentRepository) GetCommentByID(ctx context.Context, commentID primitive.ObjectID) (models.Comments, error) {
+	filter := bson.M{"_id": commentID}
+	var comment models.Comments
+	err := r.comments.FindOne(ctx, filter).Decode(&comment)
+	if err != nil {
+		return models.Comments{}, err
+	}
+	return comment, nil
+}
+
 func (r *commentRepository) GetComments(ctx context.Context, postID primitive.ObjectID, page int) ([]models.Comments, error) {
 	filter := bson.M{"post_id": postID, "parent_comment_id": bson.M{"$exists": false}}
 
 	pageSize := Pagesize
 
-	findOption := options.Find().SetSkip(int64((page - 1) * pageSize)).SetLimit(Pagesize)
+	findOption := options.Find().SetSkip(int64((page - 1) * pageSize)).SetLimit(Pagesize + 1)
 	cursor, err := r.comments.Find(ctx, filter, findOption)
 	if err != nil {
 		return nil, err
@@ -118,7 +129,7 @@ func (r *commentRepository) GetReply(ctx context.Context, commentID primitive.Ob
 	pageSize := Pagesize
 	filter := bson.M{"parent_comment_id": commentID}
 
-	findOption := options.Find().SetSkip(int64((page - 1) * pageSize)).SetLimit(Pagesize)
+	findOption := options.Find().SetSkip(int64((page - 1) * pageSize)).SetLimit(Pagesize + 1)
 	cursor, err := r.comments.Find(ctx, filter, findOption)
 	if err != nil {
 		return nil, err
@@ -158,6 +169,7 @@ func (r *commentRepository) AddReply(ctx context.Context, reply models.Comments)
 	if err != nil {
 		return models.Comments{}, err
 	}
+
 	// Update the parent comment to indicate it has replies
 	_, err = r.comments.UpdateOne(ctx, bson.M{"_id": reply.ParentCommentID}, bson.M{"$inc": bson.M{"reply_count": 1}})
 	if err != nil {

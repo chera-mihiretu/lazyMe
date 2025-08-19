@@ -8,6 +8,7 @@ import (
 	"github.com/chera-mihiretu/IKnow/delivery/controller"
 	"github.com/chera-mihiretu/IKnow/delivery/router"
 	"github.com/chera-mihiretu/IKnow/infrastructure/mongodb"
+	"github.com/chera-mihiretu/IKnow/infrastructure/my_websocket"
 	"github.com/chera-mihiretu/IKnow/infrastructure/redis"
 	"github.com/chera-mihiretu/IKnow/repository"
 	"github.com/chera-mihiretu/IKnow/usecases"
@@ -31,6 +32,12 @@ func main() {
 	// redis.RateLimiter()
 
 	myDatabase := client.Database("lazyme")
+	geminiClient, err := GeminiClient(context.Background())
+	if err != nil {
+		log.Fatal("Failed to create Gemini client:", err)
+	}
+	geminiRepository := repository.NewGeminiRepository(geminiClient)
+
 	// posts storage dependencies
 	postsStorageUseCase := StorageInstances(os.Getenv("SUPABASE_BUCKET_NAME"), "posts")
 	profileStorageUseCase := StorageInstances(os.Getenv("SUPABASE_BUCKET_NAME"), "profile")
@@ -40,34 +47,27 @@ func main() {
 	userRepository := repository.NewUserRepository(myDatabase)
 	userUseCase := usecases.NewUserUseCase(userRepository)
 	userController := controller.NewUserController(userUseCase, profileStorageUseCase)
-	// follow dependencies
-	connectionRepository := repository.NewConnectRepository(myDatabase)
-	connectionUsecase := usecases.NewConnectUsecase(connectionRepository)
-	connectionController := controller.NewConnectController(connectionUsecase, userRepository)
+
 	// department dependencies
 	departmentRepository := repository.NewDepartmentRepository(myDatabase)
 	departmentUsecase := usecases.NewDepartmentUseCase(departmentRepository)
 	departmentController := controller.NewDepartmentController(departmentUsecase)
-	// like dependencies
-	postLikeRepository := repository.NewPostLikeRepository(myDatabase)
-	postLikeUsecase := usecases.NewPostLikeUsecase(postLikeRepository)
-	postLikeController := controller.NewPostLikeController(postLikeUsecase)
 
-	jobLikeRepository := repository.NewJobLikeRepository(myDatabase)
-	jobLikeUsecase := usecases.NewJobLikeUsecase(jobLikeRepository)
-	jobLikeController := controller.NewJobLikeController(jobLikeUsecase)
-	// comment dependencies
-	commentRepository := repository.NewCommentRepository(myDatabase)
-	commentUsecase := usecases.NewCommentUsecase(commentRepository)
-	commentController := controller.NewCommentController(commentUsecase, userUseCase)
-	// gemini dependencies
-	geminiClient, err := GeminiClient(context.Background())
-	if err != nil {
-		log.Fatal("Failed to create Gemini client:", err)
-	}
-	geminiRepository := repository.NewGeminiRepository(geminiClient)
+	// websocket dependencies
+	webSocketClient := my_websocket.NewWebSocketClient()
+	webSocketRepository := repository.NewWebSocketRepository(webSocketClient)
+	webSocketUsecase := usecases.NewWebSocketUsecase(webSocketRepository)
+	webSocketController := controller.NewWebSocketController(webSocketUsecase)
+
+	// notification dependencies
+	notificationRepository := repository.NewNotificationRepository(myDatabase)
+	notificationUsecase := usecases.NewNotificationUsecase(notificationRepository, webSocketUsecase)
+	notificationController := controller.NewNotificationController(notificationUsecase, userUseCase)
+	// follow dependencies
+	connectionRepository := repository.NewConnectRepository(myDatabase)
+	connectionUsecase := usecases.NewConnectUsecase(connectionRepository)
+	connectionController := controller.NewConnectController(connectionUsecase, userRepository, notificationUsecase)
 	// post dependencies
-
 	postRepository := repository.NewPostRepository(
 		myDatabase,
 		departmentRepository,
@@ -76,7 +76,23 @@ func main() {
 		geminiRepository,
 	)
 	postUseCase := usecases.NewPostUseCase(postRepository)
-	PostController := controller.NewPostController(postUseCase, userUseCase, departmentUsecase, postsStorageUseCase, postLikeUsecase)
+	// like dependencies
+	postLikeRepository := repository.NewPostLikeRepository(myDatabase)
+	postLikeUsecase := usecases.NewPostLikeUsecase(postLikeRepository)
+	postLikeController := controller.NewPostLikeController(postLikeUsecase, notificationUsecase, postUseCase)
+
+	// dependecy crumble
+	PostController := controller.NewPostController(postUseCase, userUseCase, departmentUsecase, postsStorageUseCase, postLikeUsecase, notificationUsecase)
+
+	jobLikeRepository := repository.NewJobLikeRepository(myDatabase)
+	jobLikeUsecase := usecases.NewJobLikeUsecase(jobLikeRepository)
+	jobLikeController := controller.NewJobLikeController(jobLikeUsecase)
+	// comment dependencies
+	commentRepository := repository.NewCommentRepository(myDatabase)
+	commentUsecase := usecases.NewCommentUsecase(commentRepository)
+	commentController := controller.NewCommentController(commentUsecase, userUseCase, postUseCase, notificationUsecase)
+	// gemini dependencies
+
 	// material dependencies
 	materialRepository := repository.NewMaterialsRepository(myDatabase)
 	materialUseCase := usecases.NewMaterialUseCase(materialRepository)
@@ -100,7 +116,7 @@ func main() {
 	// report dependencies
 	reportRepository := repository.NewReportRepository(myDatabase)
 	reportUseCase := usecases.NewReportUseCase(reportRepository)
-	reportController := controller.NewReportController(reportUseCase, userUseCase, postUseCase, jobUsecase)
+	reportController := controller.NewReportController(reportUseCase, userUseCase, postUseCase, jobUsecase, notificationUsecase)
 	// admin dependencies
 	redisClient := redis.RedisClient()
 	if redisClient == nil {
@@ -115,6 +131,7 @@ func main() {
 	)
 	adminUsecase := usecases.NewAdminUseCase(adminRepository)
 	adminController := controller.NewAdminController(adminUsecase)
+
 	router := router.SetupRoutes(
 		AuthController,
 		PostController,
@@ -130,6 +147,8 @@ func main() {
 		commentController,
 		reportController,
 		adminController,
+		webSocketController,
+		notificationController,
 	)
 
 	if err := router.Run(":8080"); err != nil {

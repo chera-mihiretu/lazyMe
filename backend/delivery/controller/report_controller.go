@@ -1,11 +1,14 @@
 package controller
 
 import (
+	"context"
 	"fmt"
+	"log"
 	"net/http"
 	"strconv"
 	"time"
 
+	"github.com/chera-mihiretu/IKnow/domain/constants"
 	"github.com/chera-mihiretu/IKnow/domain/models"
 	"github.com/chera-mihiretu/IKnow/repository"
 	"github.com/chera-mihiretu/IKnow/usecases"
@@ -14,18 +17,20 @@ import (
 )
 
 type ReportController struct {
-	reportUsecase usecases.ReportUseCase
-	userUsecase   usecases.UserUseCase
-	postUsecase   usecases.PostUseCase
-	jobUseCase    usecases.JobUsecase
+	reportUsecase       usecases.ReportUseCase
+	userUsecase         usecases.UserUseCase
+	postUsecase         usecases.PostUseCase
+	jobUseCase          usecases.JobUsecase
+	notificationUsecase usecases.NotificationUsecase
 }
 
-func NewReportController(reportUsecase usecases.ReportUseCase, userUsecase usecases.UserUseCase, postUsecase usecases.PostUseCase, jobUseCase usecases.JobUsecase) *ReportController {
+func NewReportController(reportUsecase usecases.ReportUseCase, userUsecase usecases.UserUseCase, postUsecase usecases.PostUseCase, jobUseCase usecases.JobUsecase, notificationUsecase usecases.NotificationUsecase) *ReportController {
 	return &ReportController{
-		reportUsecase: reportUsecase,
-		userUsecase:   userUsecase,
-		postUsecase:   postUsecase,
-		jobUseCase:    jobUseCase,
+		reportUsecase:       reportUsecase,
+		userUsecase:         userUsecase,
+		postUsecase:         postUsecase,
+		jobUseCase:          jobUseCase,
+		notificationUsecase: notificationUsecase,
 	}
 }
 
@@ -165,6 +170,7 @@ func (p *ReportController) GetReportAnalytics(ctx *gin.Context) {
 }
 
 func (p *ReportController) TakeActionOnReport(ctx *gin.Context) {
+	log.Println("TakeActionOnReport is called ✅✅✅✅")
 	var action models.ReportAction
 
 	if err := ctx.ShouldBindJSON(&action); err != nil {
@@ -199,6 +205,7 @@ func (p *ReportController) TakeActionOnReport(ctx *gin.Context) {
 		)
 		return
 	}
+	log.Println("User us collected")
 	if action.Description == "" {
 		fmt.Println("Error: Action description is required")
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Action description is required"})
@@ -212,7 +219,9 @@ func (p *ReportController) TakeActionOnReport(ctx *gin.Context) {
 		return
 	}
 
-	err = p.reportUsecase.TakeActionOnReport(ctx, action.ReportID, action)
+	log.Println("Action is sent to the usecase")
+
+	actionTaken, err := p.reportUsecase.TakeActionOnReport(ctx, action.ReportID, action)
 	if err != nil {
 		fmt.Println("Error taking action on report:", err)
 		ctx.JSON(http.StatusInternalServerError, gin.H{
@@ -220,6 +229,28 @@ func (p *ReportController) TakeActionOnReport(ctx *gin.Context) {
 			"details": err.Error(),
 		})
 		return
+	}
+	log.Println("actionTaken", actionTaken)
+	if actionTaken.Taken {
+
+		if actionTaken.Action == constants.ActionTypeDelete || actionTaken.Action == constants.ActionTypeDeleteJob {
+			actionTaken.PostID = primitive.NilObjectID
+		}
+
+		notifcation := models.Notifications{
+			ID:        primitive.NewObjectID(),
+			UserID:    userIDPrimitive,
+			To:        actionTaken.UserID,
+			Type:      string(constants.GetNotificationTypeBasedOnAction(action.Action)),
+			Content:   string(constants.GetNotificationMessageBasedOnAction(action.Action)),
+			ContentID: &actionTaken.PostID,
+			IsRead:    false,
+			CreatedAt: time.Now(),
+		}
+		log.Println("Sending notification.....")
+		go func() {
+			p.notificationUsecase.SendNotification(context.Background(), &notifcation)
+		}()
 	}
 	ctx.JSON(http.StatusOK, gin.H{
 		"message": "Action taken on report successfully",

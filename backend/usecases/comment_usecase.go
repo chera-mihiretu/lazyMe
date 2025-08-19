@@ -10,6 +10,7 @@ import (
 
 type CommentUsecase interface {
 	GetComments(ctx context.Context, postID primitive.ObjectID, page int) ([]models.Comments, error)
+	GetCommentByID(ctx context.Context, commentID primitive.ObjectID) (models.Comments, error)
 	AddComment(ctx context.Context, comment models.Comments) (models.Comments, error)
 	DeleteComment(ctx context.Context, commentID, userID primitive.ObjectID) error
 	EditComment(ctx context.Context, commentID, userID primitive.ObjectID, content string) (models.Comments, error)
@@ -23,6 +24,10 @@ type commentUsecase struct {
 
 func NewCommentUsecase(repo repository.CommentRepository) CommentUsecase {
 	return &commentUsecase{repo: repo}
+}
+
+func (u *commentUsecase) GetCommentByID(ctx context.Context, commentID primitive.ObjectID) (models.Comments, error) {
+	return u.repo.GetCommentByID(ctx, commentID)
 }
 
 func (u *commentUsecase) GetComments(ctx context.Context, postID primitive.ObjectID, page int) ([]models.Comments, error) {

@@ -18,8 +18,8 @@ type PostUseCase interface {
 	SearchPosts(ctx context.Context, query string, page int) ([]models.Posts, error)
 	GetPostsWithListOfId(ctx context.Context, postIDs []primitive.ObjectID) ([]models.Posts, error)
 	GetUnverifiedPosts(ctx context.Context, page int) ([]models.Posts, error)
-	VerifyPosts(ctx context.Context, postID primitive.ObjectID) error
-	RemoveUnverifiedPost(ctx context.Context, postID primitive.ObjectID) error
+	VerifyPosts(ctx context.Context, postID primitive.ObjectID) (primitive.ObjectID, error)
+	RemoveUnverifiedPost(ctx context.Context, postID primitive.ObjectID) (primitive.ObjectID, error)
 }
 
 type postUseCase struct {
@@ -31,10 +31,10 @@ func NewPostUseCase(repository repository.PostRepository) PostUseCase {
 		postRepository: repository,
 	}
 }
-func (p *postUseCase) RemoveUnverifiedPost(ctx context.Context, postID primitive.ObjectID) error {
+func (p *postUseCase) RemoveUnverifiedPost(ctx context.Context, postID primitive.ObjectID) (primitive.ObjectID, error) {
 	return p.postRepository.RemoveUnverifiedPost(ctx, postID)
 }
-func (p *postUseCase) VerifyPosts(ctx context.Context, postID primitive.ObjectID) error {
+func (p *postUseCase) VerifyPosts(ctx context.Context, postID primitive.ObjectID) (primitive.ObjectID, error) {
 	return p.postRepository.VerifyPosts(ctx, postID)
 }
 func (p *postUseCase) GetUnverifiedPosts(ctx context.Context, page int) ([]models.Posts, error) {

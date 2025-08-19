@@ -1,9 +1,12 @@
 package controller
 
 import (
+	"context"
 	"fmt"
 	"strconv"
+	"time"
 
+	"github.com/chera-mihiretu/IKnow/domain/constants"
 	"github.com/chera-mihiretu/IKnow/domain/models"
 	"github.com/chera-mihiretu/IKnow/usecases"
 	"github.com/gin-gonic/gin"
@@ -11,14 +14,16 @@ import (
 )
 
 type ConnectionController struct {
-	connectionUsecase usecases.ConnectUsecase
-	userUsecase       usecases.UserUseCase
+	connectionUsecase   usecases.ConnectUsecase
+	userUsecase         usecases.UserUseCase
+	notificationUsecase usecases.NotificationUsecase
 }
 
-func NewConnectController(connect usecases.ConnectUsecase, userUsecase usecases.UserUseCase) *ConnectionController {
+func NewConnectController(connect usecases.ConnectUsecase, userUsecase usecases.UserUseCase, notificationUsecase usecases.NotificationUsecase) *ConnectionController {
 	return &ConnectionController{
-		connectionUsecase: connect,
-		userUsecase:       userUsecase,
+		connectionUsecase:   connect,
+		userUsecase:         userUsecase,
+		notificationUsecase: notificationUsecase,
 	}
 }
 
@@ -230,6 +235,22 @@ func (c *ConnectionController) CreateConnection(ctx *gin.Context) {
 		ctx.JSON(500, gin.H{"error": "Failed to create connection: " + err.Error()})
 		return
 	}
+
+	notification := &models.Notifications{
+		ID:        primitive.NewObjectID(),
+		UserID:    obId,
+		To:        connect.ConnecteeID,
+		Type:      string(constants.SentYouConnectionRequest),
+		Content:   constants.SentYouConnectionRequestMessage,
+		IsRead:    false,
+		ContentID: &connect.ConnecteeID,
+		CreatedAt: time.Now(),
+	}
+
+	go func() {
+		c.notificationUsecase.SendNotification(context.Background(), notification)
+	}()
+
 	ctx.JSON(201, gin.H{"message": "Connection created successfully"})
 
 }
@@ -369,6 +390,21 @@ func (c *ConnectionController) AcceptConnection(ctx *gin.Context) {
 		ctx.JSON(500, gin.H{"error": "Failed to create connection: " + err.Error()})
 		return
 	}
+	notification := &models.Notifications{
+		ID:        primitive.NewObjectID(),
+		UserID:    obId,
+		To:        connect.ConnectorID,
+		Type:      string(constants.ConnectionAccepted),
+		Content:   constants.ConnectionAcceptedMessage,
+		IsRead:    false,
+		ContentID: &connect.ConnectorID,
+		CreatedAt: time.Now(),
+	}
+
+	go func() {
+		c.notificationUsecase.SendNotification(context.Background(), notification)
+	}()
+
 	ctx.JSON(201, gin.H{"message": "Connection created successfully"})
 }
 

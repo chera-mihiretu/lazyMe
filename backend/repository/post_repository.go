@@ -27,8 +27,8 @@ type PostRepository interface {
 	SearchPosts(ctx context.Context, query string, page int) ([]models.Posts, error)
 	GetPostsWithListOfId(ctx context.Context, postIDs []primitive.ObjectID) ([]models.Posts, error)
 	GetUnverifiedPosts(ctx context.Context, page int) ([]models.Posts, error)
-	VerifyPosts(ctx context.Context, postID primitive.ObjectID) error
-	RemoveUnverifiedPost(ctx context.Context, postID primitive.ObjectID) error
+	VerifyPosts(ctx context.Context, postID primitive.ObjectID) (primitive.ObjectID, error)
+	RemoveUnverifiedPost(ctx context.Context, postID primitive.ObjectID) (primitive.ObjectID, error)
 }
 
 type postRepository struct {
@@ -51,24 +51,35 @@ func NewPostRepository(db *mongo.Database,
 	}
 }
 
-func (r *postRepository) RemoveUnverifiedPost(ctx context.Context, postID primitive.ObjectID) error {
+func (r *postRepository) RemoveUnverifiedPost(ctx context.Context, postID primitive.ObjectID) (primitive.ObjectID, error) {
+	var post models.Posts
 	filter := bson.M{"_id": postID}
-	_, err := r.postsDB.DeleteOne(ctx, filter)
+	err := r.postsDB.FindOne(ctx, filter).Decode(&post)
 	if err != nil {
-		return fmt.Errorf("failed to remove unverified post: %v", err)
+		return primitive.NilObjectID, fmt.Errorf("failed to find post: %v", err)
 	}
-	return nil
+	_, err = r.postsDB.DeleteOne(ctx, filter)
+	if err != nil {
+		return primitive.NilObjectID, fmt.Errorf("failed to remove unverified post: %v", err)
+	}
+	return post.UserID, nil
 }
 
-func (r *postRepository) VerifyPosts(ctx context.Context, postID primitive.ObjectID) error {
+func (r *postRepository) VerifyPosts(ctx context.Context, postID primitive.ObjectID) (primitive.ObjectID, error) {
+	var post models.Posts
 
 	filter := bson.M{"_id": postID}
-	update := bson.M{"$set": bson.M{"is_validated": true, "updated_at": time.Now()}}
-	_, err := r.postsDB.UpdateOne(ctx, filter, update)
+	err := r.postsDB.FindOne(ctx, filter).Decode(&post)
 	if err != nil {
-		return fmt.Errorf("failed to verify post: %v", err)
+		return primitive.NilObjectID, fmt.Errorf("failed to find post: %v", err)
 	}
-	return nil
+	update := bson.M{"$set": bson.M{"is_validated": true, "updated_at": time.Now()}}
+	_, err = r.postsDB.UpdateOne(ctx, filter, update)
+	if err != nil {
+		return primitive.NilObjectID, fmt.Errorf("failed to verify post: %v", err)
+	}
+
+	return post.UserID, nil
 }
 
 func (p *postRepository) GetUnverifiedPosts(ctx context.Context, page int) ([]models.Posts, error) {

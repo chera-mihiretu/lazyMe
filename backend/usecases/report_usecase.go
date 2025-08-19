@@ -15,7 +15,7 @@ type ReportUseCase interface {
 	GetReportedJobs(ctx context.Context, page int) ([]models.Report, error)
 
 	GetReportAnalytics(ctx context.Context) (models.ReportAnalytics, error)
-	TakeActionOnReport(ctx context.Context, reportID primitive.ObjectID, actionType models.ReportAction) error
+	TakeActionOnReport(ctx context.Context, reportID primitive.ObjectID, actionType models.ReportAction) (models.ActionTaken, error)
 }
 
 type reportUseCase struct {
@@ -48,6 +48,6 @@ func (r *reportUseCase) ReportJob(ctx context.Context, report models.Report) (mo
 	return r.reportRepository.ReportJob(ctx, report)
 }
 
-func (r *reportUseCase) TakeActionOnReport(ctx context.Context, reportID primitive.ObjectID, actionType models.ReportAction) error {
+func (r *reportUseCase) TakeActionOnReport(ctx context.Context, reportID primitive.ObjectID, actionType models.ReportAction) (models.ActionTaken, error) {
 	return r.reportRepository.TakeActionOnReport(ctx, reportID, actionType)
 }

@@ -22,11 +22,11 @@ type ReportRepository interface {
 
 	GetReportAnalytics(ctx context.Context) (models.ReportAnalytics, error)
 
-	TakeActionOnReport(ctx context.Context, reportID primitive.ObjectID, action models.ReportAction) error
+	TakeActionOnReport(ctx context.Context, reportID primitive.ObjectID, action models.ReportAction) (models.ActionTaken, error)
 
-	HideActionOnReport(ctx context.Context, reportID primitive.ObjectID, action models.ReportAction) error
-	DeleteActionOnReport(ctx context.Context, reportID primitive.ObjectID, action models.ReportAction) error
-	IgnoreActionOnReport(ctx context.Context, reportID primitive.ObjectID, action models.ReportAction) error
+	HideActionOnReport(ctx context.Context, reportID primitive.ObjectID, action models.ReportAction) (models.ActionTaken, error)
+	DeleteActionOnReport(ctx context.Context, reportID primitive.ObjectID, action models.ReportAction) (models.ActionTaken, error)
+	IgnoreActionOnReport(ctx context.Context, reportID primitive.ObjectID, action models.ReportAction) (models.ActionTaken, error)
 }
 
 type reportRepository struct {
@@ -211,14 +211,14 @@ func (r *reportRepository) GetReportAnalytics(ctx context.Context) (models.Repor
 	return analytics, nil
 }
 
-func (r *reportRepository) TakeActionOnReport(ctx context.Context, reportID primitive.ObjectID, action models.ReportAction) error {
+func (r *reportRepository) TakeActionOnReport(ctx context.Context, reportID primitive.ObjectID, action models.ReportAction) (models.ActionTaken, error) {
 
 	switch action.Action {
 
 	case constants.ActionTypeDelete:
 		// insert the action into the action database
 		return r.DeleteActionOnReport(ctx, reportID, action)
-	case constants.ActionTypeHide:
+	case constants.ActionTypeBlock:
 		// insert the action into the action database
 		return r.HideActionOnReport(ctx, reportID, action)
 
@@ -227,17 +227,17 @@ func (r *reportRepository) TakeActionOnReport(ctx context.Context, reportID prim
 		return r.IgnoreActionOnReport(ctx, reportID, action)
 
 	default:
-		return errors.New("invalid action type")
+		return models.ActionTaken{}, errors.New("invalid action type")
 	}
 
 }
 
-func (r *reportRepository) HideActionOnReport(ctx context.Context, reportID primitive.ObjectID, action models.ReportAction) error {
+func (r *reportRepository) HideActionOnReport(ctx context.Context, reportID primitive.ObjectID, action models.ReportAction) (models.ActionTaken, error) {
 	var report models.Report
 	err := r.reportCollection.FindOne(ctx, bson.M{"_id": reportID}).Decode(&report)
 	if err != nil {
 		if err == mongo.ErrNoDocuments {
-			return errors.New("report not found")
+			return models.ActionTaken{}, errors.New("report not found")
 		}
 	}
 
@@ -245,7 +245,7 @@ func (r *reportRepository) HideActionOnReport(ctx context.Context, reportID prim
 	action.ID = primitive.NewObjectID()
 	_, err = r.actionCollection.InsertOne(ctx, action)
 	if err != nil {
-		return err
+		return models.ActionTaken{}, err
 	}
 	// hide the post or job based on the report type
 	switch report.Type {
@@ -256,7 +256,7 @@ func (r *reportRepository) HideActionOnReport(ctx context.Context, reportID prim
 			},
 		})
 		if err != nil {
-			return err
+			return models.ActionTaken{}, err
 		}
 	case constants.ReportTypeJob:
 		_, err = r.jobCollection.UpdateOne(ctx, bson.M{"_id": report.ReportedPostID}, bson.M{
@@ -265,10 +265,10 @@ func (r *reportRepository) HideActionOnReport(ctx context.Context, reportID prim
 			},
 		})
 		if err != nil {
-			return err
+			return models.ActionTaken{}, err
 		}
 	default:
-		return errors.New("invalid report type")
+		return models.ActionTaken{}, errors.New("invalid report type")
 	}
 	// update the report to mark it as reviewed
 	report.Reviewed = true
@@ -283,29 +283,39 @@ func (r *reportRepository) HideActionOnReport(ctx context.Context, reportID prim
 	})
 	if err != nil || update.MatchedCount == 0 {
 		if err != nil {
-			return err
+			return models.ActionTaken{}, err
 		}
-		return errors.New("report not found or already reviewed")
+		return models.ActionTaken{}, errors.New("report not found or already reviewed")
 	}
-	// TODO: notify the user the post has been hidden
-	return nil
+	actionType := ""
+	if report.Type == constants.ReportTypePost {
+		actionType = constants.ActionTypeBlock
+	} else {
+		actionType = constants.ActionTypeJobBlock
+	}
+	return models.ActionTaken{
+		UserID: report.ReportedPostID,
+		PostID: report.ReportedPostID,
+		Action: actionType,
+		Taken:  true,
+	}, nil
 }
 
-func (r *reportRepository) DeleteActionOnReport(ctx context.Context, reportID primitive.ObjectID, action models.ReportAction) error {
+func (r *reportRepository) DeleteActionOnReport(ctx context.Context, reportID primitive.ObjectID, action models.ReportAction) (models.ActionTaken, error) {
 	var report models.Report
 	err := r.reportCollection.FindOne(ctx, bson.M{"_id": reportID}).Decode(&report)
 	if err != nil {
 		if err == mongo.ErrNoDocuments {
-			return errors.New("report not found")
+			return models.ActionTaken{}, errors.New("report not found")
 		}
-		return err
+		return models.ActionTaken{}, err
 	}
 	action.ID = primitive.NewObjectID()
 	action.CreatedAt = time.Now()
 	_, err = r.actionCollection.InsertOne(ctx, action)
 
 	if err != nil {
-		return err
+		return models.ActionTaken{}, err
 	}
 
 	report.Reviewed = true
@@ -320,9 +330,9 @@ func (r *reportRepository) DeleteActionOnReport(ctx context.Context, reportID pr
 
 	if err != nil || update.MatchedCount == 0 {
 		if err != nil {
-			return err
+			return models.ActionTaken{}, err
 		}
-		return errors.New("report not found or already reviewed")
+		return models.ActionTaken{}, errors.New("report not found or already reviewed")
 	}
 
 	switch report.Type {
@@ -331,41 +341,51 @@ func (r *reportRepository) DeleteActionOnReport(ctx context.Context, reportID pr
 
 		if err != nil || eff.DeletedCount == 0 {
 			if err != nil {
-				return err
+				return models.ActionTaken{}, err
 			}
-			return errors.New("job not found or already deleted")
+			return models.ActionTaken{}, errors.New("job not found or already deleted")
 		}
 	case constants.ReportTypePost:
 		eff, err := r.postCollection.DeleteOne(ctx, bson.M{"_id": report.ReportedPostID})
 
 		if err != nil || eff.DeletedCount == 0 {
 			if err != nil {
-				return err
+				return models.ActionTaken{}, err
 			}
-			return errors.New("post not found or already deleted")
+			return models.ActionTaken{}, errors.New("post not found or already deleted")
 		}
 	default:
-		return errors.New("invalid report type")
+		return models.ActionTaken{}, errors.New("invalid report type")
 	}
-	// TODO : send users notification that their post has been deleted
-	return nil
+	actionType := ""
+	if report.Type == constants.ReportTypePost {
+		actionType = constants.ActionTypeDelete
+	} else {
+		actionType = constants.ActionTypeDeleteJob
+	}
+	return models.ActionTaken{
+		UserID: report.ReportedPostID,
+		PostID: report.ReportedPostID,
+		Action: actionType,
+		Taken:  true,
+	}, nil
 }
 
-func (r *reportRepository) IgnoreActionOnReport(ctx context.Context, reportID primitive.ObjectID, action models.ReportAction) error {
+func (r *reportRepository) IgnoreActionOnReport(ctx context.Context, reportID primitive.ObjectID, action models.ReportAction) (models.ActionTaken, error) {
 	var report models.Report
 	err := r.reportCollection.FindOne(ctx, bson.M{"_id": reportID}).Decode(&report)
 	if err != nil {
 		if err == mongo.ErrNoDocuments {
-			return errors.New("report not found")
+			return models.ActionTaken{}, errors.New("report not found")
 		}
-		return err
+		return models.ActionTaken{}, err
 	}
 	action.ID = primitive.NewObjectID()
 	action.CreatedAt = time.Now()
 	_, err = r.actionCollection.InsertOne(ctx, action)
 
 	if err != nil {
-		return err
+		return models.ActionTaken{}, err
 	}
 
 	report.Reviewed = true
@@ -380,12 +400,24 @@ func (r *reportRepository) IgnoreActionOnReport(ctx context.Context, reportID pr
 
 	if err != nil || update.MatchedCount == 0 {
 		if err != nil {
-			return err
+			return models.ActionTaken{}, err
 		}
-		return errors.New("report not found or already reviewed")
+		return models.ActionTaken{}, errors.New("report not found or already reviewed")
 	}
 
-	return nil
+	actionType := ""
+	if report.Type == constants.ReportTypePost {
+		actionType = constants.ActionTypeIgnore
+	} else {
+		actionType = constants.ActionTypeIgnoreJob
+	}
+
+	return models.ActionTaken{
+		UserID: report.ReportedPostID,
+		PostID: report.ReportedPostID,
+		Action: actionType,
+		Taken:  true,
+	}, nil
 
 }
 

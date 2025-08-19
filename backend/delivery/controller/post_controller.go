@@ -1,11 +1,14 @@
 package controller
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"net/http"
 	"strconv"
+	"time"
 
+	"github.com/chera-mihiretu/IKnow/domain/constants"
 	"github.com/chera-mihiretu/IKnow/domain/models"
 	"github.com/chera-mihiretu/IKnow/repository"
 	"github.com/chera-mihiretu/IKnow/usecases"
@@ -14,11 +17,12 @@ import (
 )
 
 type PostController struct {
-	postUseCase       usecases.PostUseCase
-	userUseCase       usecases.UserUseCase
-	departmentUsecase usecases.DepartmentUseCase
-	storage           usecases.StorageUseCase
-	PostlikeUseCase   usecases.PostLikeUsecase
+	postUseCase         usecases.PostUseCase
+	userUseCase         usecases.UserUseCase
+	departmentUsecase   usecases.DepartmentUseCase
+	storage             usecases.StorageUseCase
+	PostlikeUseCase     usecases.PostLikeUsecase
+	notificationUsecase usecases.NotificationUsecase
 }
 
 func NewPostController(
@@ -26,14 +30,16 @@ func NewPostController(
 	user usecases.UserUseCase,
 	department usecases.DepartmentUseCase,
 	storage usecases.StorageUseCase,
-	liked usecases.PostLikeUsecase) *PostController {
+	liked usecases.PostLikeUsecase,
+	notification usecases.NotificationUsecase) *PostController {
 
 	return &PostController{
-		postUseCase:       post,
-		userUseCase:       user,
-		departmentUsecase: department,
-		storage:           storage,
-		PostlikeUseCase:   liked,
+		postUseCase:         post,
+		userUseCase:         user,
+		departmentUsecase:   department,
+		storage:             storage,
+		PostlikeUseCase:     liked,
+		notificationUsecase: notification,
 	}
 }
 
@@ -302,6 +308,22 @@ func (p *PostController) CreatePost(ctx *gin.Context) {
 		return
 	}
 
+	if !uploadedPost.IsValidated {
+		notification := &models.Notifications{
+			ID:        primitive.NewObjectID(),
+			UserID:    obId,
+			To:        uploadedPost.UserID,
+			Type:      string(constants.PostBlocked),
+			Content:   constants.PostBlockedMessage,
+			ContentID: &uploadedPost.ID,
+			IsRead:    false,
+			CreatedAt: time.Now(),
+		}
+		go func() {
+			p.notificationUsecase.SendNotification(context.Background(), notification)
+		}()
+	}
+
 	ctx.JSON(http.StatusCreated, gin.H{
 		"message": "Post created succef mobile clients fail silentlyssfully",
 		"post":    uploadedPost,
@@ -324,12 +346,27 @@ func (p *PostController) VerifyPost(ctx *gin.Context) {
 		return
 	}
 
-	err = p.postUseCase.VerifyPosts(ctx, postIDPrimitive)
+	postUserID, err := p.postUseCase.VerifyPosts(ctx, postIDPrimitive)
 	if err != nil {
 		fmt.Println("Error: Failed to verify post:", err)
 		ctx.JSON(500, gin.H{"error": "Failed to verify post " + err.Error()})
 		return
 	}
+
+	notification := &models.Notifications{
+		ID:        primitive.NewObjectID(),
+		UserID:    primitive.NilObjectID,
+		To:        postUserID,
+		Type:      string(constants.PostUnblocked),
+		Content:   constants.PostUnblockedMessage,
+		ContentID: &postIDPrimitive,
+		IsRead:    false,
+		CreatedAt: time.Now(),
+	}
+
+	go func() {
+		p.notificationUsecase.SendNotification(context.Background(), notification)
+	}()
 
 	ctx.JSON(200, gin.H{"message": "Post verified successfully"})
 }
@@ -349,13 +386,28 @@ func (p *PostController) RemoveUnverifiedPost(ctx *gin.Context) {
 		return
 	}
 
-	err = p.postUseCase.RemoveUnverifiedPost(ctx, postIDPrimitive)
+	postUserID, err := p.postUseCase.RemoveUnverifiedPost(ctx, postIDPrimitive)
 
 	if err != nil {
 		fmt.Println("Error: Failed to delete post:", err)
 		ctx.JSON(500, gin.H{"error": "Failed to delete post " + err.Error()})
 		return
 	}
+
+	notification := &models.Notifications{
+		ID:        primitive.NewObjectID(),
+		UserID:    primitive.NilObjectID,
+		To:        postUserID,
+		Type:      string(constants.PostDeleted),
+		Content:   constants.PostDeletedMessage,
+		ContentID: &postIDPrimitive,
+		IsRead:    false,
+		CreatedAt: time.Now(),
+	}
+
+	go func() {
+		p.notificationUsecase.SendNotification(context.Background(), notification)
+	}()
 
 	ctx.JSON(200, gin.H{"message": "Post removed successfully"})
 }

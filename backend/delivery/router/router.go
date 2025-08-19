@@ -33,6 +33,8 @@ func SetupRoutes(
 	commentController *controller.CommentController,
 	reportController *controller.ReportController,
 	adminController *controller.AdminController,
+	websocketController *controller.WebSocketController,
+	notificationController *controller.NotificationController,
 ) *gin.Engine {
 	fmt.Println("FRONT_BASE_URL:", os.Getenv("FRONT_BASE_URL"))
 	r := gin.New()
@@ -192,11 +194,20 @@ func SetupRoutes(
 		admins.POST("/improve-email", middleware.AuthUserMiddleware(SuperAdmin), adminController.ImproveEmail)
 	}
 
+	// notifications
+	notifications := r.Group("/api/notifications")
+	{
+		notifications.GET("/", middleware.AuthUserMiddleware(RoleAll), notificationController.GetNotifications)
+	}
+
 	r.GET("api/health", func(c *gin.Context) {
 		c.JSON(200, gin.H{
 			"message": "Server is running",
 		})
 	})
+
+	r.GET("/api/ws", middleware.AuthUserMiddleware(RoleAll), websocketController.Connect)
+
 	r.GET("/", func(c *gin.Context) {
 		c.JSON(200, gin.H{"message": "Server is running"})
 	})

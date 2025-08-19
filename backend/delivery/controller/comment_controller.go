@@ -4,20 +4,25 @@ import (
 	"context"
 	"net/http"
 	"strconv"
+	"time"
 
+	"github.com/chera-mihiretu/IKnow/domain/constants"
 	"github.com/chera-mihiretu/IKnow/domain/models"
+	"github.com/chera-mihiretu/IKnow/repository"
 	"github.com/chera-mihiretu/IKnow/usecases"
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type CommentController struct {
-	usecase      usecases.CommentUsecase
-	usersUsecase usecases.UserUseCase
+	usecase             usecases.CommentUsecase
+	usersUsecase        usecases.UserUseCase
+	notificationUsecase usecases.NotificationUsecase
+	postUsecase         usecases.PostUseCase
 }
 
-func NewCommentController(usecase usecases.CommentUsecase, users usecases.UserUseCase) *CommentController {
-	return &CommentController{usecase: usecase, usersUsecase: users}
+func NewCommentController(usecase usecases.CommentUsecase, users usecases.UserUseCase, postUsecase usecases.PostUseCase, notificationUsecase usecases.NotificationUsecase) *CommentController {
+	return &CommentController{usecase: usecase, usersUsecase: users, postUsecase: postUsecase, notificationUsecase: notificationUsecase}
 }
 
 func (c *CommentController) GetComments(ctx *gin.Context) {
@@ -47,13 +52,15 @@ func (c *CommentController) GetComments(ctx *gin.Context) {
 		return
 	}
 
-	actualComments, err := c.GetCommentsWithUsers(ctx, comments)
+	next := len(comments) > repository.ConnectPageSize
+
+	actualComments, err := c.GetCommentsWithUsers(ctx, comments[:min(len(comments), repository.ConnectPageSize)])
 
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-	ctx.JSON(http.StatusOK, gin.H{"comments": actualComments, "page": pageInt})
+	ctx.JSON(http.StatusOK, gin.H{"comments": actualComments, "page": pageInt, "next": next})
 }
 
 func (c *CommentController) AddComment(ctx *gin.Context) {
@@ -90,6 +97,25 @@ func (c *CommentController) AddComment(ctx *gin.Context) {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
+
+	post, err := c.postUsecase.GetPostByID(ctx, req.PostID.Hex())
+
+	notification := &models.Notifications{
+		ID:        primitive.NewObjectID(),
+		UserID:    userID,
+		To:        post.UserID,
+		Type:      string(constants.CommentedOnYourPost),
+		Content:   constants.CommentedOnYourPostMessage,
+		IsRead:    false,
+		ContentID: &post.ID,
+		CreatedAt: time.Now(),
+	}
+	if err == nil || userID != post.UserID {
+		go func() {
+			c.notificationUsecase.SendNotification(context.Background(), notification)
+		}()
+	}
+
 	ctx.JSON(http.StatusCreated, gin.H{"comment": comment})
 }
 
@@ -189,12 +215,14 @@ func (c *CommentController) GetReplies(ctx *gin.Context) {
 		return
 	}
 
-	actualReplies, err := c.GetCommentsWithUsers(ctx, replies)
+	next := len(replies) > repository.ConnectPageSize
+
+	actualReplies, err := c.GetCommentsWithUsers(ctx, replies[:min(len(replies), repository.ConnectPageSize)])
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-	ctx.JSON(http.StatusOK, gin.H{"replies": actualReplies, "page": pageInt})
+	ctx.JSON(http.StatusOK, gin.H{"replies": actualReplies, "page": pageInt, "next": next})
 }
 
 func (c *CommentController) AddReply(ctx *gin.Context) {
@@ -231,6 +259,26 @@ func (c *CommentController) AddReply(ctx *gin.Context) {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
+
+	comment, err := c.usecase.GetCommentByID(ctx, *reply.ParentCommentID)
+
+	notification := &models.Notifications{
+		ID:        primitive.NewObjectID(),
+		UserID:    userID,
+		To:        comment.UserID,
+		Type:      string(constants.RepliedToYourComment),
+		Content:   constants.RepliedToYourCommentMessage,
+		ContentID: &reply.PostID,
+		IsRead:    false,
+		CreatedAt: time.Now(),
+	}
+
+	if err == nil || userID != comment.UserID {
+		go func() {
+			c.notificationUsecase.SendNotification(context.Background(), notification)
+		}()
+	}
+
 	ctx.JSON(http.StatusCreated, gin.H{"reply": reply})
 }
 
