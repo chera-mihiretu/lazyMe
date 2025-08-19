@@ -225,7 +225,7 @@ const ForgotPassword: React.FC = () => {
                     </div>
                     <input
                       type="email"
-                      placeholder="Enter your university email"
+                      placeholder="Enter your email"
                       value={email}
                       onChange={e => setEmail(e.target.value)}
                       className="w-full pl-12 pr-4 py-4 bg-white/5 border border-white/20 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 transition-all duration-300"

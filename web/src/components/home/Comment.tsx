@@ -65,8 +65,8 @@ const Comment: React.FC<{
       });
       const data = await res.json();
       if (res.ok) {
-        setReplies(pageNum === 1 ? data.replies : prev => [...prev, ...data.replies]);
-        setRepliesHasMore(data.hasMore || false);
+        setReplies(pageNum === 1 ? (data.replies || []) : (prev) => [...prev, ...(data.replies || [])]);
+        setRepliesHasMore(Boolean((data as { next?: boolean })?.next));
         setRepliesPage(pageNum);
       }
     } catch {}

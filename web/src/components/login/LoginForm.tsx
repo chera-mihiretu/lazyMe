@@ -78,7 +78,7 @@ const LoginForm: React.FC = () => {
           value={email}
           onChange={e => setEmail(e.target.value)}
           className={`w-full px-4 py-3 rounded-lg font-poppins text-base outline-none mb-2 bg-inputBg text-[#171717] shadow-md transition-all duration-200 border-[1.5px] ${error ? 'border-error shadow-[0_0_0_2px_rgba(211,47,47,0.2),0_2px_8px_#e0e0e0]' : 'border-inputBorder shadow-[0_2px_8px_#e0e0e0]'}`}
-          aria-label="University Email"
+          aria-label="Email"
         />
       </div>
       <div className="mb-2 relative">

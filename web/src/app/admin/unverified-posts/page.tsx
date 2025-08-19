@@ -4,10 +4,11 @@ import React from "react";
 import Navbar from "@/components/admin/Navbar";
 import ProtectedRoute from "@/app/ProtectedRoute";
 import { motion } from "framer-motion";
-import { Sparkles, CheckCircle2, Trash2, Loader2 } from "lucide-react";
+import { Sparkles, CheckCircle2, Trash2, Loader2, ArrowLeft } from "lucide-react";
 import Image from "next/image";
 import { formatTimeAgo } from "@/app/helpers/time_formatter";
 import type { Post } from "@/types/post";
+import { useRouter } from "next/navigation";
 
 const baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
 
@@ -156,6 +157,7 @@ function PostRow({ post, onVerify, onDelete }: { post: Post; onVerify: (id: stri
 const UnverifiedPostsPage: React.FC = () => {
   const [activeTab, setActiveTab] = React.useState<TabType>("post");
   const posts = useUnverifiedPosts();
+  const router = useRouter();
 
   const handleVerify = React.useCallback(async (id: string) => {
     await verifyPost(id);
@@ -179,6 +181,16 @@ const UnverifiedPostsPage: React.FC = () => {
         <Navbar />
 
         <div className="relative z-10 max-w-7xl mx-auto p-6 pt-8">
+          <div className="mb-4">
+            <motion.button
+              onClick={() => router.back()}
+              className="p-2 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-600 hover:text-gray-800 transition-colors duration-300"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              <ArrowLeft className="w-5 h-5" />
+            </motion.button>
+          </div>
           <motion.div className="text-center mb-8" initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8 }}>
             <motion.div className="inline-flex items-center px-4 py-2 rounded-full bg-purple-100 border border-purple-200 text-purple-700 text-sm font-medium mb-4" initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.2, duration: 0.6 }}>
               <Sparkles className="w-4 h-4 mr-2" />

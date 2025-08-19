@@ -431,7 +431,7 @@ const SignUpLayout: React.FC = () => {
                     {/* Email */}
                     <div className="md:col-span-2">
                       <label htmlFor="email" className="block text-white text-sm font-medium mb-2">
-                        University Email *
+                        Email *
                       </label>
                       <div className="relative">
                         <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
@@ -439,7 +439,7 @@ const SignUpLayout: React.FC = () => {
                           id="email"
                           name="email"
                           type="email"
-                          placeholder="john.doe@university.edu"
+                          placeholder="john.doe@example.com"
                           value={form.email}
                           onChange={handleChange}
                           className={`w-full pl-12 pr-4 py-4 bg-white/10 backdrop-blur-sm border rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 transition-all duration-300 ${

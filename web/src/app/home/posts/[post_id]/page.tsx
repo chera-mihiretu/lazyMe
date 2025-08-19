@@ -14,6 +14,7 @@ import { useParams, useRouter } from "next/navigation";
 import PostCard from "@/components/home/PostCard";
 import Comment from "@/components/home/Comment";
 import ProtectedRoute from "@/app/ProtectedRoute";
+import { Post } from "@/types/post";
 
 interface UserType {
   id: string;
@@ -36,7 +37,7 @@ const baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
 const PostDetailPage = () => {
   const { post_id } = useParams();
   const router = useRouter();
-  const [post, setPost] = useState(null);
+  const [post, setPost] = useState<Post | null>(null);
   const [comments, setComments] = useState<CommentType[]>([]);
   const [commentText, setCommentText] = useState("");
   const [loading, setLoading] = useState(true);
@@ -44,6 +45,9 @@ const PostDetailPage = () => {
   const [commentLoading, setCommentLoading] = useState(false);
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(false);
+  const [commentError, setCommentError] = useState("");
+
+  const postId = Array.isArray(post_id) ? post_id[0] : String(post_id || "");
 
   // Fetch post details
   useEffect(() => {
@@ -52,7 +56,7 @@ const PostDetailPage = () => {
       setError("");
       try {
         const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
-        const res = await fetch(`${baseUrl}/posts/post?id=${post_id}`, {
+        const res = await fetch(`${baseUrl}/posts/post?id=${postId}`, {
           headers: { Authorization: token ? `Bearer ${token}` : "" },
         });
         const data = await res.json();
@@ -64,50 +68,69 @@ const PostDetailPage = () => {
         setLoading(false);
       }
     };
-    fetchPost();
-  }, [post_id]);
+    if (postId) fetchPost();
+  }, [postId]);
 
   // Fetch comments
   const fetchComments = React.useCallback(async (pageNum = 1) => {
     setCommentLoading(true);
     try {
       const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
-      const res = await fetch(`${baseUrl}/posts/comments/?post_id=${post_id}&page=${pageNum}`, {
+      const res = await fetch(`${baseUrl}/posts/comments/?post_id=${postId}&page=${pageNum}`, {
         headers: { Authorization: token ? `Bearer ${token}` : "" },
       });
       const data = await res.json();
       if (res.ok) {
-        setComments(pageNum === 1 ? data.comments : prev => [...prev, ...data.comments]);
-        setHasMore(data.hasMore || false);
+        setComments(pageNum === 1 ? (data.comments || []) : (prev) => [...prev, ...(data.comments || [])]);
+        setHasMore(Boolean((data as { next?: boolean })?.next));
         setPage(pageNum);
       }
     } catch {}
     setCommentLoading(false);
-  }, [post_id]);
+  }, [postId]);
 
   useEffect(() => {
-    if (post_id) fetchComments(1);
-  }, [post_id, fetchComments]);
+    if (postId) fetchComments(1);
+  }, [postId, fetchComments]);
 
   // Submit new comment
   const handleCommentSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (!commentText.trim()) return;
+    setCommentError("");
+    if (!commentText.trim() || !postId) return;
+    setCommentLoading(true);
     try {
       const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
+      if (!token) {
+        setCommentError("You must be logged in to comment.");
+        setCommentLoading(false);
+        return;
+      }
       const res = await fetch(`${baseUrl}/posts/comments/`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: token ? `Bearer ${token}` : "",
+          Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({ post_id, content: commentText }),
+        body: JSON.stringify({ post_id: postId, content: commentText.trim() }),
       });
-      if (res.ok) {
-        setCommentText("");
-        fetchComments(1);
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        setCommentError((data as { message?: string })?.message || "Failed to add comment.");
+        setCommentLoading(false);
+        return;
       }
-    } catch {}
+      // Clear input and refresh comments
+      setCommentText("");
+      // Optimistically increment local post comment count
+      setPost((prev: Post | null) => prev ? { ...prev, comments: (prev.comments ?? 0) + 1 } : prev);
+      await fetchComments(1);
+    } catch (err) {
+      console.error(err);
+      setCommentError("Network error. Please try again.");
+    } finally {
+      setCommentLoading(false);
+    }
   };
 
   // Loading Component
@@ -302,19 +325,22 @@ const PostDetailPage = () => {
                     />
                     <motion.button
                       type="submit"
-                      disabled={!commentText.trim()}
+                      disabled={!commentText.trim() || commentLoading}
                       className={`px-4 sm:px-6 py-3 rounded-xl font-semibold transition-all duration-300 flex items-center justify-center gap-2 flex-shrink-0 ${
-                        commentText.trim()
+                        commentText.trim() && !commentLoading
                           ? 'bg-gradient-to-r from-green-600 to-green-700 text-white shadow-lg hover:shadow-xl'
                           : 'bg-gray-200 text-gray-400 cursor-not-allowed'
                       }`}
-                      whileHover={commentText.trim() ? { scale: 1.05 } : {}}
-                      whileTap={commentText.trim() ? { scale: 0.95 } : {}}
+                      whileHover={commentText.trim() && !commentLoading ? { scale: 1.05 } : {}}
+                      whileTap={commentText.trim() && !commentLoading ? { scale: 0.95 } : {}}
                     >
-                      <Send className="w-4 h-4" />
+                      {commentLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
                       <span className="text-sm sm:text-base">Comment</span>
                     </motion.button>
                   </form>
+                  {commentError && (
+                    <div className="mt-2 text-sm text-red-600">{commentError}</div>
+                  )}
                 </motion.div>
 
                 {/* Comments Section */}
@@ -375,7 +401,7 @@ const PostDetailPage = () => {
                         </motion.div>
                       ) : (
                         <div className="overflow-x-auto -mx-4 sm:mx-0 px-4 sm:px-0">
-                        <motion.div
+                          <motion.div
                             className="space-y-4 min-w-max sm:min-w-0 sm:space-y-4"
                           initial={{ opacity: 0 }}
                           animate={{ opacity: 1 }}
@@ -389,7 +415,7 @@ const PostDetailPage = () => {
                               transition={{ delay: index * 0.1, duration: 0.4 }}
                                 className="w-full sm:w-auto"
                             >
-                              <Comment comment={comment} post_id={post_id as string} />
+                              <Comment comment={comment} post_id={postId as string} />
                             </motion.div>
                           ))}
                         </motion.div>
@@ -398,38 +424,37 @@ const PostDetailPage = () => {
                     </AnimatePresence>
 
                     {/* Load More Button */}
-                    {hasMore && (
-                      <motion.div
-                        className="flex justify-center mt-6 pt-6 border-t border-gray-200"
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.4, duration: 0.6 }}
+                    <motion.div
+                      className="flex justify-center mt-6 pt-6 border-t border-gray-200"
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.4, duration: 0.6 }}
+                    >
+                      <motion.button
+                        onClick={() => fetchComments(page + 1)}
+                        disabled={commentLoading || !hasMore}
+                        className={`flex items-center gap-2 px-4 sm:px-6 py-3 rounded-xl font-medium transition-all duration-300 ${
+                          commentLoading || !hasMore
+                            ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                            : 'bg-blue-50 text-blue-600 hover:bg-blue-100 hover:text-blue-700'
+                        }`}
+                        whileHover={commentLoading || !hasMore ? {} : { scale: 1.05 }}
+                        whileTap={commentLoading || !hasMore ? {} : { scale: 0.95 }}
                       >
-                        <motion.button
-                          onClick={() => fetchComments(page + 1)}
-                          disabled={commentLoading}
-                          className={`flex items-center gap-2 px-4 sm:px-6 py-3 rounded-xl font-medium transition-all duration-300 ${
-                            commentLoading
-                              ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                              : 'bg-blue-50 text-blue-600 hover:bg-blue-100 hover:text-blue-700'
-                          }`}
-                          whileHover={commentLoading ? {} : { scale: 1.05 }}
-                          whileTap={commentLoading ? {} : { scale: 0.95 }}
-                        >
-                          {commentLoading ? (
-                            <>
-                              <Loader2 className="w-4 h-4 animate-spin" />
-                              <span className="text-sm sm:text-base">Loading...</span>
-                            </>
-                          ) : (
-                            <>
-                              <Clock className="w-4 h-4" />
-                              <span className="text-sm sm:text-base">Load more comments</span>
-                            </>
-                          )}
-                        </motion.button>
-                      </motion.div>
-                    )}
+                        {commentLoading ? (
+                          <>
+                            <Loader2 className="w-4 h-4 animate-spin" />
+                            <span className="text-sm sm:text-base">Loading...</span>
+                          </>
+                        ) : (
+                          <>
+                            <Clock className="w-4 h-4" />
+                            <span className="text-sm sm:text-base">More</span>
+                          </>
+                        )}
+                      </motion.button>
+                    </motion.div>
+                    
                   </div>
                 </motion.div>
               </motion.div>

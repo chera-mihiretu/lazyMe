@@ -3,11 +3,12 @@
 import React from "react";
 import Navbar from "@/components/admin/Navbar";
 import ProtectedRoute from "@/app/ProtectedRoute";
-import { Loader2, CheckCircle2, EyeOff, Trash2, Sparkles, X, ExternalLink } from "lucide-react";
+import { Loader2, CheckCircle2, EyeOff, Trash2, Sparkles, X, ExternalLink, ArrowLeft } from "lucide-react";
 import { motion } from "framer-motion";
 import Image from "next/image";
 import { formatTimeAgo } from "@/app/helpers/time_formatter";
 import { createPortal } from "react-dom";
+import { useRouter } from "next/navigation";
 
 const baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
 
@@ -457,6 +458,7 @@ const ReportsTab: React.FC<{ type: ReportType }> = ({ type }) => {
 
 const ReportsPage: React.FC = () => {
   const [activeTab, setActiveTab] = React.useState<ReportType>("post");
+  const router = useRouter();
 
   return (
     <ProtectedRoute role="admin">
@@ -505,6 +507,16 @@ const ReportsPage: React.FC = () => {
 
         {/* Main Content */}
         <div className="relative z-10 max-w-7xl mx-auto p-6 pt-8">
+          <div className="mb-4">
+            <motion.button
+              onClick={() => router.back()}
+              className="p-2 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-600 hover:text-gray-800 transition-colors duration-300"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              <ArrowLeft className="w-5 h-5" />
+            </motion.button>
+          </div>
           {/* Header */}
           <motion.div
             className="text-center mb-8"

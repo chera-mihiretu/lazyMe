@@ -172,7 +172,7 @@ const EditProfilePage: React.FC = () => {
     if (universities.length > 0 && currentUser && showUniversityFields) {
       findUserAcademicData();
     }
-  }, [universities, currentUser, showUniversityFields]);
+  }, [universities, currentUser, showUniversityFields, findUserAcademicData]);
 
   // Fetch schools when university changes
   useEffect(() => {
