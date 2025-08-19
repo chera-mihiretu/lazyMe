@@ -10,6 +10,7 @@ import (
 type NotificationUsecase interface {
 	SendNotification(ctx context.Context, notification *models.Notifications) error
 	GetNotifications(ctx context.Context, userID string, page int) ([]models.Notifications, error)
+	GetUnreadNotificationsCount(ctx context.Context, userID string) (int64, error)
 }
 
 type notificationUsecase struct {
@@ -22,6 +23,10 @@ func NewNotificationUsecase(notificationRepository repository.NotificationReposi
 		notificationRepository: notificationRepository,
 		webSocketUsecase:       webSocketUsecase,
 	}
+}
+
+func (n *notificationUsecase) GetUnreadNotificationsCount(ctx context.Context, userID string) (int64, error) {
+	return n.notificationRepository.GetUnreadNotificationsCount(ctx, userID)
 }
 
 func (n *notificationUsecase) SendNotification(ctx context.Context, notification *models.Notifications) error {

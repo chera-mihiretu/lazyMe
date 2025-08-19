@@ -65,6 +65,9 @@ func (m *NotificationUsecaseMock) SendNotification(ctx context.Context, notifica
 func (m *NotificationUsecaseMock) GetNotifications(ctx context.Context, userID string, page int) ([]models.Notifications, error) {
 	return data.TestNotificationsTyped, nil
 }
+func (m *NotificationUsecaseMock) GetUnreadNotificationsCount(ctx context.Context, userID string) (int64, error) {
+	return 0, nil
+}
 
 func NewUserUsecaseMock() *UserUsecaseMock                 { return &UserUsecaseMock{} }
 func NewNotificationUsecaseMock() *NotificationUsecaseMock { return &NotificationUsecaseMock{} }

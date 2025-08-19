@@ -26,11 +26,17 @@ func NewNotificationController(notificationUsecase usecases.NotificationUsecase,
 }
 
 func (c *NotificationController) GetNotifications(ctx *gin.Context) {
-	userID := ctx.Query("userID")
-	if userID == "" {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": "User ID is required"})
+	userID, exist := ctx.Get("user_id")
+	if !exist {
+		ctx.JSON(400, gin.H{"error": "User ID not found in context"})
 		return
 	}
+	userIDStr, ok := userID.(string)
+	if !ok {
+		ctx.JSON(400, gin.H{"error": "Invalid User ID type"})
+		return
+	}
+
 	pageStr := ctx.Query("page")
 	if pageStr == "" {
 		pageStr = "1"
@@ -41,15 +47,19 @@ func (c *NotificationController) GetNotifications(ctx *gin.Context) {
 		return
 	}
 
-	notifications, err := c.notificationUsecase.GetNotifications(ctx, userID, page)
-	next := len(notifications) > repository.ConnectPageSize
-
-	notifications = notifications[:min(len(notifications), repository.ConnectPageSize)]
-
+	notifications, err := c.notificationUsecase.GetNotifications(ctx, userIDStr, page)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
+	unreadCount, err := c.notificationUsecase.GetUnreadNotificationsCount(ctx, userIDStr)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	next := len(notifications) > repository.ConnectPageSize
+
+	notifications = notifications[:min(len(notifications), repository.ConnectPageSize)]
 
 	notificationsWithUser, err := c.NotificiationWithUser(ctx.Request.Context(), notifications)
 
@@ -58,7 +68,7 @@ func (c *NotificationController) GetNotifications(ctx *gin.Context) {
 		return
 	}
 
-	ctx.JSON(http.StatusOK, gin.H{"notifications": notificationsWithUser, "next": next, "page": page})
+	ctx.JSON(http.StatusOK, gin.H{"notifications": notificationsWithUser, "next": next, "page": page, "unreadCount": unreadCount})
 }
 
 func (c *NotificationController) NotificiationWithUser(ctx context.Context, notifications []models.Notifications) ([]models.NotificationView, error) {

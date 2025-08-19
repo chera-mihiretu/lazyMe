@@ -16,6 +16,7 @@ import (
 type NotificationRepository interface {
 	SendNotification(ctx context.Context, notification *models.Notifications) (error, bool)
 	GetNotifications(ctx context.Context, userID string, page int) ([]models.Notifications, error)
+	GetUnreadNotificationsCount(ctx context.Context, userID string) (int64, error)
 }
 
 type notificationRepository struct {
@@ -26,6 +27,20 @@ func NewNotificationRepository(db *mongo.Database) NotificationRepository {
 	return &notificationRepository{
 		notifications: db.Collection("notifications"),
 	}
+}
+
+func (r *notificationRepository) GetUnreadNotificationsCount(ctx context.Context, userID string) (int64, error) {
+	userObjectID, err := primitive.ObjectIDFromHex(userID)
+	if err != nil {
+		return 0, fmt.Errorf("invalid user ID: %v", err)
+	}
+	filter := bson.M{"to": userObjectID, "is_read": false}
+
+	count, err := r.notifications.CountDocuments(ctx, filter)
+	if err != nil {
+		return 0, err
+	}
+	return count, nil
 }
 
 func (r *notificationRepository) SendNotification(ctx context.Context, notification *models.Notifications) (error, bool) {
@@ -79,7 +94,7 @@ func (r *notificationRepository) GetNotifications(ctx context.Context, userID st
 	skip := int64((page - 1) * pageSize)
 	limit := int64(pageSize)
 
-	filter := bson.M{"user_id": userObjectID}
+	filter := bson.M{"to": userObjectID}
 	findOptions := options.Find().
 		SetSort(bson.D{{Key: "created_at", Value: -1}}).
 		SetSkip(skip).

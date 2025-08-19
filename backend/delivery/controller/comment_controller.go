@@ -110,7 +110,7 @@ func (c *CommentController) AddComment(ctx *gin.Context) {
 		ContentID: &post.ID,
 		CreatedAt: time.Now(),
 	}
-	if err == nil || userID != post.UserID {
+	if err == nil && userID != post.UserID {
 		go func() {
 			c.notificationUsecase.SendNotification(context.Background(), notification)
 		}()
@@ -273,7 +273,7 @@ func (c *CommentController) AddReply(ctx *gin.Context) {
 		CreatedAt: time.Now(),
 	}
 
-	if err == nil || userID != comment.UserID {
+	if err == nil && userID != comment.UserID {
 		go func() {
 			c.notificationUsecase.SendNotification(context.Background(), notification)
 		}()

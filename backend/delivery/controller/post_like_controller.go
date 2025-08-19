@@ -64,7 +64,7 @@ func (c *PostLikeController) AddLike(ctx *gin.Context) {
 		IsRead:    false,
 		CreatedAt: time.Now(),
 	}
-	if err == nil {
+	if err == nil && userID != post.UserID {
 		go func() {
 			c.notificationUsecase.SendNotification(context.Background(), notification)
 		}()
