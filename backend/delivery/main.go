@@ -97,6 +97,12 @@ func main() {
 	materialRepository := repository.NewMaterialsRepository(myDatabase)
 	materialUseCase := usecases.NewMaterialUseCase(materialRepository)
 	MaterialController := controller.NewMaterialController(materialUseCase, materialsStorageUseCase)
+
+	// exam dependencies
+	examRepository := repository.NewExamsRepository(myDatabase)
+	examUseCase := usecases.NewExamUseCase(examRepository)
+	examController := controller.NewExamController(examUseCase, materialsStorageUseCase)
+
 	// school dependencies
 	schoolRepository := repository.NewSchoolRepository(myDatabase)
 	schoolUseCase := usecases.NewSchoolUsecase(schoolRepository)
@@ -138,6 +144,7 @@ func main() {
 		connectionController,
 		departmentController,
 		MaterialController,
+		examController,
 		schoolController,
 		universityController,
 		jobController,

@@ -24,6 +24,7 @@ func SetupRoutes(
 	connectionController *controller.ConnectionController,
 	departmentController *controller.DepartmentController,
 	materialController *controller.MaterialController,
+	examController *controller.ExamController,
 	schoolController *controller.SchoolController,
 	universityController *controller.UniversityController,
 	jobController *controller.JobController,
@@ -131,6 +132,17 @@ func SetupRoutes(
 		material.POST("/", middleware.AuthUserMiddleware(RoleAdmin), materialController.CreateMaterial)
 		material.PUT("/:id", middleware.AuthUserMiddleware(RoleAdmin), materialController.UpdateMaterial)
 		material.DELETE("/:id", middleware.AuthUserMiddleware(RoleAdmin), materialController.DeleteMaterial)
+	}
+
+	// Exams endpoints
+	exam := r.Group("/api/exams")
+	{
+		exam.GET("/", middleware.AuthUserMiddleware(RoleAll), examController.GetExams)
+		exam.GET("/tree", middleware.AuthUserMiddleware(RoleAll), examController.GetExamsInTree)
+		exam.GET("/:id", middleware.AuthUserMiddleware(RoleAll), examController.GetExamByID)
+		exam.POST("/", middleware.AuthUserMiddleware(RoleAdmin), examController.CreateExam)
+		exam.PUT("/:id", middleware.AuthUserMiddleware(RoleAdmin), examController.UpdateExam)
+		exam.DELETE("/:id", middleware.AuthUserMiddleware(RoleAdmin), examController.DeleteExam)
 	}
 
 	// Departments endpoints
