@@ -104,7 +104,11 @@ func (r *examsRepository) UpdateExam(ctx context.Context, exam models.Exam) (mod
 	res, err := r.exams.UpdateOne(ctx,
 		bson.M{"_id": exam.ID, "uploaded_by": exam.UploadedBy},
 		bson.M{"$set": bson.M{
-			"title": exam.Title,
+			"title":        exam.Title,
+			"year":         exam.Year,
+			"semester":     exam.Semester,
+			"department_id": exam.DepartmentID,
+			"updated_at":   exam.UpdatedAt,
 		}})
 	if err != nil {
 		return models.Exam{}, err
