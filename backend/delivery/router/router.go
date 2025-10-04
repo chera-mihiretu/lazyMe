@@ -8,6 +8,11 @@ import (
 	"github.com/chera-mihiretu/IKnow/infrastructure/middleware"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
+
+	
+    ginSwagger "github.com/swaggo/gin-swagger"
+    swaggerFiles "github.com/swaggo/files"
+    _ "github.com/chera-mihiretu/IKnow/docs" // generated docs
 )
 
 const (
@@ -224,5 +229,8 @@ func SetupRoutes(
 		c.JSON(200, gin.H{"message": "Server is running"})
 	})
 
+
+	// Inside SetupRoutes, before `return r`
+r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 	return r
 }

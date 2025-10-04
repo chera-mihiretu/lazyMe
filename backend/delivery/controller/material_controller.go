@@ -23,6 +23,19 @@ func NewMaterialController(materialUsecase usecases.MaterialUseCase, storage use
 	}
 }
 
+// GetMaterials godoc
+// @Summary Get paginated materials
+// @Description Retrieve materials for the logged-in user with pagination
+// @Tags Materials
+// @Accept json
+// @Produce json
+// @Param page query int true "Page number"
+// @Success 200 {object} map[string]interface{}
+// @Failure 400 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Failure 401 {object} map[string]string
+// @Security BearerAuth
+// @Router /api/materials [get]
 func (mc *MaterialController) GetMaterials(ctx *gin.Context) {
 
 	userID, exist := ctx.Get("user_id")
@@ -62,6 +75,18 @@ func (mc *MaterialController) GetMaterials(ctx *gin.Context) {
 	})
 }
 
+// GetMaterialByID godoc
+// @Summary Get a material by ID
+// @Description Returns a material by its ID
+// @Tags Materials
+// @Produce json
+// @Param id path string true "Material ID"
+// @Success 200 {object} models.Materials
+// @Failure 400 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Failure 401 {object} map[string]string
+// @Security BearerAuth
+// @Router /api/materials/{id} [get]
 func (mc *MaterialController) GetMaterialByID(ctx *gin.Context) {
 	materialID := ctx.Param("id")
 	if materialID == "" {
@@ -88,6 +113,23 @@ func (mc *MaterialController) GetMaterialByID(ctx *gin.Context) {
 		})
 }
 
+// CreateMaterial godoc
+// @Summary Create a new material
+// @Description Upload a PDF material with title, year, semester, and department ID
+// @Tags Materials
+// @Accept multipart/form-data
+// @Produce json
+// @Param title formData string true "Title of the material"
+// @Param year formData int true "Year of study"
+// @Param semester formData int true "Semester (1 or 2)"
+// @Param department_id formData string true "Department ID"
+// @Param file formData file true "PDF file to upload"
+// @Success 201 {object} models.Materials
+// @Failure 400 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Failure 401 {object} map[string]string
+// @Security BearerAuth
+// @Router /api/materials [post]
 func (mc *MaterialController) CreateMaterial(ctx *gin.Context) {
 	// Grab user ID
 

@@ -1,0 +1,587 @@
+basePath: /
+definitions:
+  models.Exam:
+    properties:
+      created_at:
+        type: string
+      department_id:
+        type: string
+      file:
+        type: string
+      id:
+        type: string
+      is_verified:
+        type: boolean
+      semester:
+        type: integer
+      title:
+        type: string
+      updated_at:
+        type: string
+      uploaded_by:
+        type: string
+      year:
+        type: integer
+    type: object
+  models.Materials:
+    properties:
+      created_at:
+        type: string
+      department_id:
+        type: string
+      file:
+        type: string
+      id:
+        type: string
+      is_verified:
+        type: boolean
+      semester:
+        type: integer
+      title:
+        type: string
+      updated_at:
+        type: string
+      uploaded_by:
+        type: string
+      year:
+        type: integer
+    type: object
+  models.User:
+    properties:
+      acedemic_year:
+        type: integer
+      blue_badge:
+        type: boolean
+      created_at:
+        type: string
+      department_id:
+        type: string
+      email:
+        type: string
+      follow_count:
+        type: integer
+      google_id:
+        type: string
+      id:
+        type: string
+      is_complete:
+        type: boolean
+      is_teacher:
+        type: boolean
+      is_verified:
+        type: boolean
+      name:
+        type: string
+      password:
+        type: string
+      profile_image_url:
+        type: string
+      role:
+        type: string
+      school_id:
+        type: string
+      university_id:
+        type: string
+      updated_at:
+        type: string
+    type: object
+host: localhost:8080
+info:
+  contact: {}
+  description: IKnow Learning Platform API
+  title: IKnow API
+  version: "1.0"
+paths:
+  /api/auth/email/forgot-password:
+    post:
+      consumes:
+      - application/json
+      description: Send reset password email
+      parameters:
+      - description: User Email
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/models.User'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Reset email sent
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Request password reset
+      tags:
+      - Auth
+  /api/auth/email/login:
+    post:
+      consumes:
+      - application/json
+      description: Authenticate user using email and password
+      parameters:
+      - description: User Credentials
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/models.User'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Returns JWT token
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Login with email
+      tags:
+      - Auth
+  /api/auth/email/register:
+    post:
+      consumes:
+      - application/json
+      description: Create a new account and send verification email
+      parameters:
+      - description: User Registration Info
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/models.User'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: User created successfully
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "409":
+          description: Conflict
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Register new user with email
+      tags:
+      - Auth
+  /api/auth/email/reset-password:
+    post:
+      consumes:
+      - application/json
+      description: Reset password using token
+      parameters:
+      - description: Password reset token
+        in: query
+        name: token
+        required: true
+        type: string
+      - description: New Password
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/models.User'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Password reset successfully
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Reset password
+      tags:
+      - Auth
+  /api/auth/email/verify-email:
+    get:
+      description: Verify email using token
+      parameters:
+      - description: Verification token
+        in: query
+        name: token
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "302":
+          description: Redirects to front-end after verification
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Verify user email
+      tags:
+      - Auth
+  /api/auth/google/callback:
+    get:
+      description: Complete authentication after Google login
+      produces:
+      - application/json
+      responses:
+        "302":
+          description: Redirects to front-end with token
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Handle Google OAuth2 callback
+      tags:
+      - Auth
+  /api/auth/google/login:
+    get:
+      description: Redirects user to Google OAuth2 login page
+      produces:
+      - application/json
+      responses: {}
+      summary: Login with Google
+      tags:
+      - Auth
+  /api/exams:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve exams for the logged-in user with pagination
+      parameters:
+      - description: Page number
+        in: query
+        name: page
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get paginated exams
+      tags:
+      - Exams
+    post:
+      consumes:
+      - multipart/form-data
+      description: Upload a PDF exam with title, year, semester, and department ID
+      parameters:
+      - description: Title of the exam
+        in: formData
+        name: title
+        required: true
+        type: string
+      - description: Year of study
+        in: formData
+        name: year
+        required: true
+        type: integer
+      - description: Semester (1 or 2)
+        in: formData
+        name: semester
+        required: true
+        type: integer
+      - description: Department ID
+        in: formData
+        name: department_id
+        required: true
+        type: string
+      - description: PDF file to upload
+        in: formData
+        name: file
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.Exam'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Create a new exam
+      tags:
+      - Exams
+  /api/exams/{id}:
+    get:
+      description: Returns a exam by its ID
+      parameters:
+      - description: Exam ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Exam'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get a exam by ID
+      tags:
+      - Exams
+  /api/materials:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve materials for the logged-in user with pagination
+      parameters:
+      - description: Page number
+        in: query
+        name: page
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get paginated materials
+      tags:
+      - Materials
+    post:
+      consumes:
+      - multipart/form-data
+      description: Upload a PDF material with title, year, semester, and department
+        ID
+      parameters:
+      - description: Title of the material
+        in: formData
+        name: title
+        required: true
+        type: string
+      - description: Year of study
+        in: formData
+        name: year
+        required: true
+        type: integer
+      - description: Semester (1 or 2)
+        in: formData
+        name: semester
+        required: true
+        type: integer
+      - description: Department ID
+        in: formData
+        name: department_id
+        required: true
+        type: string
+      - description: PDF file to upload
+        in: formData
+        name: file
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.Materials'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Create a new material
+      tags:
+      - Materials
+  /api/materials/{id}:
+    get:
+      description: Returns a material by its ID
+      parameters:
+      - description: Material ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Materials'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get a material by ID
+      tags:
+      - Materials
+securityDefinitions:
+  BearerAuth:
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"

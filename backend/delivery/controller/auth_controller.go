@@ -26,12 +26,27 @@ func NewAuthController(authUseCase usecases.AuthUseCase) *AuthController {
 	}
 }
 
+// LoginWithGoogle godoc
+// @Summary Login with Google
+// @Description Redirects user to Google OAuth2 login page
+// @Tags Auth
+// @Produce json
+// @Router /api/auth/google/login [get]
 func (auth *AuthController) LoginWithGoogle(c *gin.Context) {
 
 	gothic.BeginAuthHandler(c.Writer, c.Request)
 
 }
 
+// HandleCallback godoc
+// @Summary Handle Google OAuth2 callback
+// @Description Complete authentication after Google login
+// @Tags Auth
+// @Produce json
+// @Success 302 "Redirects to front-end with token"
+// @Failure 400 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /api/auth/google/callback [get]
 func (auth *AuthController) HandleCallback(c *gin.Context) {
 	// Complete the OAuth2 authentication
 	user, err := gothic.CompleteUserAuth(c.Writer, c.Request)
@@ -70,6 +85,17 @@ func (auth *AuthController) HandleCallback(c *gin.Context) {
 	c.Redirect(http.StatusFound, redirectURL)
 }
 
+// LoginWithEmail godoc
+// @Summary Login with email
+// @Description Authenticate user using email and password
+// @Tags Auth
+// @Accept json
+// @Produce json
+// @Param user body models.User true "User Credentials"
+// @Success 200 {object} map[string]string "Returns JWT token"
+// @Failure 400 {object} map[string]string
+// @Failure 401 {object} map[string]string
+// @Router /api/auth/email/login [post]
 func (auth *AuthController) LoginWithEmail(ctx *gin.Context) {
 	var user models.User
 
@@ -95,6 +121,17 @@ func (auth *AuthController) LoginWithEmail(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, gin.H{"token": token})
 }
 
+// RegisterWithEmail godoc
+// @Summary Register new user with email
+// @Description Create a new account and send verification email
+// @Tags Auth
+// @Accept json
+// @Produce json
+// @Param user body models.User true "User Registration Info"
+// @Success 201 {object} map[string]string "User created successfully"
+// @Failure 400 {object} map[string]string
+// @Failure 409 {object} map[string]string
+// @Router /api/auth/email/register [post]
 func (auth *AuthController) RegisterWithEmail(ctx *gin.Context) {
 	var user models.User
 
@@ -132,6 +169,15 @@ func (auth *AuthController) RegisterWithEmail(ctx *gin.Context) {
 	ctx.JSON(http.StatusCreated, gin.H{"message": "User Created Successfully, Please Verify Your account"})
 }
 
+// VerifyEmail godoc
+// @Summary Verify user email
+// @Description Verify email using token
+// @Tags Auth
+// @Produce json
+// @Param token query string true "Verification token"
+// @Success 302 "Redirects to front-end after verification"
+// @Failure 400 {object} map[string]string
+// @Router /api/auth/email/verify-email [get]
 func (auth *AuthController) VerifyEmail(ctx *gin.Context) {
 	token := ctx.DefaultQuery("token", "")
 	front_url, exist := os.LookupEnv("FRONT_BASE_URL")
@@ -162,6 +208,17 @@ func (auth *AuthController) VerifyEmail(ctx *gin.Context) {
 	ctx.Redirect(http.StatusFound, front_url+"/auth/verified")
 }
 
+// ForgotPassword godoc
+// @Summary Request password reset
+// @Description Send reset password email
+// @Tags Auth
+// @Accept json
+// @Produce json
+// @Param user body models.User true "User Email"
+// @Success 200 {object} map[string]string "Reset email sent"
+// @Failure 400 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /api/auth/email/forgot-password [post]
 func (auth *AuthController) ForgotPassword(ctx *gin.Context) {
 	var user models.User
 
@@ -185,6 +242,18 @@ func (auth *AuthController) ForgotPassword(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, gin.H{"message": "Reset password email sent successfully"})
 }
 
+// ResetPassword godoc
+// @Summary Reset password
+// @Description Reset password using token
+// @Tags Auth
+// @Accept json
+// @Produce json
+// @Param token query string true "Password reset token"
+// @Param user body models.User true "New Password"
+// @Success 200 {object} map[string]string "Password reset successfully"
+// @Failure 400 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /api/auth/email/reset-password [post]
 func (auth *AuthController) ResetPassword(ctx *gin.Context) {
 	token := ctx.DefaultQuery("token", "")
 

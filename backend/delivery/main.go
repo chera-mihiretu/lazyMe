@@ -12,8 +12,18 @@ import (
 	"github.com/chera-mihiretu/IKnow/infrastructure/redis"
 	"github.com/chera-mihiretu/IKnow/repository"
 	"github.com/chera-mihiretu/IKnow/usecases"
+	"github.com/chera-mihiretu/IKnow/utils"
 	"github.com/joho/godotenv"
 )
+
+// @title IKnow API
+// @version 1.0
+// @description IKnow Learning Platform API
+// @host localhost:8080
+// @BasePath /
+// @securityDefinitions.apikey BearerAuth
+// @in header
+// @name Authorization
 
 func main() {
 
@@ -22,7 +32,7 @@ func main() {
 		panic("Error loading .env file")
 	}
 
-	GothSetup()
+	utils.GothSetup()
 	client, err := mongodb.NewMongoClient()
 
 	if err != nil {
@@ -32,16 +42,17 @@ func main() {
 	// redis.RateLimiter()
 
 	myDatabase := client.Database("lazyme")
-	geminiClient, err := GeminiClient(context.Background())
+	geminiClient, err := utils.GeminiClient(context.Background())
 	if err != nil {
 		log.Fatal("Failed to create Gemini client:", err)
 	}
 	geminiRepository := repository.NewGeminiRepository(geminiClient)
 
 	// posts storage dependencies
-	postsStorageUseCase := StorageInstances(os.Getenv("SUPABASE_BUCKET_NAME"), "posts")
-	profileStorageUseCase := StorageInstances(os.Getenv("SUPABASE_BUCKET_NAME"), "profile")
-	materialsStorageUseCase := StorageInstances(os.Getenv("SUPABASE_BUCKET_NAME"), "materials")
+	postsStorageUseCase := utils.StorageInstances(os.Getenv("SUPABASE_BUCKET_NAME"), "posts")
+	profileStorageUseCase := utils.StorageInstances(os.Getenv("SUPABASE_BUCKET_NAME"), "profile")
+	materialsStorageUseCase := utils.StorageInstances(os.Getenv("SUPABASE_BUCKET_NAME"), "materials")
+	examsStorageUseCase := utils.StorageInstances(os.Getenv("SUPABASE_BUCKET_NAME"), "exams")
 
 	// user dependencies
 	userRepository := repository.NewUserRepository(myDatabase)
@@ -101,7 +112,7 @@ func main() {
 	// exam dependencies
 	examRepository := repository.NewExamsRepository(myDatabase)
 	examUseCase := usecases.NewExamUseCase(examRepository)
-	examController := controller.NewExamController(examUseCase, materialsStorageUseCase)
+	examController := controller.NewExamController(examUseCase, examsStorageUseCase)
 
 	// school dependencies
 	schoolRepository := repository.NewSchoolRepository(myDatabase)

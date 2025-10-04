@@ -22,7 +22,19 @@ func NewExamController(examUsecase usecases.ExamUseCase, storage usecases.Storag
 	}
 }
 
-// GET /api/exams?page=1
+// GetExams godoc
+// @Summary Get paginated exams
+// @Description Retrieve exams for the logged-in user with pagination
+// @Tags Exams
+// @Accept json
+// @Produce json
+// @Param page query int true "Page number"
+// @Success 200 {object} map[string]interface{}
+// @Failure 400 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Failure 401 {object} map[string]string
+// @Security BearerAuth
+// @Router /api/exams [get]
 func (ec *ExamController) GetExams(ctx *gin.Context) {
 	userID, exist := ctx.Get("user_id")
 	if !exist {
@@ -63,7 +75,18 @@ func (ec *ExamController) GetExams(ctx *gin.Context) {
 	})
 }
 
-// GET /api/exams/:id
+// GetExamByID godoc
+// @Summary Get a exam by ID
+// @Description Returns a exam by its ID
+// @Tags Exams
+// @Produce json
+// @Param id path string true "Exam ID"
+// @Success 200 {object} models.Exam
+// @Failure 400 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Failure 401 {object} map[string]string
+// @Security BearerAuth
+// @Router /api/exams/{id} [get]
 func (ec *ExamController) GetExamByID(ctx *gin.Context) {
 	examID := ctx.Param("id")
 	if examID == "" {
@@ -89,7 +112,23 @@ func (ec *ExamController) GetExamByID(ctx *gin.Context) {
 	})
 }
 
-// POST /api/exams
+// CreateExam godoc
+// @Summary Create a new exam
+// @Description Upload a PDF exam with title, year, semester, and department ID
+// @Tags Exams
+// @Accept multipart/form-data
+// @Produce json
+// @Param title formData string true "Title of the exam"
+// @Param year formData int true "Year of study"
+// @Param semester formData int true "Semester (1 or 2)"
+// @Param department_id formData string true "Department ID"
+// @Param file formData file true "PDF file to upload"
+// @Success 201 {object} models.Exam
+// @Failure 400 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Failure 401 {object} map[string]string
+// @Security BearerAuth
+// @Router /api/exams [post]
 func (ec *ExamController) CreateExam(ctx *gin.Context) {
 	userID, exist := ctx.Get("user_id")
 	if !exist {
