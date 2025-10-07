@@ -8,6 +8,11 @@ import (
 	"github.com/chera-mihiretu/IKnow/infrastructure/middleware"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
+
+	
+    ginSwagger "github.com/swaggo/gin-swagger"
+    swaggerFiles "github.com/swaggo/files"
+    _ "github.com/chera-mihiretu/IKnow/docs" // generated docs
 )
 
 const (
@@ -24,6 +29,7 @@ func SetupRoutes(
 	connectionController *controller.ConnectionController,
 	departmentController *controller.DepartmentController,
 	materialController *controller.MaterialController,
+	examController *controller.ExamController,
 	schoolController *controller.SchoolController,
 	universityController *controller.UniversityController,
 	jobController *controller.JobController,
@@ -133,6 +139,17 @@ func SetupRoutes(
 		material.DELETE("/:id", middleware.AuthUserMiddleware(RoleAdmin), materialController.DeleteMaterial)
 	}
 
+	// Exams endpoints
+	exam := r.Group("/api/exams")
+	{
+		exam.GET("/", middleware.AuthUserMiddleware(RoleAll), examController.GetExams)
+		exam.GET("/tree", middleware.AuthUserMiddleware(RoleAll), examController.GetExamsInTree)
+		exam.GET("/:id", middleware.AuthUserMiddleware(RoleAll), examController.GetExamByID)
+		exam.POST("/", middleware.AuthUserMiddleware(RoleAdmin), examController.CreateExam)
+		exam.PUT("/:id", middleware.AuthUserMiddleware(RoleAdmin), examController.UpdateExam)
+		exam.DELETE("/:id", middleware.AuthUserMiddleware(RoleAdmin), examController.DeleteExam)
+	}
+
 	// Departments endpoints
 	department := r.Group("/api/departments")
 	{
@@ -212,5 +229,8 @@ func SetupRoutes(
 		c.JSON(200, gin.H{"message": "Server is running"})
 	})
 
+
+	// Inside SetupRoutes, before `return r`
+r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 	return r
 }

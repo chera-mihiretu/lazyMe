@@ -1,7 +1,6 @@
 package controller
 
 import (
-	"fmt"
 	"net/http"
 	"strconv"
 
@@ -11,22 +10,22 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-type MaterialController struct {
-	MaterialUsecase usecases.MaterialUseCase
-	StorageUsecase  usecases.StorageUseCase
+type ExamController struct {
+	ExamUsecase   usecases.ExamUseCase
+	StorageUsecase usecases.StorageUseCase
 }
 
-func NewMaterialController(materialUsecase usecases.MaterialUseCase, storage usecases.StorageUseCase) *MaterialController {
-	return &MaterialController{
-		MaterialUsecase: materialUsecase,
-		StorageUsecase:  storage,
+func NewExamController(examUsecase usecases.ExamUseCase, storage usecases.StorageUseCase) *ExamController {
+	return &ExamController{
+		ExamUsecase:   examUsecase,
+		StorageUsecase: storage,
 	}
 }
 
-// GetMaterials godoc
-// @Summary Get paginated materials
-// @Description Retrieve materials for the logged-in user with pagination
-// @Tags Materials
+// GetExams godoc
+// @Summary Get paginated exams
+// @Description Retrieve exams for the logged-in user with pagination
+// @Tags Exams
 // @Accept json
 // @Produce json
 // @Param page query int true "Page number"
@@ -35,9 +34,8 @@ func NewMaterialController(materialUsecase usecases.MaterialUseCase, storage use
 // @Failure 500 {object} map[string]string
 // @Failure 401 {object} map[string]string
 // @Security BearerAuth
-// @Router /api/materials [get]
-func (mc *MaterialController) GetMaterials(ctx *gin.Context) {
-
+// @Router /api/exams [get]
+func (ec *ExamController) GetExams(ctx *gin.Context) {
 	userID, exist := ctx.Get("user_id")
 	if !exist {
 		ctx.JSON(400, gin.H{"error": "User ID not found in context"})
@@ -53,6 +51,7 @@ func (mc *MaterialController) GetMaterials(ctx *gin.Context) {
 		ctx.JSON(400, gin.H{"error": "Invalid User ID format"})
 		return
 	}
+
 	page := ctx.Query("page")
 	if page == "" {
 		ctx.JSON(400, gin.H{"error": "Page number is required"})
@@ -63,76 +62,74 @@ func (mc *MaterialController) GetMaterials(ctx *gin.Context) {
 		ctx.JSON(400, gin.H{"error": "Invalid page number"})
 		return
 	}
-	materials, err := mc.MaterialUsecase.GetMaterials(ctx, userIDPrimitive, pageInt)
+
+	exams, err := ec.ExamUsecase.GetExams(ctx, userIDPrimitive, pageInt)
 	if err != nil {
-		ctx.JSON(500, gin.H{"error": "Failed to retrieve materials"})
+		ctx.JSON(500, gin.H{"error": "Failed to retrieve exams"})
 		return
 	}
 
 	ctx.JSON(200, gin.H{
-		"materials": materials,
-		"message":   "Materials retrieved successfully",
+		"exams":   exams,
+		"message": "Exams retrieved successfully",
 	})
 }
 
-// GetMaterialByID godoc
-// @Summary Get a material by ID
-// @Description Returns a material by its ID
-// @Tags Materials
+// GetExamByID godoc
+// @Summary Get a exam by ID
+// @Description Returns a exam by its ID
+// @Tags Exams
 // @Produce json
-// @Param id path string true "Material ID"
-// @Success 200 {object} models.Materials
+// @Param id path string true "Exam ID"
+// @Success 200 {object} models.Exam
 // @Failure 400 {object} map[string]string
 // @Failure 500 {object} map[string]string
 // @Failure 401 {object} map[string]string
 // @Security BearerAuth
-// @Router /api/materials/{id} [get]
-func (mc *MaterialController) GetMaterialByID(ctx *gin.Context) {
-	materialID := ctx.Param("id")
-	if materialID == "" {
-		ctx.JSON(400, gin.H{"error": "Material ID is required"})
+// @Router /api/exams/{id} [get]
+func (ec *ExamController) GetExamByID(ctx *gin.Context) {
+	examID := ctx.Param("id")
+	if examID == "" {
+		ctx.JSON(400, gin.H{"error": "Exam ID is required"})
 		return
 	}
 
-	materialIDPrimitive, err := primitive.ObjectIDFromHex(materialID)
+	examIDPrimitive, err := primitive.ObjectIDFromHex(examID)
 	if err != nil {
-		ctx.JSON(400, gin.H{"error": "Invalid Material ID format"})
+		ctx.JSON(400, gin.H{"error": "Invalid Exam ID format"})
 		return
 	}
 
-	material, err := mc.MaterialUsecase.GetMaterialByID(ctx, materialIDPrimitive)
+	exam, err := ec.ExamUsecase.GetExamByID(ctx, examIDPrimitive)
 	if err != nil {
-		ctx.JSON(500, gin.H{"error": "Failed to retrieve material"})
+		ctx.JSON(500, gin.H{"error": "Failed to retrieve exam"})
 		return
 	}
 
-	ctx.JSON(200,
-		gin.H{
-			"materials": material,
-			"message":   "Material retrieved successfully",
-		})
+	ctx.JSON(200, gin.H{
+		"exam":    exam,
+		"message": "Exam retrieved successfully",
+	})
 }
 
-// CreateMaterial godoc
-// @Summary Create a new material
-// @Description Upload a PDF material with title, year, semester, and department ID
-// @Tags Materials
+// CreateExam godoc
+// @Summary Create a new exam
+// @Description Upload a PDF exam with title, year, semester, and department ID
+// @Tags Exams
 // @Accept multipart/form-data
 // @Produce json
-// @Param title formData string true "Title of the material"
+// @Param title formData string true "Title of the exam"
 // @Param year formData int true "Year of study"
 // @Param semester formData int true "Semester (1 or 2)"
 // @Param department_id formData string true "Department ID"
 // @Param file formData file true "PDF file to upload"
-// @Success 201 {object} models.Materials
+// @Success 201 {object} models.Exam
 // @Failure 400 {object} map[string]string
 // @Failure 500 {object} map[string]string
 // @Failure 401 {object} map[string]string
 // @Security BearerAuth
-// @Router /api/materials [post]
-func (mc *MaterialController) CreateMaterial(ctx *gin.Context) {
-	// Grab user ID
-
+// @Router /api/exams [post]
+func (ec *ExamController) CreateExam(ctx *gin.Context) {
 	userID, exist := ctx.Get("user_id")
 	if !exist {
 		ctx.JSON(400, gin.H{"error": "User ID not found in context"})
@@ -143,17 +140,15 @@ func (mc *MaterialController) CreateMaterial(ctx *gin.Context) {
 		ctx.JSON(400, gin.H{"error": "Invalid user ID type"})
 		return
 	}
-
 	obId, err := primitive.ObjectIDFromHex(userIDStr)
 	if err != nil {
 		ctx.JSON(400, gin.H{"error": "Invalid user ID format"})
 		return
 	}
 
-	ctx.Request.Body = http.MaxBytesReader(ctx.Writer, ctx.Request.Body, 20<<20) // 10 MB limit
+	ctx.Request.Body = http.MaxBytesReader(ctx.Writer, ctx.Request.Body, 20<<20) // 20 MB
 	form, err := ctx.MultipartForm()
 	if err != nil {
-		fmt.Println("Error parsing multipart form:", err)
 		ctx.JSON(http.StatusBadRequest, gin.H{
 			"error":   "Failed to parse multipart form",
 			"details": err.Error(),
@@ -161,8 +156,9 @@ func (mc *MaterialController) CreateMaterial(ctx *gin.Context) {
 		return
 	}
 
-	var material models.Materials
+	var exam models.Exam
 
+	// Department
 	departmentID := form.Value["department_id"]
 	if len(departmentID) == 0 {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Department ID is required"})
@@ -170,19 +166,20 @@ func (mc *MaterialController) CreateMaterial(ctx *gin.Context) {
 	}
 	depId, err := primitive.ObjectIDFromHex(departmentID[0])
 	if err != nil {
-		fmt.Println("Invalid Department ID format:", err)
 		ctx.JSON(400, gin.H{"error": "Invalid Department ID format"})
 		return
 	}
-	material.DepartmentID = depId
+	exam.DepartmentID = depId
 
+	// Title
 	title := form.Value["title"]
 	if len(title) == 0 {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Title is required"})
 		return
 	}
-	material.Title = title[0]
+	exam.Title = title[0]
 
+	// Year
 	year := form.Value["year"]
 	if len(year) == 0 {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Year is required"})
@@ -193,8 +190,9 @@ func (mc *MaterialController) CreateMaterial(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Year must be a positive integer"})
 		return
 	}
-	material.Year = yearInt
+	exam.Year = yearInt
 
+	// Semester
 	semester := form.Value["semester"]
 	if len(semester) == 0 {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Semester is required"})
@@ -205,94 +203,72 @@ func (mc *MaterialController) CreateMaterial(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Semester must be either 1 or 2"})
 		return
 	}
-	material.Semester = semesterInt
+	exam.Semester = semesterInt
 
-	material.UploadedBy = obId
+	exam.UploadedBy = obId
 
-	if material.DepartmentID.IsZero() {
-		fmt.Println("Department ID is required")
-		ctx.JSON(400, gin.H{"error": "Department ID is required"})
-		return
-	}
-	if material.Year < 1 {
-		fmt.Println("Year must be a positive integer")
-		ctx.JSON(400, gin.H{"error": "Year must be a positive integer"})
-		return
-	}
-	if material.Semester < 1 || material.Semester > 2 {
-		fmt.Println("Semester must be either 1 or 2")
-		ctx.JSON(400, gin.H{"error": "Semester must be either 1 or 2"})
-		return
-	}
+	/////////////////////checkpoint----////
+
+	// File validation
 	files := form.File["file"]
-	if len(files) == 0 && len(material.FileURL) > 1 {
-		fmt.Println("You have to upload one file")
-		ctx.JSON(400, gin.H{"error": "You have to upload one file"})
+	if len(files) == 0 {
+		ctx.JSON(400, gin.H{"error": "You must upload a file"})
 		return
 	}
-
 	for _, file := range files {
 		if file.Header.Get("Content-Type") != "application/pdf" {
-			fmt.Println("Only PDF files are allowed")
 			ctx.JSON(400, gin.H{"error": "Only PDF files are allowed"})
 			return
 		}
 	}
 
-	// TODO: Implement file storage logic
-	urls, err := mc.StorageUsecase.UploadFile(files)
-
+	// Upload file
+	urls, err := ec.StorageUsecase.UploadFile(files)
 	if err != nil {
-		fmt.Println("Failed to upload files:", err)
-		ctx.JSON(500, gin.H{
-			"error":   "Failed to upload files",
-			"details": err.Error(),
-		})
+		ctx.JSON(500, gin.H{"error": "Failed to upload files", "details": err.Error()})
 		return
 	}
+	exam.FileURL = urls[0]
 
-	material.FileURL = urls[0]
-
-	newMaterial, err := mc.MaterialUsecase.CreateMaterial(ctx, material)
+	newExam, err := ec.ExamUsecase.CreateExam(ctx, exam)
 	if err != nil {
-		mc.StorageUsecase.DeleteFile(urls) // Clean up uploaded file if creation fails
-
-		fmt.Println("Failed to create material:", err)
-		ctx.JSON(500, gin.H{"error": "Failed to create material"})
+		ec.StorageUsecase.DeleteFile(urls) // rollback
+		ctx.JSON(500, gin.H{"error": "Failed to create exam"})
 		return
 	}
 
 	ctx.JSON(201, gin.H{
-		"message":  "Material created successfully",
-		"material": newMaterial,
+		"message": "Exam created successfully",
+		"exam":    newExam,
 	})
 }
 
-func (mc *MaterialController) UpdateMaterial(ctx *gin.Context) {
-	materialID := ctx.Param("id")
-	if materialID == "" {
-		ctx.JSON(400, gin.H{"error": "Material ID is required"})
+// PUT /api/exams/:id
+func (ec *ExamController) UpdateExam(ctx *gin.Context) {
+	examID := ctx.Param("id")
+	if examID == "" {
+		ctx.JSON(400, gin.H{"error": "Exam ID is required"})
 		return
 	}
 
-	var material models.Materials
-	if err := ctx.ShouldBindJSON(&material); err != nil {
+	var exam models.Exam
+	if err := ctx.ShouldBindJSON(&exam); err != nil {
 		ctx.JSON(400, gin.H{"error": "Invalid request body"})
 		return
 	}
 
-	materialIDPrimitive, err := primitive.ObjectIDFromHex(materialID)
+	examIDPrimitive, err := primitive.ObjectIDFromHex(examID)
 	if err != nil {
-		ctx.JSON(400, gin.H{"error": "Invalid Material ID format"})
+		ctx.JSON(400, gin.H{"error": "Invalid Exam ID format"})
 		return
 	}
-	material.ID = materialIDPrimitive
+	exam.ID = examIDPrimitive
+
 	userID, exist := ctx.Get("user_id")
 	if !exist {
 		ctx.JSON(400, gin.H{"error": "User ID not found in context"})
 		return
 	}
-
 	userIDStr, ok := userID.(string)
 	if !ok {
 		ctx.JSON(400, gin.H{"error": "Invalid user ID type"})
@@ -303,28 +279,27 @@ func (mc *MaterialController) UpdateMaterial(ctx *gin.Context) {
 		ctx.JSON(400, gin.H{"error": "Invalid User ID format"})
 		return
 	}
-	material.UploadedBy = userIDPrimitive
+	exam.UploadedBy = userIDPrimitive
 
-	updatedMaterial, err := mc.MaterialUsecase.UpdateMaterial(ctx, material)
+	updatedExam, err := ec.ExamUsecase.UpdateExam(ctx, exam)
 	if err != nil {
-
-		ctx.JSON(500, gin.H{"error": "Failed to update material"})
+		ctx.JSON(500, gin.H{"error": "Failed to update exam"})
 		return
 	}
 
-	ctx.JSON(200, updatedMaterial)
+	ctx.JSON(200, updatedExam)
 }
 
-func (mc *MaterialController) DeleteMaterial(ctx *gin.Context) {
-	materialID := ctx.Param("id")
-	if materialID == "" {
-		ctx.JSON(400, gin.H{"error": "Material ID is required"})
+// DELETE /api/exams/:id
+func (ec *ExamController) DeleteExam(ctx *gin.Context) {
+	examID := ctx.Param("id")
+	if examID == "" {
+		ctx.JSON(400, gin.H{"error": "Exam ID is required"})
 		return
 	}
-
-	materialIDPrimitive, err := primitive.ObjectIDFromHex(materialID)
+	examIDPrimitive, err := primitive.ObjectIDFromHex(examID)
 	if err != nil {
-		ctx.JSON(400, gin.H{"error": "Invalid Material ID format"})
+		ctx.JSON(400, gin.H{"error": "Invalid Exam ID format"})
 		return
 	}
 
@@ -332,9 +307,7 @@ func (mc *MaterialController) DeleteMaterial(ctx *gin.Context) {
 	if !exist {
 		ctx.JSON(400, gin.H{"error": "User ID not found in context"})
 		return
-
 	}
-
 	userIDStr, ok := userID.(string)
 	if !ok {
 		ctx.JSON(400, gin.H{"error": "Invalid user ID type"})
@@ -346,38 +319,36 @@ func (mc *MaterialController) DeleteMaterial(ctx *gin.Context) {
 		return
 	}
 
-	material, err := mc.MaterialUsecase.GetMaterialByID(ctx, materialIDPrimitive)
+	exam, err := ec.ExamUsecase.GetExamByID(ctx, examIDPrimitive)
 	if err != nil {
-		ctx.JSON(404, gin.H{"error": "Material not found"})
+		ctx.JSON(404, gin.H{"error": "Exam not found"})
 		return
 	}
-	if material.UploadedBy != userIDPrimitive {
-		ctx.JSON(403, gin.H{"error": "You are not authorized to delete this material"})
+	if exam.UploadedBy != userIDPrimitive {
+		ctx.JSON(403, gin.H{"error": "You are not authorized to delete this exam"})
 		return
 	}
 
-	err = mc.MaterialUsecase.DeleteMaterial(ctx, userIDPrimitive, materialIDPrimitive)
-
+	err = ec.ExamUsecase.DeleteExam(ctx, userIDPrimitive, examIDPrimitive)
 	if err != nil {
-		ctx.JSON(500, gin.H{"error": "Failed to delete material"})
+		ctx.JSON(500, gin.H{"error": "Failed to delete exam"})
 		return
 	}
 
-	mc.StorageUsecase.DeleteFile([]string{material.FileURL}) // Clean up the file from storage
+	ec.StorageUsecase.DeleteFile([]string{exam.FileURL})
 
 	ctx.JSON(204, gin.H{
-		"message": "Material deleted successfully",
+		"message": "Exam deleted successfully",
 	})
 }
 
-func (mc *MaterialController) GetMaterialsInTree(ctx *gin.Context) {
-	fmt.Println(ctx.Request.URL)
+// GET /api/exams/tree?department_id=...&year=1&semester=2
+func (ec *ExamController) GetExamsInTree(ctx *gin.Context) {
 	departmentID := ctx.Query("department_id")
 	if departmentID == "" {
 		ctx.JSON(400, gin.H{"error": "Department ID is required"})
 		return
 	}
-	fmt.Println("Department ID:", departmentID)
 	departmentIDPrimitive, err := primitive.ObjectIDFromHex(departmentID)
 	if err != nil {
 		ctx.JSON(400, gin.H{"error": "Invalid Department ID format"})
@@ -400,20 +371,19 @@ func (mc *MaterialController) GetMaterialsInTree(ctx *gin.Context) {
 		ctx.JSON(400, gin.H{"error": "Semester is required"})
 		return
 	}
-	fmt.Println("Semester:", semesterStr, "Year:", year, "Department ID:", departmentID)
 	semester, err := strconv.Atoi(semesterStr)
 	if err != nil || (semester != 1 && semester != 2) {
 		ctx.JSON(400, gin.H{"error": "Invalid semester"})
 		return
 	}
 
-	materials, err := mc.MaterialUsecase.GetMaterialsInTree(ctx, departmentIDPrimitive, year, semester)
+	exams, err := ec.ExamUsecase.GetExamsInTree(ctx, departmentIDPrimitive, year, semester)
 	if err != nil {
-		ctx.JSON(500, gin.H{"error": "Failed to retrieve materials"})
+		ctx.JSON(500, gin.H{"error": "Failed to retrieve exams"})
 		return
 	}
 
 	ctx.JSON(200, gin.H{
-		"materials": materials,
+		"exams": exams,
 	})
 }
