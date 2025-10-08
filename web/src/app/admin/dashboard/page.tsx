@@ -29,6 +29,7 @@ import DepartmentsSection from "@/components/admin/DepartmentsSection";
 import MaterialsSection from "@/components/admin/MaterialsSection";
 import ProtectedRoute from "@/app/ProtectedRoute";
 import AdminEmailDialog from "@/components/admin/AdminEmailDialog";
+import AddExamDialog from "@/components/admin/AddExamDIalog";
 
 const AdminDashboard: React.FC = () => {
   // Dialog open/close state only
@@ -37,6 +38,7 @@ const AdminDashboard: React.FC = () => {
   const [showUniversityDialog, setShowUniversityDialog] = useState(false);
   const [showSchoolDialog, setShowSchoolDialog] = useState(false);
   const [showEmailDialog, setShowEmailDialog] = useState(false);
+  const [showExamDialog, setShowExamDialog] = useState(false);
 
   const quickActions = [
     {
@@ -80,6 +82,13 @@ const AdminDashboard: React.FC = () => {
       color: "from-pink-500 to-pink-600",
       action: () => setShowMaterialDialog(true),
       description: "Upload new material"
+    },
+    {
+      title: "Add Exam",
+      icon: FileImage,
+      color: "from-yellow-500 to-orange-500",
+      action: () => setShowExamDialog(true),
+      description: "Upload new exam"
     },
     {
       title: "Send Users Email",
@@ -365,10 +374,16 @@ const AdminDashboard: React.FC = () => {
           open={showMaterialDialog}
           onClose={() => setShowMaterialDialog(false)}
         />
+        <AddExamDialog
+          open={showExamDialog}
+          onClose={() => setShowExamDialog(false)}
+        />
+        
         <AdminEmailDialog
           open={showEmailDialog}
           onClose={() => setShowEmailDialog(false)}
         />
+
 
         {/* Footer */}
         <motion.footer
