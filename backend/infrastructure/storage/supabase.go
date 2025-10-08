@@ -89,6 +89,8 @@ func (s *supabaseStorage) DeleteFile(filePath []string) error {
 	for _, path := range filePath {
 		contents := strings.Split(path, "/")
 
+		fmt.Println("Contents", contents)
+
 		p := strings.Join(contents[len(contents)-2:], "/")
 
 		files = append(files, p)

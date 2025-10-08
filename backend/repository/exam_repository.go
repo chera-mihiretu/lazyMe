@@ -88,7 +88,7 @@ func (r *examsRepository) CreateExam(ctx context.Context, exam models.Exam) (mod
 		return models.Exam{}, errors.New("invalid year for the department")
 	}
 
-	if exam.FileURL != "" {
+	if exam.FileURL == "" {
 		return models.Exam{}, errors.New("file url must exist")
 	}
 

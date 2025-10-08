@@ -135,17 +135,20 @@ func (mc *MaterialController) CreateMaterial(ctx *gin.Context) {
 
 	userID, exist := ctx.Get("user_id")
 	if !exist {
+		fmt.Println("User ID not found in context")
 		ctx.JSON(400, gin.H{"error": "User ID not found in context"})
 		return
 	}
 	userIDStr, ok := userID.(string)
 	if !ok {
+		fmt.Println("Invalid user ID type")
 		ctx.JSON(400, gin.H{"error": "Invalid user ID type"})
 		return
 	}
 
 	obId, err := primitive.ObjectIDFromHex(userIDStr)
 	if err != nil {
+		fmt.Println("Invalid user ID format")
 		ctx.JSON(400, gin.H{"error": "Invalid user ID format"})
 		return
 	}
@@ -165,6 +168,7 @@ func (mc *MaterialController) CreateMaterial(ctx *gin.Context) {
 
 	departmentID := form.Value["department_id"]
 	if len(departmentID) == 0 {
+		fmt.Println("Department ID is required")
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Department ID is required"})
 		return
 	}
@@ -178,6 +182,7 @@ func (mc *MaterialController) CreateMaterial(ctx *gin.Context) {
 
 	title := form.Value["title"]
 	if len(title) == 0 {
+		fmt.Println("Title is required")
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Title is required"})
 		return
 	}
@@ -185,11 +190,13 @@ func (mc *MaterialController) CreateMaterial(ctx *gin.Context) {
 
 	year := form.Value["year"]
 	if len(year) == 0 {
+		fmt.Println("Year is required")
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Year is required"})
 		return
 	}
 	yearInt, err := strconv.Atoi(year[0])
 	if err != nil || yearInt < 1 {
+		fmt.Println("Year must be a positive integer")
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Year must be a positive integer"})
 		return
 	}
@@ -197,11 +204,13 @@ func (mc *MaterialController) CreateMaterial(ctx *gin.Context) {
 
 	semester := form.Value["semester"]
 	if len(semester) == 0 {
+		fmt.Println("Semester is required")
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Semester is required"})
 		return
 	}
 	semesterInt, err := strconv.Atoi(semester[0])
 	if err != nil || (semesterInt != 1 && semesterInt != 2) {
+		fmt.Println("Semester must be either 1 or 2")
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Semester must be either 1 or 2"})
 		return
 	}
