@@ -18,6 +18,9 @@ import {
 import Image from 'next/image';
 import { NotificationType, NotificationsResponse } from '@/types/post';
 import { useRouter } from 'next/navigation';
+import SideContent from '@/components/home/SideContent';
+import UserSuggestionsList from '@/components/home/UserSuggestionsList';
+import sideContentCards from '@/components/general/SideComponentStatics';
 
 const baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
 
@@ -224,6 +227,31 @@ const NotificationsPage: React.FC = () => {
       </motion.div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <div className="flex flex-col xl:flex-row gap-8 items-start">
+          {/* Left Sidebar */}
+          <motion.div
+            className="hidden xl:block w-80 flex-shrink-0"
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.2, duration: 0.6 }}
+          >
+            <div className="sticky top-24">
+              {/* Quick Actions */}
+              <SideContent
+                title="Quick Actions"
+                subtitle="Explore more features"
+                cards={sideContentCards}
+              />
+            </div>
+          </motion.div>
+
+          {/* Main Content Area */}
+          <motion.div
+            className="flex-1 w-full"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+          >
 
         {/* Notifications List */}
         <div className="space-y-4">
@@ -346,6 +374,21 @@ const NotificationsPage: React.FC = () => {
             </motion.button>
           </motion.div>
         )}
+          </motion.div>
+
+          {/* Right Sidebar */}
+          <motion.div
+            className="hidden xl:block w-80 flex-shrink-0"
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.4, duration: 0.6 }}
+          >
+            <div className="sticky top-24">
+              {/* User Suggestions */}
+              <UserSuggestionsList />
+            </div>
+          </motion.div>
+        </div>
       </div>
     </div>
   );

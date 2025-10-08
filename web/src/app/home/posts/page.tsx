@@ -4,9 +4,13 @@ import { motion } from "framer-motion";
 import HomeNavBar from "@/components/home/HomeNavBar";
 import PostsList from "@/components/home/PostsList";
 import UserSuggestionsList from "@/components/home/UserSuggestionsList";
+import SideContent from "@/components/home/SideContent";
 import ProtectedRoute from "@/app/ProtectedRoute";
+import sideContentCards from "@/components/general/SideComponentStatics";
 
 const PostsPage = () => {
+  // Example data for SideContent - you can customize this
+  
   return (
     <ProtectedRoute role="student">
       <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50/30 to-purple-50/30">
@@ -82,6 +86,23 @@ const PostsPage = () => {
         <div className="relative z-10">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
             <div className="flex flex-col xl:flex-row gap-8 items-start">
+              {/* Left Sidebar */}
+              <motion.div
+                className="hidden xl:block w-80 flex-shrink-0"
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.2, duration: 0.6 }}
+              >
+                <div className="sticky top-24">
+                  {/* Quick Actions */}
+                  <SideContent
+                    title="Quick Actions"
+                    subtitle="Explore more features"
+                    cards={sideContentCards}
+                  />
+                </div>
+              </motion.div>
+
               {/* Main Content Area */}
               <motion.div
                 className="flex-1 w-full"
@@ -92,14 +113,15 @@ const PostsPage = () => {
                 <PostsList />
               </motion.div>
 
-              {/* Sidebar */}
+              {/* Right Sidebar */}
               <motion.div
                 className="hidden xl:block w-80 flex-shrink-0"
                 initial={{ opacity: 0, x: 20 }}
                 animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.3, duration: 0.6 }}
+                transition={{ delay: 0.4, duration: 0.6 }}
               >
                 <div className="sticky top-24">
+                  {/* User Suggestions */}
                   <UserSuggestionsList />
                 </div>
               </motion.div>

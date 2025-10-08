@@ -6,6 +6,8 @@ import dynamic from 'next/dynamic';
 const ProtectedRoute = dynamic(() => import('../../ProtectedRoute'), { ssr: false });
 import HomeNavBar from '@/components/home/HomeNavBar';
 import ExamsTree from './ExamsTree';
+import SideContent from '@/components/home/SideContent';
+import sideContentCards from '@/components/general/SideComponentStatics';
 
 const ExamsPage = () => {
   return (
@@ -80,7 +82,32 @@ const ExamsPage = () => {
       <HomeNavBar />
 
         {/* Main Content */}
-        <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-8">
+        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="flex flex-col xl:flex-row gap-8 items-start">
+            {/* Left Sidebar */}
+            <motion.div
+              className="hidden xl:block w-80 flex-shrink-0"
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.2, duration: 0.6 }}
+            >
+              <div className="sticky top-24">
+                {/* Quick Actions */}
+                <SideContent
+                  title="Quick Actions"
+                  subtitle="Explore more features"
+                  cards={sideContentCards}
+                />
+              </div>
+            </motion.div>
+
+            {/* Main Content Area */}
+            <motion.div
+              className="flex-1 w-full"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6 }}
+            >
           {/* Header Section - Similar to Materials/Opportunity Page */}
           <motion.div
             className="mb-6 sm:mb-8"
@@ -122,7 +149,11 @@ const ExamsPage = () => {
           >
         <ExamsTree />
           </motion.div>
-      </div>
+            </motion.div>
+
+            
+          </div>
+        </div>
 
         {/* Footer */}
         <motion.footer

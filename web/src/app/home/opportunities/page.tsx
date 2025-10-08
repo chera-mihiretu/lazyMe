@@ -16,6 +16,9 @@ const ProtectedRoute = dynamic(() => import('../../ProtectedRoute'), { ssr: fals
 import HomeNavBar from '@/components/home/HomeNavBar';
 import { useRouter } from 'next/navigation';
 import JobCard, { JobPost } from './JobCard';
+import SideContent from '@/components/home/SideContent';
+import UserSuggestionsList from '@/components/home/UserSuggestionsList';
+import sideContentCards from '@/components/general/SideComponentStatics';
 
 const OpportunitiesPage = () => {
   const [jobs, setJobs] = useState<JobPost[]>([]);
@@ -183,7 +186,33 @@ const OpportunitiesPage = () => {
         <HomeNavBar />
 
         {/* Main Content */}
-        <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-8">
+        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="flex flex-col xl:flex-row gap-8 items-start">
+            {/* Left Sidebar */}
+            <motion.div
+              className="hidden xl:block w-80 flex-shrink-0"
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.2, duration: 0.6 }}
+            >
+              <div className="sticky top-24">
+                {/* Quick Actions */}
+                <SideContent
+                  title="Quick Actions"
+                  subtitle="Explore more features"
+                  cards={sideContentCards}
+                />
+              </div>
+            </motion.div>
+
+            {/* Main Content Area */}
+            <motion.div
+              className="flex-1 w-full"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6 }}
+            >
+          
           {/* Header Section */}
           <motion.div
             className="mb-8"
@@ -310,20 +339,12 @@ const OpportunitiesPage = () => {
             </AnimatePresence>
           </motion.div>
 
-          {/* Footer */}
-          <motion.div
-            className="mt-16 py-8 border-t border-gray-200"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.8, duration: 0.6 }}
-          >
-            <div className="flex items-center justify-center gap-2 text-gray-500">
-              <Users className="w-4 h-4" />
-              <span className="text-sm">
-                Connecting students with career opportunities
-              </span>
-            </div>
-          </motion.div>
+          
+            </motion.div>
+
+            
+            
+          </div>
         </div>
       </div>
     </ProtectedRoute>
