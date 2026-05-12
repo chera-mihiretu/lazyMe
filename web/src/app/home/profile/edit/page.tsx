@@ -73,7 +73,7 @@ const EditProfilePage: React.FC = () => {
   ];
 
   // Helper function to find user's current university and school
-  const findUserAcademicData = async () => {
+  const findUserAcademicData = React.useCallback(async () => {
     if (!currentUser?.school) return;
     
     try {
@@ -132,7 +132,7 @@ const EditProfilePage: React.FC = () => {
     } catch (error) {
       console.error('Error finding user academic data:', error);
     }
-  };
+  }, [currentUser, universities]);
 
   // Initialize form with current user data
   useEffect(() => {

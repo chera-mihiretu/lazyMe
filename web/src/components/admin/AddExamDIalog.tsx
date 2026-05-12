@@ -21,7 +21,6 @@ const AddExamDialog: React.FC<AddExamDialogProps> = ({ open, onClose }) => {
   const [examFile, setExamFile] = useState<File | null>(null);
   const [year, setYear] = useState("");
   const [semester, setSemester] = useState("");
-  const [questionCount, setQuestionCount] = useState("");
   const [universities, setUniversities] = useState<{ id: string; name: string }[]>([]);
   const [schools, setSchools] = useState<{ id: string; name: string }[]>([]);
   const [departments, setDepartments] = useState<Department[]>([]);

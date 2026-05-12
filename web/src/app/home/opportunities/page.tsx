@@ -6,8 +6,7 @@ import {
   Plus, 
   Briefcase, 
   Loader2, 
-  AlertCircle, 
-  Users,
+  AlertCircle,
   TrendingUp,
   Filter
 } from 'lucide-react';
@@ -17,7 +16,6 @@ import HomeNavBar from '@/components/home/HomeNavBar';
 import { useRouter } from 'next/navigation';
 import JobCard, { JobPost } from './JobCard';
 import SideContent from '@/components/home/SideContent';
-import UserSuggestionsList from '@/components/home/UserSuggestionsList';
 import sideContentCards from '@/components/general/SideComponentStatics';
 
 const OpportunitiesPage = () => {
